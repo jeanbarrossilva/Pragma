@@ -1,0 +1,16 @@
+{
+  "lineBreakBeforeEachArgument": true,
+  "lineBreakBetweenDeclarationAttributes": true,
+  "multiElementCollectionTrailingCommas": false,
+  "prioritizeKeepingFunctionOutputTogether": true,
+  "reflowMultilineStringLiterals": {
+    "always": {}
+  },
+  "respectsExistingLineBreaks": false,
+  "rules": {
+    "AvoidRetroactiveConformances": false
+  },
+  "spacesBeforeEndOfLineComments": 1,
+  "tabWidth": 2,
+  "version": 1
+}
