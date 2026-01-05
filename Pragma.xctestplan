@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "BD33BCF1-0115-42C1-B94F-DD53A5FFDA15",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Pragma.xcodeproj",
+      "identifier" : "49DCA0CD2F0A60F200274F58",
+      "name" : "Pragma"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Pragma.xcodeproj",
+        "identifier" : "49DCA0F92F0A679100274F58",
+        "name" : "PlannerKitTests"
+      }
+    }
+  ],
+  "version" : 1
+}
