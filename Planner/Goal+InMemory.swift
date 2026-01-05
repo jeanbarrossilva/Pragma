@@ -24,14 +24,15 @@ public struct InMemoryGoal: Goal {
   public let id = UUID()
   public private(set) var title: String
   public private(set) var description: String
-  public private(set) var toDos = [InMemoryToDo]()
+  public private(set) var toDos: [InMemoryToDo]
 
-  public init(title: String, description: String) {
+  public init(title: String, description: String, toDos: [InMemoryToDo] = []) {
     var title = title
     var description = description
     normalize(&title, &description, typeDescription: "goal")
     self.title = title
     self.description = description
+    self.toDos = toDos
   }
 
   public mutating func setTitle(to newTitle: String) async { title = newTitle }
