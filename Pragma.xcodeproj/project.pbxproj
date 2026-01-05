@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		49DCA0EA2F0A65BC00274F58 /* .swift-format in Resources */ = {isa = PBXBuildFile; fileRef = 49DCA0E82F0A65B700274F58 /* .swift-format */; };
 		49DCA0EC2F0A669700274F58 /* .gitignore in Sources */ = {isa = PBXBuildFile; fileRef = 49DCA0EB2F0A669000274F58 /* .gitignore */; };
-		49DCA0FB2F0A679100274F58 /* PlannerKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DCA0F22F0A679100274F58 /* PlannerKit.framework */; };
+		49DCA0FB2F0A679100274F58 /* Planner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DCA0F22F0A679100274F58 /* Planner.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,8 +27,8 @@
 		49DCA0CE2F0A60F200274F58 /* Pragma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pragma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49DCA0E82F0A65B700274F58 /* .swift-format */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".swift-format"; sourceTree = "<group>"; };
 		49DCA0EB2F0A669000274F58 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		49DCA0F22F0A679100274F58 /* PlannerKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlannerKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		49DCA0FA2F0A679100274F58 /* PlannerKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlannerKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		49DCA0F22F0A679100274F58 /* Planner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Planner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		49DCA0FA2F0A679100274F58 /* PlannerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlannerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -37,14 +37,14 @@
 			path = Pragma;
 			sourceTree = "<group>";
 		};
-		49DCA0F32F0A679100274F58 /* PlannerKit */ = {
+		49DCA0F32F0A679100274F58 /* Planner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PlannerKit;
+			path = Planner;
 			sourceTree = "<group>";
 		};
-		49DCA0FE2F0A679100274F58 /* PlannerKitTests */ = {
+		49DCA0FE2F0A679100274F58 /* PlannerTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PlannerKitTests;
+			path = PlannerTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -68,7 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49DCA0FB2F0A679100274F58 /* PlannerKit.framework in Frameworks */,
+				49DCA0FB2F0A679100274F58 /* Planner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,8 +80,8 @@
 			children = (
 				495888D62F0A92A900ACB0A8 /* Pragma.xctestplan */,
 				49DCA0D02F0A60F200274F58 /* Pragma */,
-				49DCA0F32F0A679100274F58 /* PlannerKit */,
-				49DCA0FE2F0A679100274F58 /* PlannerKitTests */,
+				49DCA0F32F0A679100274F58 /* Planner */,
+				49DCA0FE2F0A679100274F58 /* PlannerTests */,
 				49DCA0CF2F0A60F200274F58 /* Products */,
 				49DCA0E82F0A65B700274F58 /* .swift-format */,
 				49DCA0EB2F0A669000274F58 /* .gitignore */,
@@ -92,8 +92,8 @@
 			isa = PBXGroup;
 			children = (
 				49DCA0CE2F0A60F200274F58 /* Pragma.app */,
-				49DCA0F22F0A679100274F58 /* PlannerKit.framework */,
-				49DCA0FA2F0A679100274F58 /* PlannerKitTests.xctest */,
+				49DCA0F22F0A679100274F58 /* Planner.framework */,
+				49DCA0FA2F0A679100274F58 /* PlannerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -133,9 +133,9 @@
 			productReference = 49DCA0CE2F0A60F200274F58 /* Pragma.app */;
 			productType = "com.apple.product-type.application";
 		};
-		49DCA0F12F0A679100274F58 /* PlannerKit */ = {
+		49DCA0F12F0A679100274F58 /* Planner */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 49DCA1012F0A679100274F58 /* Build configuration list for PBXNativeTarget "PlannerKit" */;
+			buildConfigurationList = 49DCA1012F0A679100274F58 /* Build configuration list for PBXNativeTarget "Planner" */;
 			buildPhases = (
 				49DCA0ED2F0A679100274F58 /* Headers */,
 				49DCA0EE2F0A679100274F58 /* Sources */,
@@ -147,18 +147,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				49DCA0F32F0A679100274F58 /* PlannerKit */,
+				49DCA0F32F0A679100274F58 /* Planner */,
 			);
-			name = PlannerKit;
+			name = Planner;
 			packageProductDependencies = (
 			);
 			productName = PlannerKit;
-			productReference = 49DCA0F22F0A679100274F58 /* PlannerKit.framework */;
+			productReference = 49DCA0F22F0A679100274F58 /* Planner.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		49DCA0F92F0A679100274F58 /* PlannerKitTests */ = {
+		49DCA0F92F0A679100274F58 /* PlannerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 49DCA1042F0A679100274F58 /* Build configuration list for PBXNativeTarget "PlannerKitTests" */;
+			buildConfigurationList = 49DCA1042F0A679100274F58 /* Build configuration list for PBXNativeTarget "PlannerTests" */;
 			buildPhases = (
 				49DCA0F62F0A679100274F58 /* Sources */,
 				49DCA0F72F0A679100274F58 /* Frameworks */,
@@ -170,13 +170,13 @@
 				49DCA0FD2F0A679100274F58 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				49DCA0FE2F0A679100274F58 /* PlannerKitTests */,
+				49DCA0FE2F0A679100274F58 /* PlannerTests */,
 			);
-			name = PlannerKitTests;
+			name = PlannerTests;
 			packageProductDependencies = (
 			);
 			productName = PlannerKitTests;
-			productReference = 49DCA0FA2F0A679100274F58 /* PlannerKitTests.xctest */;
+			productReference = 49DCA0FA2F0A679100274F58 /* PlannerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -216,8 +216,8 @@
 			projectRoot = "";
 			targets = (
 				49DCA0CD2F0A60F200274F58 /* Pragma */,
-				49DCA0F12F0A679100274F58 /* PlannerKit */,
-				49DCA0F92F0A679100274F58 /* PlannerKitTests */,
+				49DCA0F12F0A679100274F58 /* Planner */,
+				49DCA0F92F0A679100274F58 /* PlannerTests */,
 			);
 		};
 /* End PBXProject section */
@@ -275,7 +275,7 @@
 /* Begin PBXTargetDependency section */
 		49DCA0FD2F0A679100274F58 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 49DCA0F12F0A679100274F58 /* PlannerKit */;
+			target = 49DCA0F12F0A679100274F58 /* Planner */;
 			targetProxy = 49DCA0FC2F0A679100274F58 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -606,7 +606,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49DCA1012F0A679100274F58 /* Build configuration list for PBXNativeTarget "PlannerKit" */ = {
+		49DCA1012F0A679100274F58 /* Build configuration list for PBXNativeTarget "Planner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49DCA1022F0A679100274F58 /* Debug */,
@@ -615,7 +615,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49DCA1042F0A679100274F58 /* Build configuration list for PBXNativeTarget "PlannerKitTests" */ = {
+		49DCA1042F0A679100274F58 /* Build configuration list for PBXNativeTarget "PlannerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49DCA1052F0A679100274F58 /* Debug */,
