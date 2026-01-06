@@ -22,25 +22,31 @@ import SwiftUI
 
 struct PlanList<PlanType>: View where PlanType: Plan {
   var body: some View {
-    NavigationSplitView {
-      List(plans) { plan in
-        Button {
-          selectedPlan = plan
-        } label: {
-          Text(plan.title).padding(4).lineLimit(2).multilineTextAlignment(.leading)
-        }.buttonStyle(
-          plan != selectedPlan ? AnyPrimitiveButtonStyle(.plain) : .init(.borderedProminent)
+    GeometryReader { proxy in
+      NavigationSplitView {
+        List(plans) { plan in
+          Button {
+            selectedPlan = plan
+          } label: {
+            Text(plan.title).padding(4).lineLimit(2).multilineTextAlignment(.leading)
+          }.buttonStyle(
+            plan != selectedPlan ? AnyPrimitiveButtonStyle(.plain) : .init(.borderedProminent)
+          )
+        }.navigationTitle("Plans").navigationSplitViewColumnWidth(
+          min: proxy.size.width * 0.24,
+          ideal: proxy.size.width * 0.24,
+          max: proxy.size.width * 0.32
         )
-      }
-    } detail: {
-      if let goals = selectedPlan?.goals {
-        ScrollView {
-          LazyVStack(alignment: .leading, spacing: 32) {
-            ForEach(Array(zip(goals.indices, goals)), id: \.1.id) { (index, goal) in
-              GoalBoard(goal: goal, onToDoAdditionRequest: {}).padding(.horizontal, 32).padding(
-                .top,
-                index == goals.startIndex ? 32 : 0
-              ).padding(.bottom, index == goals.index(before: goals.endIndex) ? 32 : 0)
+      } detail: {
+        if let goals = selectedPlan?.goals {
+          ScrollView {
+            LazyVStack(alignment: .leading, spacing: 32) {
+              ForEach(Array(zip(goals.indices, goals)), id: \.1.id) { (index, goal) in
+                GoalBoard(goal: goal, onToDoAdditionRequest: {}).padding(.horizontal, 32).padding(
+                  .top,
+                  index == goals.startIndex ? 32 : 0
+                ).padding(.bottom, index == goals.index(before: goals.endIndex) ? 32 : 0)
+              }
             }
           }
         }
