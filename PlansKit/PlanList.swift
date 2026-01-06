@@ -23,34 +23,34 @@ import SwiftUI
 
 struct PlanList<PlanType>: View where PlanType: Plan {
   var body: some View {
-    if plans.isEmpty {
-      Callout {
-        Button {
-        } label: {
-          Image(systemName: "plus")
-        }
-      } title: {
-        Text("No plans in sight… for now.")
-      } description: {
-        Text(
-          "Think about the things you wish to achieve and, when done, click that \"+\" button on "
-            + "the \(layoutDirection == .leftToRight ? "right" : "left")."
-        )
-      }.padding()
-    } else {
-      PopulatedPlanList(plans: plans)
-    }
+    if plans.isEmpty { EmptyPlanList().padding() } else { PopulatedPlanList(plans: plans) }
   }
-
-  @Environment(\.layoutDirection)
-  private var layoutDirection
 
   private let plans: [PlanType]
 
   init(plans: [PlanType]) { self.plans = plans }
 }
 
-private struct EmptyPlanList: View { var body: some View {} }
+private struct EmptyPlanList: View {
+  var body: some View {
+    Callout {
+      Button {
+      } label: {
+        Image(systemName: "plus")
+      }
+    } title: {
+      Text("No plans in sight… for now.")
+    } description: {
+      Text(
+        "Think about the things you wish to achieve and, when done, click that \"+\" button on "
+          + "the \(layoutDirection == .leftToRight ? "right" : "left")."
+      )
+    }
+  }
+
+  @Environment(\.layoutDirection)
+  private var layoutDirection
+}
 
 private struct PopulatedPlanList<PlanType>: View where PlanType: Plan {
   var body: some View {
