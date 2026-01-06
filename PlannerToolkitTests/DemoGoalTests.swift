@@ -20,42 +20,40 @@ import Testing
 
 struct DemoGoalTests {
   @Test
-  func headlineIsNormalized() {
-    let goal = DemoGoal(title: "Title ", description: " Description.")
+  func headlineIsNormalized() async {
+    var goal = DemoPlanning.goals[0]
+    await goal.setTitle(to: " Title")
+    await goal.setDescription(to: "Description. ")
     #expect(goal.title == "Title")
     #expect(goal.description == "Description.")
   }
 
   @Test
   func setsTitle() async {
-    var goal = DemoGoal(title: "Title", description: "Description.")
-    let newTitle = "Title 🔥"
+    var goal = DemoPlanning.goals[0]
+    let newTitle = "🔥"
     await goal.setTitle(to: newTitle)
     #expect(goal.title == newTitle)
   }
 
   @Test
   func setsDescription() async {
-    var goal = DemoGoal(title: "Title", description: "Description.")
-    let newDescription = "Description. 🐴"
+    var goal = DemoPlanning.goals[0]
+    let newDescription = "🐴"
     await goal.setDescription(to: newDescription)
     #expect(goal.description == newDescription)
   }
 
   @Test
   func addsToDo() async {
-    var goal = DemoGoal(title: "Goal title", description: "Goal description.")
-    let toDo = await goal.addToDo(
-      titled: "To-do title",
-      describedAs: "To-do description.",
-      due: .distantFuture
-    )
-    #expect(goal.toDos.elementsEqual([toDo]))
+    var goal = DemoPlanning.goals[0]
+    let toDo = await goal.addToDo(titled: "🔭", describedAs: "🔬", due: .distantFuture)
+    #expect(goal.toDos.contains(toDo))
   }
 
   @Test
   func addedToDoIsNotDoneByDefault() async {
-    var goal = DemoGoal(title: "Goal title", description: "Goal description.")
+    var goal = DemoPlanning.goals[0]
     let toDo = await goal.addToDo(
       titled: "To-do title",
       describedAs: "To-do description.",
@@ -67,18 +65,9 @@ struct DemoGoalTests {
 
   @Test
   func removesToDo() async {
-    var goal = DemoGoal(title: "Goal title", description: "Goal description.")
-    let maintainedToDo = await goal.addToDo(
-      titled: "Maintained to-do title",
-      describedAs: "Maintained to-do description.",
-      due: .distantFuture
-    )
-    let removedToDo = await goal.addToDo(
-      titled: "Removed to-do title",
-      describedAs: "Removed to-do description.",
-      due: .distantFuture
-    )
-    await goal.removeToDo(identifiedAs: removedToDo.id)
-    #expect(goal.toDos.elementsEqual([maintainedToDo]))
+    var goal = DemoPlanning.goals.first(where: { goal in !goal.toDos.isEmpty })!
+    let toDo = goal.toDos[0]
+    await goal.removeToDo(identifiedAs: toDo.id)
+    #expect(!goal.toDos.contains(toDo))
   }
 }

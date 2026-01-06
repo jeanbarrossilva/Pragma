@@ -20,15 +20,17 @@ import Testing
 
 struct DemoToDoTests {
   @Test
-  func headlineIsNormalized() {
-    let toDo = DemoToDo(title: "Title ", description: " Description.", deadline: .distantFuture)
+  func headlineIsNormalized() async {
+    var toDo = DemoPlanning.toDos[0]
+    await toDo.setTitle(to: " Title")
+    await toDo.setDescription(to: "Description. ")
     #expect(toDo.title == "Title")
     #expect(toDo.description == "Description.")
   }
 
   @Test
   func setsTitle() async {
-    var toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
+    var toDo = DemoPlanning.toDos[0]
     let newTitle = "Title 🥸"
     await toDo.setTitle(to: newTitle)
     #expect(toDo.title == newTitle)
@@ -36,22 +38,17 @@ struct DemoToDoTests {
 
   @Test
   func setsDescription() async {
-    var toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
+    var toDo = DemoPlanning.toDos[0]
     let newDescription = "Description. 🏎️"
     await toDo.setDescription(to: newDescription)
     #expect(toDo.description == newDescription)
   }
 
   @Test
-  func isNotDoneByDefault() {
-    let toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
-    #expect(!toDo.isDone)
-  }
-
-  @Test
   func toggles() async {
-    var toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
+    var toDo = DemoPlanning.toDos[0]
+    let wasDone = toDo.isDone
     await toDo.toggle()
-    #expect(toDo.isDone)
+    #expect(toDo.isDone == !wasDone)
   }
 }

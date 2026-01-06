@@ -15,43 +15,51 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-/// Ensures that the `title` is not empty and trims both the `title` and the `description`.
-///
-/// This function *must* be called upon initialization or update of either respective fields of each
-/// struct or class containing a headline, and its ``title`` and its ``description`` *must* be set
-/// to the corresponding values (potentially) modified by this function.
-///
-/// E.g.,
-///
-/// ```swift
-/// struct Headline: Headlined {
-///   let title: String
-///   let description: String
-///
-///   init(title: String, description: String) {
-///     var title = title
-///     var description = description
-///     normalize(title, description, typeDescription: "headline")
-///     self.title = title
-///     self.description = description
-///   }
-/// }
-/// ```
-///
-/// - Parameters:
-///   - title: Title suggested by the user for a ``Headlined``.
-///   - description: Description suggested by the user for a ``Headlined``.
-///   - typeDescription: Human-readable name for the enclosing type, included mid-sentence in the
-///     message printed before the execution of the program is interrupted in a playground or
-///     `-Onone` build in case the title is empty.
-public func normalize(
-  _ title: inout String,
-  _ description: inout String,
-  typeDescription: @autoclosure () -> String
-) {
-  precondition(!title.isBlank, "Title of a \(typeDescription()) cannot be blank.")
-  title.trim(.whitespacesAndNewlines)
-  description.trim(.whitespacesAndNewlines)
+extension Headlined {
+  /// Ensures that the `title` is not empty and trims both the `title` and the `description`.
+  ///
+  /// This function *must* be called upon updates of either respective fields of each struct or
+  /// class containing a headline, and its ``title`` and its ``description`` *must* be set to the
+  /// corresponding values (potentially) modified by this function.
+  ///
+  /// E.g.,
+  ///
+  /// ```swift
+  /// struct Headline: Headlined {
+  ///  public let id = UUID()
+  ///  public private(set) var title: String
+  ///  public private(set) var description: String
+  ///
+  ///  init(title: String, description: String) {
+  ///    var title = title
+  ///    var description = description
+  ///    Self.normalize(&title, &description)
+  ///    self.title = title
+  ///    self.description = description
+  ///  }
+  ///
+  ///   public mutating func setTitle(to newTitle: String) async {
+  ///     var newTitle = newTitle
+  ///     Self.normalize(&newTitle, &description)
+  ///     title = newTitle
+  ///   }
+  ///
+  ///   public mutating func setDescription(to newDescription: String) async {
+  ///     var newDescription = newDescription
+  ///     Self.normalize(&title, &newDescription)
+  ///     description = newDescription
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - title: Title suggested by the user for a ``Headlined``.
+  ///   - description: Description suggested by the user for a ``Headlined``.
+  public static func normalize(_ title: inout String, _ description: inout String) {
+    precondition(!title.isBlank, "Title of a \(Self.description) cannot be blank.")
+    title.trim(.whitespacesAndNewlines)
+    description.trim(.whitespacesAndNewlines)
+  }
 }
 
 extension String {

@@ -197,6 +197,13 @@ public protocol Headlined: Comparable, Hashable, Identifiable {
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
   var description: String { get }
 
+  /// Human-readable name for this type, included mid-sentence in the message printed before the
+  /// execution of the program is interrupted in a playground or `-Onone` build when the title is
+  /// empty upon normalization.
+  ///
+  /// - SeeAlso: ``normalize(_:_:)``
+  static var description: String { get }
+
   /// Changes the ``Headlined/title``.
   ///
   /// - Parameter newTitle: Title by which the current one will be replaced.
@@ -215,7 +222,7 @@ extension Headlined where Self: Comparable {
   /// given.
   ///
   /// - Parameter other: Right-hand-side of the comparison.
-  fileprivate func isLesser(than other: Self) -> Bool {
+  func isLesser(than other: Self) -> Bool {
     title[title.startIndex] < other.title[other.title.startIndex]
       && description[description.startIndex] < other.description[other.description.startIndex]
   }

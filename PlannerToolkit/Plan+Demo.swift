@@ -169,18 +169,26 @@ public struct DemoPlan: Plan {
   public private(set) var description: String
   public private(set) var goals: [DemoGoal]
 
+  public static let description = "plan"
+
   fileprivate init(title: String, description: String, goals: [DemoGoal] = []) {
     var title = title
     var description = description
-    normalize(&title, &description, typeDescription: "plan")
+    Self.normalize(&title, &description)
     self.title = title
     self.description = description
     self.goals = goals
   }
 
-  public mutating func setTitle(to newTitle: String) async { title = newTitle }
+  public mutating func setTitle(to newTitle: String) async {
+    var newTitle = newTitle
+    Self.normalize(&newTitle, &description)
+    title = newTitle
+  }
 
   public mutating func setDescription(to newDescription: String) async {
+    var newDescription = newDescription
+    Self.normalize(&title, &newDescription)
     description = newDescription
   }
 
@@ -208,18 +216,26 @@ public struct DemoGoal: Goal {
   public private(set) var description: String
   public private(set) var toDos: [DemoToDo]
 
+  public static let description = "goal"
+
   fileprivate init(title: String, description: String, toDos: [DemoToDo] = []) {
     var title = title
     var description = description
-    normalize(&title, &description, typeDescription: "goal")
+    Self.normalize(&title, &description)
     self.title = title
     self.description = description
     self.toDos = toDos
   }
 
-  public mutating func setTitle(to newTitle: String) async { title = newTitle }
+  public mutating func setTitle(to newTitle: String) async {
+    var newTitle = newTitle
+    Self.normalize(&newTitle, &description)
+    title = newTitle
+  }
 
   public mutating func setDescription(to newDescription: String) async {
+    var newDescription = newDescription
+    Self.normalize(&title, &newDescription)
     description = newDescription
   }
 
@@ -248,6 +264,8 @@ public struct DemoToDo: ToDo {
   public private(set) var deadline: Date
   public private(set) var isDone: Bool = false
 
+  public static let description = "to-do"
+
   fileprivate init(title: String, description: String, deadline: Date) {
     self = .init(id: .init(), title: title, description: description, deadline: deadline)
   }
@@ -256,15 +274,21 @@ public struct DemoToDo: ToDo {
     self.id = id
     var title = title
     var description = description
-    normalize(&title, &description, typeDescription: "to-do")
+    Self.normalize(&title, &description)
     self.title = title
     self.description = description
     self.deadline = deadline
   }
 
-  public mutating func setTitle(to newTitle: String) async { title = newTitle }
+  public mutating func setTitle(to newTitle: String) async {
+    var newTitle = newTitle
+    Self.normalize(&newTitle, &description)
+    title = newTitle
+  }
 
   public mutating func setDescription(to newDescription: String) async {
+    var newDescription = newDescription
+    Self.normalize(&title, &newDescription)
     description = newDescription
   }
 

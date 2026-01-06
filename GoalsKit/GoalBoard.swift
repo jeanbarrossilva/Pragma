@@ -27,7 +27,7 @@ import SwiftUI
   GoalBoard(
     goal: DemoPlanning.goals.first(where: { goal in !goal.toDos.isEmpty })!,
     onToDoAdditionRequest: {}
-  ).padding().padding(.vertical, 16)
+  ).padding().padding(.vertical, 8)
 }
 
 public struct GoalBoard<GoalType>: View where GoalType: Goal {

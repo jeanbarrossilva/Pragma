@@ -20,55 +20,50 @@ import Testing
 
 struct DemoPlanTests {
   @Test
-  func headlineIsNormalized() {
-    let plan = DemoPlan(title: "Title ", description: " Description.")
+  func headlineIsNormalized() async {
+    var plan = DemoPlanning.plans[0]
+    await plan.setTitle(to: " Title")
+    await plan.setDescription(to: "Description. ")
     #expect(plan.title == "Title")
     #expect(plan.description == "Description.")
   }
 
   @Test
   func setsTitle() async {
-    var plan = DemoPlan(title: "Title", description: "Description.")
-    let newTitle = "Title 🥼"
+    var plan = DemoPlanning.plans[0]
+    let newTitle = "🥼"
     await plan.setTitle(to: newTitle)
     #expect(plan.title == newTitle)
   }
 
   @Test
   func setsDescription() async {
-    var plan = DemoPlan(title: "Title", description: "Description.")
-    let newDescription = "Description. ⚓️"
+    var plan = DemoPlanning.plans[0]
+    let newDescription = "⚓️"
     await plan.setDescription(to: newDescription)
     #expect(plan.description == newDescription)
   }
 
   @Test
   func addsGoal() async {
-    var plan = DemoPlan(title: "Goal title", description: "Goal description.")
-    let goal = await plan.addGoal(titled: "To-do title", describedAs: "To-do description.")
-    #expect(plan.goals.elementsEqual([goal]))
+    var plan = DemoPlanning.plans[0]
+    let goal = await plan.addGoal(titled: "🐻", describedAs: "🐰")
+    #expect(plan.goals.contains(goal))
   }
 
   @Test
   func addedGoalHasNoToDosByDefault() async {
-    var plan = DemoPlan(title: "Title", description: "Description.")
-    let goal = await plan.addGoal(titled: "To-do title", describedAs: "To-do description.")
-    #expect(plan.goals[0].toDos.isEmpty)
-    #expect(goal.toDos.isEmpty)
+    var plan = DemoPlanning.plans[0]
+    let addedGoal = await plan.addGoal(titled: "🍦", describedAs: "🍨")
+    #expect(plan.goals.first(where: { goal in goal == addedGoal })!.toDos.isEmpty)
+    #expect(addedGoal.toDos.isEmpty)
   }
 
   @Test
   func removesGoal() async {
-    var plan = DemoPlan(title: "Goal title", description: "Goal description.")
-    let maintainedGoal = await plan.addGoal(
-      titled: "Maintained goal title",
-      describedAs: "Maintained goal description."
-    )
-    let removedGoal = await plan.addGoal(
-      titled: "Removed goal title",
-      describedAs: "Removed goal description."
-    )
-    await plan.removeGoal(identifiedAs: removedGoal.id)
-    #expect(plan.goals.elementsEqual([maintainedGoal]))
+    var plan = DemoPlanning.plans.first(where: { plan in !plan.goals.isEmpty })!
+    let goal = plan.goals[0]
+    await plan.removeGoal(identifiedAs: goal.id)
+    #expect(!plan.goals.contains(goal))
   }
 }
