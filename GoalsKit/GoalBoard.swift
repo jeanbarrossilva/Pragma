@@ -18,37 +18,27 @@
 import PlannerToolkit
 import SwiftUI
 
-private let goalTitle = "Simulate the Big Bang"
-private let goalDescription =
-  "Develop a computer simulation for the origin of the Universe emergently."
-
 #Preview("Without to-dos") {
-  GoalBoard(goal: DemoGoal(title: goalTitle, description: goalDescription)).padding()
+  GoalBoard(goal: DemoPlanning.goals.first(where: \.toDos.isEmpty)!, onToDoAdditionRequest: {})
+    .padding()
 }
 
 #Preview("With to-dos") {
   GoalBoard(
-    goal: DemoGoal(
-      title: goalTitle,
-      description: goalDescription,
-      toDos: [
-        .init(
-          title: "Know kindergarden-level mathematics",
-          description: "",
-          deadline: .distantFuture
-        ), .init(title: "Study the basics of physics", description: "", deadline: .distantFuture)
-      ]
-    )
+    goal: DemoPlanning.goals.first(where: { goal in !goal.toDos.isEmpty })!,
+    onToDoAdditionRequest: {}
   ).padding().padding(.vertical, 16)
 }
 
 public struct GoalBoard<GoalType>: View where GoalType: Goal {
   private let goal: GoalType
+  private let onToDoAdditionRequest: () -> Void
 
   public var body: some View {
     GroupBox {
       if goal.toDos.isEmpty {
-        EmptyToDoBoard().frame(maxWidth: .infinity).padding()
+        EmptyToDoBoard(onAdditionRequest: onToDoAdditionRequest).frame(maxWidth: .infinity)
+          .padding()
       } else {
         PopulatedToDoBoard(toDos: goal.toDos)
       }
@@ -57,7 +47,10 @@ public struct GoalBoard<GoalType>: View where GoalType: Goal {
     }
   }
 
-  init(goal: GoalType) { self.goal = goal }
+  init(goal: GoalType, onToDoAdditionRequest: @escaping () -> Void) {
+    self.goal = goal
+    self.onToDoAdditionRequest = onToDoAdditionRequest
+  }
 }
 
 private struct PopulatedToDoBoard<ToDoType: ToDo>: View where ToDoType: ToDo {
@@ -111,9 +104,7 @@ private enum Status: CaseIterable {
   }
 
   case idle
-
   case ongoing
-
   case done
 }
 
@@ -138,6 +129,8 @@ private struct ToDoCard<ToDoType>: View where ToDoType: ToDo {
 }
 
 private struct EmptyToDoBoard: View {
+  private let onAdditionRequest: () -> Void
+
   var body: some View {
     HStack(spacing: 24) {
       Image(systemName: "lightbulb.max.fill").imageScale(.large)
@@ -146,12 +139,11 @@ private struct EmptyToDoBoard: View {
         Text("Think about the minimal steps you have to take in order to achieve this goal.")
       }
       Spacer()
-      Button {
-      } label: {
-        ZStack { Image(systemName: "plus") }
-      }.buttonStyle(.glass)
+      Button(action: onAdditionRequest) { ZStack { Image(systemName: "plus") } }.buttonStyle(.glass)
     }.foregroundStyle(.secondary)
   }
+
+  init(onAdditionRequest: @escaping () -> Void) { self.onAdditionRequest = onAdditionRequest }
 }
 
 private struct Headline<GoalType>: View where GoalType: Goal {
