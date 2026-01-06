@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4952C7352F0BF6AB00BFFB49"
-               BuildableName = "GoalsKit.framework"
-               BlueprintName = "GoalsKit"
+               BuildableName = "PlansKit.framework"
+               BlueprintName = "PlansKit"
                ReferencedContainer = "container:Pragma.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -51,8 +51,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4952C7352F0BF6AB00BFFB49"
-            BuildableName = "GoalsKit.framework"
-            BlueprintName = "GoalsKit"
+            BuildableName = "PlansKit.framework"
+            BlueprintName = "PlansKit"
             ReferencedContainer = "container:Pragma.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

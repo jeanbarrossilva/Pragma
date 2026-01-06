@@ -36,7 +36,7 @@
       "target" : {
         "containerPath" : "container:Pragma.xcodeproj",
         "identifier" : "4952C73D2F0BF6AB00BFFB49",
-        "name" : "GoalsKitTests"
+        "name" : "PlansKitTests"
       }
     }
   ],
