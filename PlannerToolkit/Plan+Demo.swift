@@ -258,7 +258,7 @@ public struct DemoGoal: Goal {
 /// To-do of a ``DemoGoal`` whose modifications are performed in-memory, maintained for as long as
 /// the program is being executed and discarted upon the deinitialization of this struct.
 public struct DemoToDo: ToDo {
-  public let id: UUID
+  public let id = UUID()
   public private(set) var title: String
   public private(set) var description: String
   public private(set) var deadline: Date
@@ -267,11 +267,6 @@ public struct DemoToDo: ToDo {
   public static let description = "to-do"
 
   fileprivate init(title: String, description: String, deadline: Date) {
-    self = .init(id: .init(), title: title, description: description, deadline: deadline)
-  }
-
-  init(id: UUID, title: String, description: String, deadline: Date) {
-    self.id = id
     var title = title
     var description = description
     Self.normalize(&title, &description)
