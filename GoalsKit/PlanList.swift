@@ -18,9 +18,41 @@
 import PlannerToolkit
 import SwiftUI
 
-#Preview { PlanList(plans: DemoPlanning.plans) }
+#Preview("Without plans") { PlanList(plans: [DemoPlan]()) }
+#Preview("With plans") { PlanList(plans: DemoPlanning.plans) }
 
 struct PlanList<PlanType>: View where PlanType: Plan {
+  var body: some View {
+    if plans.isEmpty {
+      Callout {
+        Button {
+        } label: {
+          Image(systemName: "plus")
+        }
+      } title: {
+        Text("No plans in sight… for now.")
+      } description: {
+        Text(
+          "Think about the things you wish to achieve and, when done, click that \"+\" button on "
+            + "the \(layoutDirection == .leftToRight ? "right" : "left")."
+        )
+      }.padding()
+    } else {
+      PopulatedPlanList(plans: plans)
+    }
+  }
+
+  @Environment(\.layoutDirection)
+  private var layoutDirection
+
+  private let plans: [PlanType]
+
+  init(plans: [PlanType]) { self.plans = plans }
+}
+
+private struct EmptyPlanList: View { var body: some View {} }
+
+private struct PopulatedPlanList<PlanType>: View where PlanType: Plan {
   var body: some View {
     GeometryReader { proxy in
       NavigationSplitView {
@@ -38,15 +70,17 @@ struct PlanList<PlanType>: View where PlanType: Plan {
           max: proxy.size.width * 0.32
         )
       } detail: {
-        if let goals = selectedPlan?.goals {
-          ScrollView {
-            LazyVStack(alignment: .leading, spacing: 32) {
-              ForEach(Array(zip(goals.indices, goals)), id: \.1.id) { (index, goal) in
-                GoalBoard(goal: goal, onToDoAdditionRequest: {}).padding(.horizontal, 32).padding(
-                  .top,
-                  index == goals.startIndex ? 32 : 0
-                ).padding(.bottom, index == goals.index(before: goals.endIndex) ? 32 : 0)
-              }
+        ScrollView {
+          LazyVStack(alignment: .leading, spacing: 32) {
+            ForEach(Array(zip(selectedPlan.goals.indices, selectedPlan.goals)), id: \.1.id) {
+              (index, goal) in
+              GoalBoard(goal: goal, onToDoAdditionRequest: {}).padding(.horizontal, 32).padding(
+                .top,
+                index == selectedPlan.goals.startIndex ? 32 : 0
+              ).padding(
+                .bottom,
+                index == selectedPlan.goals.index(before: selectedPlan.goals.endIndex) ? 32 : 0
+              )
             }
           }
         }
@@ -57,11 +91,11 @@ struct PlanList<PlanType>: View where PlanType: Plan {
   private let plans: [PlanType]
 
   @State
-  private var selectedPlan: PlanType?
+  private var selectedPlan: PlanType
 
   init(plans: [PlanType]) {
     self.plans = plans
-    self.selectedPlan = plans.first
+    self.selectedPlan = plans[0]
   }
 }
 

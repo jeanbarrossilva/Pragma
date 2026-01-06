@@ -31,21 +31,20 @@ import SwiftUI
 }
 
 public struct GoalBoard<GoalType>: View where GoalType: Goal {
-  private let goal: GoalType
-  private let onToDoAdditionRequest: () -> Void
-
   public var body: some View {
-    GroupBox {
-      if goal.toDos.isEmpty {
-        EmptyToDoBoard(onAdditionRequest: onToDoAdditionRequest).frame(maxWidth: .infinity)
-          .padding()
-      } else {
-        PopulatedToDoBoard(toDos: goal.toDos)
+    if goal.toDos.isEmpty {
+      EmptyGoalBoard(goal: goal, onToDoAdditionRequest: onToDoAdditionRequest)
+    } else {
+      GroupBox {
+        PopulatedGoalBoard(toDos: goal.toDos)
+      } label: {
+        Headline(goal: goal).padding(.bottom, 12)
       }
-    } label: {
-      Headline(goal: goal).padding(.bottom, 12)
     }
   }
+
+  private let goal: GoalType
+  private let onToDoAdditionRequest: () -> Void
 
   init(goal: GoalType, onToDoAdditionRequest: @escaping () -> Void) {
     self.goal = goal
@@ -53,22 +52,42 @@ public struct GoalBoard<GoalType>: View where GoalType: Goal {
   }
 }
 
-private struct PopulatedToDoBoard<ToDoType: ToDo>: View where ToDoType: ToDo {
-  private let toDos: [ToDoType]
+private struct EmptyGoalBoard<GoalType>: View where GoalType: Goal {
+  var body: some View {
+    VStack(alignment: .leading, spacing: 18) {
+      Headline(goal: goal)
+      Callout {
+        Button(action: onToDoAdditionRequest) { ZStack { Image(systemName: "plus") } }
+      } title: {
+        Text("No to-dos yet!")
+      } description: {
+        Text("Think about the minimal steps you have to take in order to achieve this goal.")
+      }
+    }
+  }
 
+  private let goal: GoalType
+  private let onToDoAdditionRequest: () -> Void
+
+  init(goal: GoalType, onToDoAdditionRequest: @escaping () -> Void) {
+    self.goal = goal
+    self.onToDoAdditionRequest = onToDoAdditionRequest
+  }
+}
+
+private struct PopulatedGoalBoard<ToDoType: ToDo>: View where ToDoType: ToDo {
   var body: some View {
     HStack(alignment: .top, spacing: 16) {
       ForEach(Status.allCases, id: \.self) { status in StatusColumn(status: status, toDos: toDos) }
     }.padding(12)
   }
 
+  private let toDos: [ToDoType]
+
   init(toDos: [ToDoType]) { self.toDos = toDos }
 }
 
 private struct StatusColumn<ToDoType>: View where ToDoType: ToDo {
-  private let stage: Status
-  private let toDos: [ToDoType]
-
   var body: some View {
     VStack(alignment: .leading) {
       HStack {
@@ -79,6 +98,9 @@ private struct StatusColumn<ToDoType>: View where ToDoType: ToDo {
       LazyVStack { ForEach(toDos) { toDo in ToDoCard(toDo: toDo) } }
     }
   }
+
+  private let stage: Status
+  private let toDos: [ToDoType]
 
   init(status: Status, toDos: [ToDoType]) {
     self.stage = status
@@ -109,8 +131,6 @@ private enum Status: CaseIterable {
 }
 
 private struct ToDoCard<ToDoType>: View where ToDoType: ToDo {
-  private let toDo: ToDoType
-
   var body: some View {
     GroupBox {
       HStack {
@@ -125,36 +145,20 @@ private struct ToDoCard<ToDoType>: View where ToDoType: ToDo {
     }
   }
 
+  private let toDo: ToDoType
+
   init(toDo: ToDoType) { self.toDo = toDo }
 }
 
-private struct EmptyToDoBoard: View {
-  private let onAdditionRequest: () -> Void
-
-  var body: some View {
-    HStack(spacing: 24) {
-      Image(systemName: "lightbulb.max.fill").imageScale(.large)
-      VStack(alignment: .leading, spacing: 4) {
-        Text("No to-dos yet!").font(.system(.headline, weight: .medium))
-        Text("Think about the minimal steps you have to take in order to achieve this goal.")
-      }
-      Spacer()
-      Button(action: onAdditionRequest) { ZStack { Image(systemName: "plus") } }.buttonStyle(.glass)
-    }.foregroundStyle(.secondary)
-  }
-
-  init(onAdditionRequest: @escaping () -> Void) { self.onAdditionRequest = onAdditionRequest }
-}
-
 private struct Headline<GoalType>: View where GoalType: Goal {
-  private let goal: GoalType
-
   var body: some View {
     VStack(alignment: .leading, spacing: 4) {
       Text(goal.title).font(.system(.title, weight: .heavy))
       Text(goal.description).font(.system(.headline, weight: .regular)).foregroundStyle(.secondary)
     }
   }
+
+  private let goal: GoalType
 
   init(goal: GoalType) { self.goal = goal }
 }
