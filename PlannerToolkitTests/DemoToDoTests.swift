@@ -18,7 +18,7 @@
 @testable import PlannerToolkit
 import Testing
 
-struct GoalToDoTests {
+struct DemoToDoTests {
   @Test
   func headlineIsNormalized() {
     let toDo = DemoToDo(title: "Title ", description: " Description.", deadline: .distantFuture)
@@ -44,7 +44,7 @@ struct GoalToDoTests {
 
   @Test
   func isNotDoneByDefault() {
-    var toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
+    let toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
     #expect(!toDo.isDone)
   }
 

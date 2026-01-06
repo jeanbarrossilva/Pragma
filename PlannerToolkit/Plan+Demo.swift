@@ -15,6 +15,45 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
+/// Plan whose modifications, including those on its goals and to-dos, are performed in-memory,
+/// maintained only for as long as the program is being executed, with changes on these structs
+/// being discarded upon their deinitialization.
+public struct DemoPlan: Plan {
+  public let id = UUID()
+  public private(set) var title: String
+  public private(set) var description: String
+  public private(set) var goals: [DemoGoal]
+
+  public init(title: String, description: String, goals: [DemoGoal] = []) {
+    var title = title
+    var description = description
+    normalize(&title, &description, typeDescription: "plan")
+    self.title = title
+    self.description = description
+    self.goals = goals
+  }
+
+  public mutating func setTitle(to newTitle: String) async { title = newTitle }
+
+  public mutating func setDescription(to newDescription: String) async {
+    description = newDescription
+  }
+
+  public mutating func addGoal(
+    titled title: String,
+    describedAs description: String
+  ) async -> DemoGoal {
+    let goal = DemoGoal(title: title, description: description)
+    goals.append(goal)
+    return goal
+  }
+
+  public mutating func removeGoal(identifiedAs id: UUID) async {
+    guard let index = goals.firstIndex(where: { goal in goal.id == id }) else { return }
+    goals.remove(at: index)
+  }
+}
+
 /// Goal whose modifications and those on its to-dos are performed in-memory, maintained only for as
 /// long as the program is being executed, with changes on these structs being discarded upon their
 /// deinitialization.
@@ -43,10 +82,10 @@ public struct DemoGoal: Goal {
     titled title: String,
     describedAs description: String,
     due deadline: Date
-  ) async -> UUID {
+  ) async -> DemoToDo {
     let toDo = DemoToDo(title: title, description: description, deadline: deadline)
     toDos.append(toDo)
-    return toDo.id
+    return toDo
   }
 
   public mutating func removeToDo(identifiedAs id: UUID) async {

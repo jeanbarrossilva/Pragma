@@ -29,6 +29,8 @@
 ///   let description: String
 ///
 ///   init(title: String, description: String) {
+///     var title = title
+///     var description = description
 ///     normalize(title, description, typeDescription: "headline")
 ///     self.title = title
 ///     self.description = description

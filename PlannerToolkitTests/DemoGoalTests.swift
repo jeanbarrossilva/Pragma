@@ -45,60 +45,40 @@ struct DemoGoalTests {
   @Test
   func addsToDo() async {
     var goal = DemoGoal(title: "Goal title", description: "Goal description.")
-    let toDoTitle = "To-do title"
-    let toDoDescription = "To-do description."
-    let toDoDeadline = Date.distantFuture
-    let toDoID = await goal.addToDo(
-      titled: toDoTitle,
-      describedAs: toDoDescription,
-      due: toDoDeadline
+    let toDo = await goal.addToDo(
+      titled: "To-do title",
+      describedAs: "To-do description.",
+      due: .distantFuture
     )
-    #expect(
-      goal.toDos.elementsEqual([
-        .init(id: toDoID, title: toDoTitle, description: toDoDescription, deadline: toDoDeadline)
-      ])
-    )
+    #expect(goal.toDos.elementsEqual([toDo]))
   }
 
   @Test
   func addedToDoIsNotDoneByDefault() async {
     var goal = DemoGoal(title: "Goal title", description: "Goal description.")
-    let toDoTitle = "To-do title"
-    let toDoDescription = "To-do description."
-    let toDoDeadline = Date.distantFuture
-    let _ = await goal.addToDo(titled: toDoTitle, describedAs: toDoDescription, due: toDoDeadline)
+    let toDo = await goal.addToDo(
+      titled: "To-do title",
+      describedAs: "To-do description.",
+      due: .distantFuture
+    )
     #expect(!goal.toDos[0].isDone)
+    #expect(!toDo.isDone)
   }
 
   @Test
   func removesToDo() async {
     var goal = DemoGoal(title: "Goal title", description: "Goal description.")
-    let maintainedToDoTitle = "Maintained to-do title"
-    let maintainedToDoDescription = "Maintained to-do description."
-    let maintainedToDoDeadline = Date.distantFuture
-    let maintainedToDoID = await goal.addToDo(
-      titled: maintainedToDoTitle,
-      describedAs: maintainedToDoDescription,
-      due: maintainedToDoDeadline
+    let maintainedToDo = await goal.addToDo(
+      titled: "Maintained to-do title",
+      describedAs: "Maintained to-do description.",
+      due: .distantFuture
     )
-    let removedToDoTitle = "Removed to-do title"
-    let removedToDoDescription = "Removed to-do description."
-    let removedToDoDeadline = Date.distantFuture
-    let removedToDoID = await goal.addToDo(
-      titled: removedToDoTitle,
-      describedAs: removedToDoDescription,
-      due: removedToDoDeadline
+    let removedToDo = await goal.addToDo(
+      titled: "Removed to-do title",
+      describedAs: "Removed to-do description.",
+      due: .distantFuture
     )
-    await goal.removeToDo(identifiedAs: removedToDoID)
-    #expect(
-      goal.toDos.elementsEqual([
-        .init(
-          id: maintainedToDoID,
-          title: maintainedToDoTitle,
-          description: maintainedToDoDescription,
-          deadline: maintainedToDoDeadline
-        )
-      ])
-    )
+    await goal.removeToDo(identifiedAs: removedToDo.id)
+    #expect(goal.toDos.elementsEqual([maintainedToDo]))
   }
 }
