@@ -18,26 +18,31 @@
 import PlannerToolkit
 import SwiftUI
 
-#Preview("Without plans") { PlanList(plans: [DemoPlan]()) }
-#Preview("With plans") { PlanList(plans: DemoPlanning.plans) }
+#Preview("Without plans") { PlanList(plans: [DemoPlan](), onPlanAdditionRequest: {}) }
+#Preview("With plans") { PlanList(plans: DemoPlanning.plans, onPlanAdditionRequest: {}) }
 
 struct PlanList<PlanType>: View where PlanType: Plan {
   var body: some View {
-    if plans.isEmpty { EmptyPlanList().padding() } else { PopulatedPlanList(plans: plans) }
+    if plans.isEmpty {
+      EmptyPlanList(onPlanAdditionRequest: onPlanAdditionRequest).padding()
+    } else {
+      PopulatedPlanList(plans: plans)
+    }
   }
 
   private let plans: [PlanType]
+  private let onPlanAdditionRequest: () -> Void
 
-  init(plans: [PlanType]) { self.plans = plans }
+  init(plans: [PlanType], onPlanAdditionRequest: @escaping () -> Void) {
+    self.plans = plans
+    self.onPlanAdditionRequest = onPlanAdditionRequest
+  }
 }
 
 private struct EmptyPlanList: View {
   var body: some View {
     Callout {
-      Button {
-      } label: {
-        Image(systemName: "plus")
-      }
+      Button(action: onPlanAdditionRequest) { Image(systemName: "plus") }
     } title: {
       Text("No plans in sight… for now.")
     } description: {
@@ -50,6 +55,12 @@ private struct EmptyPlanList: View {
 
   @Environment(\.layoutDirection)
   private var layoutDirection
+
+  private let onPlanAdditionRequest: () -> Void
+
+  init(onPlanAdditionRequest: @escaping () -> Void) {
+    self.onPlanAdditionRequest = onPlanAdditionRequest
+  }
 }
 
 private struct PopulatedPlanList<PlanType>: View where PlanType: Plan {
