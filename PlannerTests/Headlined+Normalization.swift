@@ -15,8 +15,7 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Foundation
-@testable import PlannerKit
+@testable import Planner
 import Testing
 
 @Suite("Headlined+Normalization tests")

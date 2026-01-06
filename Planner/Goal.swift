@@ -15,8 +15,6 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Foundation
-
 /// Characteristics of a desired outcome, consisting of an obligatory, non-empty ``Headlined/title``
 /// and an initially-empty set of ``toDos`` (referred to as "tasks" to the user). It intends to make
 /// specific an otherwise broad objective, e.g., "work at Apple", by dividing it into various

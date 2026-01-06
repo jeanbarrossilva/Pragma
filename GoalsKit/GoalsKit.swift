@@ -15,5 +15,5 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Foundation
-import Planner
+@_exported import Foundation
+@_exported import Planner

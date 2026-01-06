@@ -15,8 +15,6 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Foundation
-
 /// Ensures that the `title` is not empty and trims both the `title` and the `description`.
 ///
 /// This function *must* be called upon initialization or update of either respective fields of each
@@ -44,7 +42,7 @@ import Foundation
 ///   - typeDescription: Human-readable name for the enclosing type, included mid-sentence in the
 ///     message printed before the execution of the program is interrupted in a playground or
 ///     `-Onone` build in case the title is empty.
-func normalize(
+public func normalize(
   _ title: inout String,
   _ description: inout String,
   typeDescription: @autoclosure () -> String

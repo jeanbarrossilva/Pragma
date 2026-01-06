@@ -15,12 +15,12 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Planner
+import PlannerToolkit
 import SwiftUI
 
 #Preview {
   GoalsList(goals: [
-    InMemoryGoal(
+    DemoGoal(
       title: "Work at Apple",
       description: "Be employed by one the most influential tech companies in the world."
     ),

@@ -15,21 +15,20 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Foundation
-@testable import PlannerKit
+@testable import PlannerToolkit
 import Testing
 
-struct InMemoryToDoTests {
+struct GoalToDoTests {
   @Test
   func headlineIsNormalized() {
-    let toDo = InMemoryToDo(title: "Title ", description: " Description.", deadline: .distantFuture)
+    let toDo = DemoToDo(title: "Title ", description: " Description.", deadline: .distantFuture)
     #expect(toDo.title == "Title")
     #expect(toDo.description == "Description.")
   }
 
   @Test
   func setsTitle() async {
-    var toDo = InMemoryToDo(title: "Title", description: "Description.", deadline: .distantFuture)
+    var toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
     let newTitle = "Title 🥸"
     await toDo.setTitle(to: newTitle)
     #expect(toDo.title == newTitle)
@@ -37,7 +36,7 @@ struct InMemoryToDoTests {
 
   @Test
   func setsDescription() async {
-    var toDo = InMemoryToDo(title: "Title", description: "Description.", deadline: .distantFuture)
+    var toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
     let newDescription = "Description. 🏎️"
     await toDo.setDescription(to: newDescription)
     #expect(toDo.description == newDescription)
@@ -45,13 +44,13 @@ struct InMemoryToDoTests {
 
   @Test
   func isNotDoneByDefault() {
-    var toDo = InMemoryToDo(title: "Title", description: "Description.", deadline: .distantFuture)
+    var toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
     #expect(!toDo.isDone)
   }
 
   @Test
   func toggles() async {
-    var toDo = InMemoryToDo(title: "Title", description: "Description.", deadline: .distantFuture)
+    var toDo = DemoToDo(title: "Title", description: "Description.", deadline: .distantFuture)
     await toDo.toggle()
     #expect(toDo.isDone)
   }

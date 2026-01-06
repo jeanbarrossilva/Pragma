@@ -15,18 +15,16 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Foundation
-
-/// ``Goal`` whose modifications and those on its ``InMemoryToDo``s are performed in-memory,
-/// maintained only for as long as the program is being executed, with changes on these structs
-/// being discarded upon their deinitialization.
-public struct InMemoryGoal: Goal {
+/// Goal whose modifications and those on its to-dos are performed in-memory, maintained only for as
+/// long as the program is being executed, with changes on these structs being discarded upon their
+/// deinitialization.
+public struct DemoGoal: Goal {
   public let id = UUID()
   public private(set) var title: String
   public private(set) var description: String
-  public private(set) var toDos: [InMemoryToDo]
+  public private(set) var toDos: [DemoToDo]
 
-  public init(title: String, description: String, toDos: [InMemoryToDo] = []) {
+  public init(title: String, description: String, toDos: [DemoToDo] = []) {
     var title = title
     var description = description
     normalize(&title, &description, typeDescription: "goal")
@@ -46,7 +44,7 @@ public struct InMemoryGoal: Goal {
     describedAs description: String,
     due deadline: Date
   ) async -> UUID {
-    let toDo = InMemoryToDo(title: title, description: description, deadline: deadline)
+    let toDo = DemoToDo(title: title, description: description, deadline: deadline)
     toDos.append(toDo)
     return toDo.id
   }
@@ -57,9 +55,9 @@ public struct InMemoryGoal: Goal {
   }
 }
 
-/// ``ToDo`` of an ``InMemoryGoal`` whose modifications are performed in-memory, maintained for as
-/// long as the program is being executed and discarted upon the deinitialization of this struct.
-public struct InMemoryToDo: ToDo {
+/// To-do of a ``DemoGoal`` whose modifications are performed in-memory, maintained for as long as
+/// the program is being executed and discarted upon the deinitialization of this struct.
+public struct DemoToDo: ToDo {
   public let id: UUID
   public private(set) var title: String
   public private(set) var description: String

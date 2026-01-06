@@ -15,7 +15,7 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Planner
+import PlannerToolkit
 import SwiftUI
 
 private let goalTitle = "Simulate the Big Bang"
@@ -23,12 +23,12 @@ private let goalDescription =
   "Develop a computer simulation for the origin of the Universe emergently."
 
 #Preview("Without to-dos") {
-  GoalBoard(goal: InMemoryGoal(title: goalTitle, description: goalDescription)).previewPadding()
+  GoalBoard(goal: DemoGoal(title: goalTitle, description: goalDescription)).padding()
 }
 
 #Preview("With to-dos") {
   GoalBoard(
-    goal: InMemoryGoal(
+    goal: DemoGoal(
       title: goalTitle,
       description: goalDescription,
       toDos: [
@@ -39,7 +39,7 @@ private let goalDescription =
         ), .init(title: "Study the basics of physics", description: "", deadline: .distantFuture)
       ]
     )
-  ).previewPadding()
+  ).padding().padding(.vertical, 16)
 }
 
 public struct GoalBoard<GoalType>: View where GoalType: Goal {
@@ -165,9 +165,4 @@ private struct Headline<GoalType>: View where GoalType: Goal {
   }
 
   init(goal: GoalType) { self.goal = goal }
-}
-
-extension View {
-  @ViewBuilder
-  fileprivate func previewPadding() -> some View { padding().padding(.vertical, 16) }
 }

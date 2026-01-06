@@ -1,7 +1,7 @@
 // ===-------------------------------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
-// This file is part of the Pragma open-source project.
+// This file is part of the PlannerToolkit open-source project.
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the
 // GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -16,3 +16,4 @@
 // ===-------------------------------------------------------------------------------------------===
 
 @_exported import Foundation
+@_exported import Planner

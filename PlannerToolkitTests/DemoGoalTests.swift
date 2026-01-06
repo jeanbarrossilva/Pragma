@@ -15,21 +15,20 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Foundation
-@testable import PlannerKit
+@testable import PlannerToolkit
 import Testing
 
-struct InMemoryGoalTests {
+struct DemoGoalTests {
   @Test
   func headlineIsNormalized() {
-    let goal = InMemoryGoal(title: "Title ", description: " Description.")
+    let goal = DemoGoal(title: "Title ", description: " Description.")
     #expect(goal.title == "Title")
     #expect(goal.description == "Description.")
   }
 
   @Test
   func setsTitle() async {
-    var goal = InMemoryGoal(title: "Title", description: "Description.")
+    var goal = DemoGoal(title: "Title", description: "Description.")
     let newTitle = "Title 🔥"
     await goal.setTitle(to: newTitle)
     #expect(goal.title == newTitle)
@@ -37,7 +36,7 @@ struct InMemoryGoalTests {
 
   @Test
   func setsDescription() async {
-    var goal = InMemoryGoal(title: "Title", description: "Description.")
+    var goal = DemoGoal(title: "Title", description: "Description.")
     let newDescription = "Description. 🐴"
     await goal.setDescription(to: newDescription)
     #expect(goal.description == newDescription)
@@ -45,7 +44,7 @@ struct InMemoryGoalTests {
 
   @Test
   func addsToDo() async {
-    var goal = InMemoryGoal(title: "Goal title", description: "Goal description.")
+    var goal = DemoGoal(title: "Goal title", description: "Goal description.")
     let toDoTitle = "To-do title"
     let toDoDescription = "To-do description."
     let toDoDeadline = Date.distantFuture
@@ -63,7 +62,7 @@ struct InMemoryGoalTests {
 
   @Test
   func addedToDoIsNotDoneByDefault() async {
-    var goal = InMemoryGoal(title: "Goal title", description: "Goal description.")
+    var goal = DemoGoal(title: "Goal title", description: "Goal description.")
     let toDoTitle = "To-do title"
     let toDoDescription = "To-do description."
     let toDoDeadline = Date.distantFuture
@@ -73,7 +72,7 @@ struct InMemoryGoalTests {
 
   @Test
   func removesToDo() async {
-    var goal = InMemoryGoal(title: "Goal title", description: "Goal description.")
+    var goal = DemoGoal(title: "Goal title", description: "Goal description.")
     let maintainedToDoTitle = "Maintained to-do title"
     let maintainedToDoDescription = "Maintained to-do description."
     let maintainedToDoDeadline = Date.distantFuture
