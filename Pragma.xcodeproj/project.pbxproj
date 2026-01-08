@@ -17,6 +17,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4901139C2F0DF87F005A8EAC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4952C75E2F0C7C9900BFFB49;
+			remoteInfo = PlannerToolkit;
+		};
 		4952C7402F0BF6AB00BFFB49 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
@@ -355,6 +362,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				4901139D2F0DF87F005A8EAC /* PBXTargetDependency */,
 				4952C7482F0BF6AB00BFFB49 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -580,6 +588,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4901139D2F0DF87F005A8EAC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4952C75E2F0C7C9900BFFB49 /* PlannerToolkit */;
+			targetProxy = 4901139C2F0DF87F005A8EAC /* PBXContainerItemProxy */;
+		};
 		4952C7412F0BF6AB00BFFB49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4952C7352F0BF6AB00BFFB49 /* PlansKit */;

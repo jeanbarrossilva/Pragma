@@ -21,8 +21,8 @@ import SwiftUI
 #Preview("Without plans") { PlanList(plans: [DemoPlan](), onPlanAdditionRequest: {}) }
 #Preview("With plans") { PlanList(plans: DemoPlanning.plans, onPlanAdditionRequest: {}) }
 
-struct PlanList<PlanType>: View where PlanType: Plan {
-  var body: some View {
+public struct PlanList<PlanType>: View where PlanType: Plan {
+  public var body: some View {
     if plans.isEmpty {
       EmptyPlanList(onPlanAdditionRequest: onPlanAdditionRequest).padding()
     } else {
@@ -33,7 +33,7 @@ struct PlanList<PlanType>: View where PlanType: Plan {
   private let plans: [PlanType]
   private let onPlanAdditionRequest: () -> Void
 
-  init(plans: [PlanType], onPlanAdditionRequest: @escaping () -> Void) {
+  public init(plans: [PlanType], onPlanAdditionRequest: @escaping () -> Void) {
     self.plans = plans
     self.onPlanAdditionRequest = onPlanAdditionRequest
   }
@@ -71,13 +71,16 @@ private struct PopulatedPlanList<PlanType>: View where PlanType: Plan {
           Button {
             selectedPlan = plan
           } label: {
-            Text(plan.title).padding(4).lineLimit(2).multilineTextAlignment(.leading)
+            HStack {
+              Text(plan.title).lineLimit(2).multilineTextAlignment(.leading)
+              Spacer()
+            }.padding(4)
           }.buttonStyle(
             plan != selectedPlan ? AnyPrimitiveButtonStyle(.plain) : .init(.borderedProminent)
           )
         }.navigationTitle("Plans").navigationSplitViewColumnWidth(
-          min: proxy.size.width * 0.24,
-          ideal: proxy.size.width * 0.24,
+          min: proxy.size.width * 0.16,
+          ideal: proxy.size.width * 0.16,
           max: proxy.size.width * 0.32
         )
       } detail: {

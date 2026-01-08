@@ -15,15 +15,12 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
+import PlannerToolkit
+import PlansKit
 import SwiftUI
 
 #Preview { ContentView() }
 
 struct ContentView: View {
-  var body: some View {
-    VStack {
-      Image(systemName: "globe").imageScale(.large).foregroundStyle(.tint)
-      Text("Hello, world!")
-    }.padding()
-  }
+  var body: some View { PlanList(plans: DemoPlanning.plans, onPlanAdditionRequest: {}) }
 }
