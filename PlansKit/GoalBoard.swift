@@ -75,6 +75,19 @@ private struct EmptyGoalBoard<GoalType>: View where GoalType: Goal {
   }
 }
 
+private struct Headline<GoalType>: View where GoalType: Goal {
+  var body: some View {
+    VStack(alignment: .leading, spacing: 4) {
+      Text(goal.title).font(.system(.title, weight: .heavy))
+      Text(goal.description).font(.system(.headline, weight: .regular)).foregroundStyle(.secondary)
+    }
+  }
+
+  private let goal: GoalType
+
+  init(goal: GoalType) { self.goal = goal }
+}
+
 private struct PopulatedGoalBoard<ToDoType: ToDo>: View where ToDoType: ToDo {
   var body: some View {
     HStack(alignment: .top, spacing: 16) {
@@ -90,21 +103,31 @@ private struct PopulatedGoalBoard<ToDoType: ToDo>: View where ToDoType: ToDo {
 private struct StatusColumn<ToDoType>: View where ToDoType: ToDo {
   var body: some View {
     VStack(alignment: .leading) {
-      HStack {
-        Circle().frame(width: 4).foregroundStyle(stage.color)
-        Text(stage.title).frame(width: .infinity).font(.system(.headline, weight: .medium))
-          .textCase(.uppercase)
+      Label {
+        Text(status.title).font(.system(.headline, weight: .medium)).textCase(.uppercase)
+      } icon: {
+        Image(systemName: "circle.fill").offset(y: -1).foregroundStyle(status.color).indicatorGlow(
+          status: status
+        ).imageScale(.small)
       }
       LazyVStack { ForEach(toDos) { toDo in ToDoCard(toDo: toDo) } }
     }
   }
 
-  private let stage: Status
+  private let status: Status
   private let toDos: [ToDoType]
 
   init(status: Status, toDos: [ToDoType]) {
-    self.stage = status
+    self.status = status
     self.toDos = toDos
+  }
+}
+
+extension View {
+  fileprivate func indicatorGlow(status: Status) -> some View {
+    Group {
+      if case .idle = status { self } else { shadow(color: status.color.opacity(0.8), radius: 1.5) }
+    }
   }
 }
 
@@ -148,17 +171,4 @@ private struct ToDoCard<ToDoType>: View where ToDoType: ToDo {
   private let toDo: ToDoType
 
   init(toDo: ToDoType) { self.toDo = toDo }
-}
-
-private struct Headline<GoalType>: View where GoalType: Goal {
-  var body: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text(goal.title).font(.system(.title, weight: .heavy))
-      Text(goal.description).font(.system(.headline, weight: .regular)).foregroundStyle(.secondary)
-    }
-  }
-
-  private let goal: GoalType
-
-  init(goal: GoalType) { self.goal = goal }
 }
