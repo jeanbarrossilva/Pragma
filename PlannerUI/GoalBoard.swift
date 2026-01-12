@@ -213,7 +213,7 @@ private struct StatusColumn: View {
         ForEach(Array(zip(toDos.indices, toDos)), id: \.1.id) { index, toDo in
           withDropDestinationIndication(
             forCardOf: toDo,
-            isFirstCard: index == toDos.startIndex,
+            isForFirstCard: index == toDos.startIndex,
             indicatorAbsoluteYOffset: { position in
               // This is just a guess for the half of the SwiftUI-defined amount of points
               // separating each view, which is unknown to the author.
@@ -334,18 +334,16 @@ private struct StatusColumn: View {
   /// - Parameters:
   ///   - toDo: To-do whose card is being hovered by the to-dos being dragged.
   ///   - isFirstCard: Whether the card of the `toDo` is the first one in the layout stack.
-  ///   - calculateMainAxisIndicatorAbsoluteOffset: Produces the amount of points by which the
-  ///     destination indicator will be offset in the Y-axis.
+  ///   - calculateIndicatorAbsoluteYOffset: Produces the amount of points by which the destination
+  ///     indicator will be offset in the Y-axis.
   /// - Returns: The `content` itself in case no drag-and-drop session is ongoing; otherwise, the
   ///   the `content` overlaid by an indicator for the destination of the to-dos being dragged in
   ///   the session.
   @ViewBuilder
   private func withDropDestinationIndication(
     forCardOf toDo: ReadOnlyToDo,
-    isFirstCard: Bool,
-    indicatorAbsoluteYOffset calculateIndicatorAbsoluteYOffset: (
-      ToDoCardPredictedDropPosition
-    ) ->
+    isForFirstCard: Bool,
+    indicatorAbsoluteYOffset calculateIndicatorAbsoluteYOffset: (ToDoCardPredictedDropPosition) ->
       CGFloat,
     @ViewBuilder content: () -> some View
   ) -> some View {
@@ -354,7 +352,7 @@ private struct StatusColumn: View {
       toDoCardFrame.contains(dragLocation)
     {
       let position =
-        isFirstCard && dragLocation.y < toDoCardFrame.minY + toDoCardFrame.height / 2
+        isForFirstCard && dragLocation.y < toDoCardFrame.minY + toDoCardFrame.height / 2
         ? ToDoCardPredictedDropPosition.before : .after
       let absoluteYOffset =
         (position == .before ? 0 : toDoCardFrame.height)
