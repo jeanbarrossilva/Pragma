@@ -40,7 +40,8 @@ import SwiftUI
 public struct PlanList: View {
   public var body: some View {
     if plans.isEmpty {
-      EmptyPlanList(onDidRequestPlanAddition: onDidRequestPlanAddition).padding()
+      EmptyPlanList(onDidRequestPlanAddition: onDidRequestPlanAddition)
+        .padding()
     } else {
       PopulatedPlanList(
         plans: plans,
@@ -100,7 +101,7 @@ private struct EmptyPlanList: View {
 
 private struct PopulatedPlanList: View {
   var body: some View {
-    GeometryReader { proxy in
+    GeometryReader { geometry in
       NavigationSplitView {
         List(plans) { plan in
           Button {
@@ -109,14 +110,18 @@ private struct PopulatedPlanList: View {
             HStack {
               Text(plan.title).lineLimit(2).multilineTextAlignment(.leading)
               Spacer()
-            }.padding(4)
-          }.buttonStyle(
+            }
+            .padding(4)
+          }
+          .buttonStyle(
             plan != selectedPlan ? AnyPrimitiveButtonStyle(.plain) : .init(.borderedProminent)
           )
-        }.navigationTitle("Plans").navigationSplitViewColumnWidth(
-          min: proxy.size.width * 0.16,
-          ideal: proxy.size.width * 0.16,
-          max: proxy.size.width * 0.32
+        }
+        .navigationTitle("Plans")
+        .navigationSplitViewColumnWidth(
+          min: geometry.size.width * 0.16,
+          ideal: geometry.size.width * 0.16,
+          max: geometry.size.width * 0.32
         )
       } detail: {
         ScrollView {
@@ -129,10 +134,10 @@ private struct PopulatedPlanList: View {
                 onDidRequestStatusChange: { toDos, newStatus in
                   onDidRequestToDoTransfer(goal, toDos, newStatus)
                 }
-              ).padding(.horizontal, 32).padding(
-                .top,
-                index == selectedPlan.goals.startIndex ? 32 : 0
-              ).padding(
+              )
+              .padding(.horizontal, 32)
+              .padding(.top, index == selectedPlan.goals.startIndex ? 32 : 0)
+              .padding(
                 .bottom,
                 index == selectedPlan.goals.index(before: selectedPlan.goals.endIndex) ? 32 : 0
               )
