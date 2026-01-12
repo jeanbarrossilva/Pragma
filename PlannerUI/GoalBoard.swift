@@ -194,8 +194,7 @@ private struct PopulatedGoalBoard: View {
   ///     ``EmptyGoalBoard`` (outside of the group box inside which a populated board should be)
   ///     instead.
   ///   - onDidRequestStatusChange: Callback called whenever to-dos are requested to have their
-  ///     status changed to another different from their current one. These to-dos may be from a
-  ///     goal other than that to which they belonged previously.
+  ///     status changed to another different from their current one.
   init(toDos: [ReadOnlyToDo], onDidRequestStatusChange: @escaping ([ReadOnlyToDo], Status) -> Void)
   {
     self.toDos = toDos
@@ -217,7 +216,7 @@ private struct StatusColumn: View {
             isFirstCard: index == toDos.startIndex,
             indicatorAbsoluteYOffset: { position in
               // This is just a guess for the half of the SwiftUI-defined amount of points
-              // separating each view, which is unknown by the author.
+              // separating each view, which is unknown to the author.
               index == toDos.startIndex && position == .before ? 4 : 1.5
             }
           ) {
@@ -264,10 +263,9 @@ private struct StatusColumn: View {
   @State
   private var frame: CGRect?
 
-  /// Relation between each of the `toDos` and the frame of its card in the coordinate space of
-  /// either the global coordinate space. This dictionary is empty by default, and gets populated
-  /// according to the appearance of each card; entries are removed whenever the card of the
-  /// respective to-do is made invisible.
+  /// Relation between each of the `toDos` and the frame of its card in the global coordinate space.
+  /// This dictionary is empty by default, and gets populated according to the appearance of each
+  /// card; entries are removed whenever the card of the respective to-do is made invisible.
   @State
   private var toDoCardFraming = [ReadOnlyToDo: CGRect]()
 
