@@ -16,18 +16,16 @@
 // ===-------------------------------------------------------------------------------------------===
 
 import PlannerToolkit
-import PlansKit
-import SwiftUI
+@testable import PlannerUI
+import Testing
 
-#Preview { ContentView() }
-
-struct ContentView: View {
-  var body: some View {
-    PlanList(
-      plans: DemoPlanning.plans.map { plan in .init(from: plan) },
-      onDidRequestPlanAddition: {},
-      onDidRequestToDoAddition: { _ in },
-      onDidRequestToDoTransfer: { _, _, _ in }
-    )
+private struct ReadOnlyPlanTests {
+  @Test
+  func isInitializedFromPlan() {
+    let originalPlan = DemoPlanning.plans[0]
+    let readOnlyPlan = ReadOnlyPlan(from: originalPlan)
+    #expect(readOnlyPlan.id == .init(originalPlan.id))
+    #expect(readOnlyPlan.title == originalPlan.title)
+    #expect(readOnlyPlan.description == originalPlan.description)
   }
 }

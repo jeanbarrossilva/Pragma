@@ -1,7 +1,7 @@
 // ===-------------------------------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
-// This file is part of the Pragma open-source project.
+// This file is part of the PlannerUI open-source project.
 //
 // This program is free software: you can redistribute it and/or modify it under the terms of the
 // GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -15,19 +15,4 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import PlannerToolkit
-import PlansKit
-import SwiftUI
-
-#Preview { ContentView() }
-
-struct ContentView: View {
-  var body: some View {
-    PlanList(
-      plans: DemoPlanning.plans.map { plan in .init(from: plan) },
-      onDidRequestPlanAddition: {},
-      onDidRequestToDoAddition: { _ in },
-      onDidRequestToDoTransfer: { _, _, _ in }
-    )
-  }
-}
+@_exported import Planner

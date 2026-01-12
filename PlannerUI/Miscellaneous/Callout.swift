@@ -34,9 +34,9 @@ import SwiftUI
 /// feature of the application to be taken advantage of, alongside a button for performing the
 /// action when triggered. This is for hinting toward an aspect of such feature only, and should not
 /// be employed for displaying critical information such as errors.
-struct Callout<Title, Description, ActionButton>: View
+public struct Callout<Title, Description, ActionButton>: View
 where Title: View, Description: View, ActionButton: View {
-  var body: some View {
+  public var body: some View {
     GroupBox {
       HStack(spacing: 24) {
         Image(systemName: "lightbulb.max.fill").imageScale(.large)
@@ -66,7 +66,7 @@ where Title: View, Description: View, ActionButton: View {
   ///   - actionButton: Button which performs the action related to this ``Callout`` when triggered.
   ///   - title: General explanation about or comment on the feature.
   ///   - description: Details on how the feature works and, ideally, what the `actionButton` does.
-  init(
+  public init(
     @ViewBuilder actionButton: @escaping () -> ActionButton,
     @ViewBuilder title: @escaping () -> Title,
     @ViewBuilder description: @escaping () -> Description

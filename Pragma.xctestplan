@@ -21,6 +21,13 @@
     {
       "target" : {
         "containerPath" : "container:Pragma.xcodeproj",
+        "identifier" : "4952C73D2F0BF6AB00BFFB49",
+        "name" : "PlansKitTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Pragma.xcodeproj",
         "identifier" : "4952C7662F0C7C9900BFFB49",
         "name" : "PlannerToolkitTests"
       }
@@ -28,15 +35,15 @@
     {
       "target" : {
         "containerPath" : "container:Pragma.xcodeproj",
-        "identifier" : "49DCA0F92F0A679100274F58",
-        "name" : "PlannerTests"
+        "identifier" : "491005992F10575300896DDF",
+        "name" : "PlannerUITests"
       }
     },
     {
       "target" : {
         "containerPath" : "container:Pragma.xcodeproj",
-        "identifier" : "4952C73D2F0BF6AB00BFFB49",
-        "name" : "PlansKitTests"
+        "identifier" : "49DCA0F92F0A679100274F58",
+        "name" : "PlannerTests"
       }
     }
   ],

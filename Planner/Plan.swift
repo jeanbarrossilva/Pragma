@@ -18,7 +18,7 @@
 /// Plans are groups of ``Goal``s which may be related by category (e.g., an academic plan, focused
 /// on studies of subjects of a given course and overall enhancement of received grades) or time
 /// (e.g., a plan with resolutions for the upcoming year).
-public protocol Plan: Headlined {
+public protocol Plan: Headlineable {
   /// Type of the ``Goal``s by which this ``Plan`` is composed.
   associatedtype GoalType: Goal
 
@@ -41,8 +41,8 @@ public protocol Plan: Headlined {
   /// according to the criteria of comparison of the type of ``Goal``.
   ///
   /// - Parameters:
-  ///   - title: ``Headlined/title`` of the ``Goal``.
-  ///   - description: ``Headlined/description`` of the ``Goal``.
+  ///   - title: ``Headlineable/title`` of the ``Goal``.
+  ///   - description: ``Headlineable/description`` of the ``Goal``.
   /// - Returns: The added ``Goal``.
   mutating func addGoal(titled title: String, describedAs description: String) async -> GoalType
 
@@ -76,12 +76,12 @@ extension Plan where Self: Equatable {
 /// and an initially-empty set of ``toDos`` (referred to as "tasks" to the user). It intends to make
 /// specific an otherwise broad objective, e.g., "work at Apple", by dividing it into various
 /// intentional, trackable, time-constrained steps.
-public protocol Goal: Headlined {
+public protocol Goal: Headlineable {
   /// Type of the ``ToDo``s by which this ``Goal`` is composed.
   associatedtype ToDoType: ToDo
 
   /// ``ToDo``s related to the achievement of the defined objective, sorted ascendingly by their
-  /// ``ToDo/deadline`` and ``Headlined/title``.
+  /// ``ToDo/deadline``.
   ///
   /// ###### Implementation notes
   ///
@@ -147,7 +147,7 @@ extension Goal where Self: Hashable {
 /// Referred to as "tasks" to the user, to-dos are the minimal steps toward the achievement of a
 /// ``Goal``. They are sequential, meaning that each is part of a set of other to-dos which are
 /// designed to be done in order; such order is ascending, determined by their ``deadline``.
-public protocol ToDo: Headlined {
+public protocol ToDo: Headlineable {
   /// Notes on the specifics of the achievement of this ``ToDo``, such as the prerequisites and
   /// prior preparations deemed necessary by the user. May also contain information about how it was
   /// done, detailing the process for mere posterior reading or as a basis for other plans.
@@ -190,6 +190,23 @@ extension ToDo where Self: Hashable {
   }
 }
 
+/// ``Headlined`` which allows for asynchronous modifications of its ``Headlined/title`` and
+/// ``Headlined/description``.
+public protocol Headlineable: Headlined {
+  /// Changes the ``Headlined/title``.
+  ///
+  /// - Parameter newTitle: Title by which the current one will be replaced.
+  mutating func setTitle(to newTitle: String) async
+
+  /// Changes the ``Headlined/description``.
+  ///
+  /// - Parameter newDescription: Description by which the current one will be replaced.
+  mutating func setDescription(to newDescription: String) async
+}
+
+/// Structs or classes conforming to this protocol are presentable by a general, short description;
+/// and a more descriptive, longer one. These may be mutable in case such structs or classes also
+/// conform to ``Headlineable``.
 public protocol Headlined: Comparable, Hashable, Identifiable {
   /// Main, general, non-blank description.
   var title: String { get }
@@ -203,16 +220,6 @@ public protocol Headlined: Comparable, Hashable, Identifiable {
   ///
   /// - SeeAlso: ``normalize(_:_:)``
   static var description: String { get }
-
-  /// Changes the ``Headlined/title``.
-  ///
-  /// - Parameter newTitle: Title by which the current one will be replaced.
-  mutating func setTitle(to newTitle: String) async
-
-  /// Changes the ``description``.
-  ///
-  /// - Parameter newDescription: Description by which the current one will be replaced.
-  mutating func setDescription(to newDescription: String) async
 }
 
 extension Headlined where Self: Comparable {
@@ -222,8 +229,10 @@ extension Headlined where Self: Comparable {
   /// given.
   ///
   /// - Parameter other: Right-hand-side of the comparison.
-  func isLesser(than other: Self) -> Bool {
+  public func isLesser(than other: Self) -> Bool {
     title[title.startIndex] < other.title[other.title.startIndex]
       && description[description.startIndex] < other.description[other.description.startIndex]
   }
+
+  public static func < (lhs: Self, rhs: Self) -> Bool { lhs.isLesser(than: rhs) }
 }

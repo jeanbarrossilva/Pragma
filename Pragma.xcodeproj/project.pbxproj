@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4910059B2F10575300896DDF /* PlannerUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 491005922F10575200896DDF /* PlannerUI.framework */; };
 		4952C73F2F0BF6AB00BFFB49 /* PlansKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansKit.framework */; };
 		4952C7492F0BF6AB00BFFB49 /* PlansKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansKit.framework */; };
 		4952C74A2F0BF6AB00BFFB49 /* PlansKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -18,6 +19,27 @@
 
 /* Begin PBXContainerItemProxy section */
 		4901139C2F0DF87F005A8EAC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4952C75E2F0C7C9900BFFB49;
+			remoteInfo = PlannerToolkit;
+		};
+		4910059C2F10575300896DDF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 491005912F10575200896DDF;
+			remoteInfo = PlannerUI;
+		};
+		491005A72F10577400896DDF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 491005912F10575200896DDF;
+			remoteInfo = PlannerUI;
+		};
+		491005AF2F105C9600896DDF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
 			proxyType = 1;
@@ -66,6 +88,20 @@
 			remoteGlobalIDString = 49DCA0F12F0A679100274F58;
 			remoteInfo = Planner;
 		};
+		4952EB7D2F107E05006D660B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 49DCA0F12F0A679100274F58;
+			remoteInfo = Planner;
+		};
+		4952EB8B2F1087D8006D660B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4952C75E2F0C7C9900BFFB49;
+			remoteInfo = PlannerToolkit;
+		};
 		49DCA0FC2F0A679100274F58 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 49DCA0C62F0A60F200274F58 /* Project object */;
@@ -90,6 +126,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		491005922F10575200896DDF /* PlannerUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlannerUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4910059A2F10575300896DDF /* PlannerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlannerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4952C7362F0BF6AB00BFFB49 /* PlansKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlansKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4952C73E2F0BF6AB00BFFB49 /* PlansKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlansKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4952C75F2F0C7C9900BFFB49 /* PlannerToolkit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlannerToolkit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,6 +141,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		491005932F10575200896DDF /* PlannerUI */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PlannerUI;
+			sourceTree = "<group>";
+		};
+		4910059E2F10575300896DDF /* PlannerUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PlannerUITests;
+			sourceTree = "<group>";
+		};
 		4952C7372F0BF6AB00BFFB49 /* PlansKit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = PlansKit;
@@ -141,6 +189,21 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4910058F2F10575200896DDF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		491005972F10575300896DDF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4910059B2F10575300896DDF /* PlannerUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4952C7332F0BF6AB00BFFB49 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -208,6 +271,8 @@
 				4952C7442F0BF6AB00BFFB49 /* PlansKitTests */,
 				4952C7602F0C7C9900BFFB49 /* PlannerToolkit */,
 				4952C76B2F0C7C9900BFFB49 /* PlannerToolkitTests */,
+				491005932F10575200896DDF /* PlannerUI */,
+				4910059E2F10575300896DDF /* PlannerUITests */,
 				49DCA0CF2F0A60F200274F58 /* Products */,
 				49DCA0E82F0A65B700274F58 /* .swift-format */,
 				49DCA0EB2F0A669000274F58 /* .gitignore */,
@@ -224,6 +289,8 @@
 				4952C73E2F0BF6AB00BFFB49 /* PlansKitTests.xctest */,
 				4952C75F2F0C7C9900BFFB49 /* PlannerToolkit.framework */,
 				4952C7672F0C7C9900BFFB49 /* PlannerToolkitTests.xctest */,
+				491005922F10575200896DDF /* PlannerUI.framework */,
+				4910059A2F10575300896DDF /* PlannerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -231,6 +298,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		4910058D2F10575200896DDF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4952C7312F0BF6AB00BFFB49 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -255,6 +329,55 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		491005912F10575200896DDF /* PlannerUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 491005A52F10575300896DDF /* Build configuration list for PBXNativeTarget "PlannerUI" */;
+			buildPhases = (
+				4910058D2F10575200896DDF /* Headers */,
+				4910058E2F10575200896DDF /* Sources */,
+				4910058F2F10575200896DDF /* Frameworks */,
+				491005902F10575200896DDF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4952EB8C2F1087D8006D660B /* PBXTargetDependency */,
+				4952EB7E2F107E05006D660B /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				491005932F10575200896DDF /* PlannerUI */,
+			);
+			name = PlannerUI;
+			packageProductDependencies = (
+			);
+			productName = PlannerUI;
+			productReference = 491005922F10575200896DDF /* PlannerUI.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		491005992F10575300896DDF /* PlannerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 491005A62F10575300896DDF /* Build configuration list for PBXNativeTarget "PlannerUITests" */;
+			buildPhases = (
+				491005962F10575300896DDF /* Sources */,
+				491005972F10575300896DDF /* Frameworks */,
+				491005982F10575300896DDF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				491005B02F105C9600896DDF /* PBXTargetDependency */,
+				4910059D2F10575300896DDF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4910059E2F10575300896DDF /* PlannerUITests */,
+			);
+			name = PlannerUITests;
+			packageProductDependencies = (
+			);
+			productName = PlannerUITests;
+			productReference = 4910059A2F10575300896DDF /* PlannerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		4952C7352F0BF6AB00BFFB49 /* PlansKit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4952C74B2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansKit" */;
@@ -267,6 +390,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				491005A82F10577400896DDF /* PBXTargetDependency */,
 				4952C77D2F0C7D5A00BFFB49 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -432,6 +556,13 @@
 				LastUpgradeCheck = 2620;
 				ORGANIZATIONNAME = "Jean Silva";
 				TargetAttributes = {
+					491005912F10575200896DDF = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					491005992F10575300896DDF = {
+						CreatedOnToolsVersion = 26.2;
+						LastSwiftMigration = 2620;
+					};
 					4952C7352F0BF6AB00BFFB49 = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -465,6 +596,8 @@
 			);
 			mainGroup = 49DCA0C52F0A60F200274F58;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 49DCA0CF2F0A60F200274F58 /* Products */;
 			projectDirPath = "";
@@ -477,11 +610,27 @@
 				4952C73D2F0BF6AB00BFFB49 /* PlansKitTests */,
 				4952C75E2F0C7C9900BFFB49 /* PlannerToolkit */,
 				4952C7662F0C7C9900BFFB49 /* PlannerToolkitTests */,
+				491005912F10575200896DDF /* PlannerUI */,
+				491005992F10575300896DDF /* PlannerUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		491005902F10575200896DDF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		491005982F10575300896DDF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4952C7342F0BF6AB00BFFB49 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -535,6 +684,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4910058E2F10575200896DDF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		491005962F10575300896DDF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4952C7322F0BF6AB00BFFB49 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -593,6 +756,21 @@
 			target = 4952C75E2F0C7C9900BFFB49 /* PlannerToolkit */;
 			targetProxy = 4901139C2F0DF87F005A8EAC /* PBXContainerItemProxy */;
 		};
+		4910059D2F10575300896DDF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 491005912F10575200896DDF /* PlannerUI */;
+			targetProxy = 4910059C2F10575300896DDF /* PBXContainerItemProxy */;
+		};
+		491005A82F10577400896DDF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 491005912F10575200896DDF /* PlannerUI */;
+			targetProxy = 491005A72F10577400896DDF /* PBXContainerItemProxy */;
+		};
+		491005B02F105C9600896DDF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4952C75E2F0C7C9900BFFB49 /* PlannerToolkit */;
+			targetProxy = 491005AF2F105C9600896DDF /* PBXContainerItemProxy */;
+		};
 		4952C7412F0BF6AB00BFFB49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4952C7352F0BF6AB00BFFB49 /* PlansKit */;
@@ -623,6 +801,16 @@
 			target = 49DCA0F12F0A679100274F58 /* Planner */;
 			targetProxy = 4952C77E2F0C7D7000BFFB49 /* PBXContainerItemProxy */;
 		};
+		4952EB7E2F107E05006D660B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 49DCA0F12F0A679100274F58 /* Planner */;
+			targetProxy = 4952EB7D2F107E05006D660B /* PBXContainerItemProxy */;
+		};
+		4952EB8C2F1087D8006D660B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4952C75E2F0C7C9900BFFB49 /* PlannerToolkit */;
+			targetProxy = 4952EB8B2F1087D8006D660B /* PBXContainerItemProxy */;
+		};
 		49DCA0FD2F0A679100274F58 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 49DCA0F12F0A679100274F58 /* Planner */;
@@ -631,6 +819,121 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		491005A12F10575300896DDF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X5FKTSKM38;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Jean Silva. All rights reserved.";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerUI;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		491005A22F10575300896DDF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X5FKTSKM38;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Jean Silva. All rights reserved.";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerUI;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		491005A32F10575300896DDF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X5FKTSKM38;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		491005A42F10575300896DDF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X5FKTSKM38;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		4952C74C2F0BF6AB00BFFB49 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1164,6 +1467,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		491005A52F10575300896DDF /* Build configuration list for PBXNativeTarget "PlannerUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				491005A12F10575300896DDF /* Debug */,
+				491005A22F10575300896DDF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		491005A62F10575300896DDF /* Build configuration list for PBXNativeTarget "PlannerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				491005A32F10575300896DDF /* Debug */,
+				491005A42F10575300896DDF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4952C74B2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

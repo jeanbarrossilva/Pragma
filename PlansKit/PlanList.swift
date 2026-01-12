@@ -16,33 +16,68 @@
 // ===-------------------------------------------------------------------------------------------===
 
 import PlannerToolkit
+import PlannerUI
 import SwiftUI
 
-#Preview("Without plans") { PlanList(plans: [DemoPlan](), onPlanAdditionRequest: {}) }
-#Preview("With plans") { PlanList(plans: DemoPlanning.plans, onPlanAdditionRequest: {}) }
+#Preview("Without plans") {
+  PlanList(
+    plans: [],
+    onDidRequestPlanAddition: {},
+    onDidRequestToDoAddition: { _ in },
+    onDidRequestToDoTransfer: { _, _, _ in }
+  )
+}
 
-public struct PlanList<PlanType>: View where PlanType: Plan {
+#Preview("With plans") {
+  PlanList(
+    plans: DemoPlanning.plans.map { plan in .init(from: plan) },
+    onDidRequestPlanAddition: {},
+    onDidRequestToDoAddition: { _ in },
+    onDidRequestToDoTransfer: { _, _, _ in }
+  )
+}
+
+public struct PlanList: View {
   public var body: some View {
     if plans.isEmpty {
-      EmptyPlanList(onPlanAdditionRequest: onPlanAdditionRequest).padding()
+      EmptyPlanList(onDidRequestPlanAddition: onDidRequestPlanAddition).padding()
     } else {
-      PopulatedPlanList(plans: plans)
+      PopulatedPlanList(
+        plans: plans,
+        onDidRequestToDoAddition: onDidRequestToDoAddition,
+        onDidRequestToDoTransfer: onDidRequestToDoTransfer
+      )
     }
   }
 
-  private let plans: [PlanType]
-  private let onPlanAdditionRequest: () -> Void
+  private let plans: [ReadOnlyPlan]
+  private let onDidRequestPlanAddition: () -> Void
+  private let onDidRequestToDoAddition: (ReadOnlyPlan) -> Void
+  private let onDidRequestToDoTransfer:
+    (_ destinationGoal: ReadOnlyGoal, _ transferredToDos: [ReadOnlyToDo], _ newStatus: Status) ->
+      Void
 
-  public init(plans: [PlanType], onPlanAdditionRequest: @escaping () -> Void) {
+  public init(
+    plans: [ReadOnlyPlan],
+    onDidRequestPlanAddition: @escaping () -> Void,
+    onDidRequestToDoAddition: @escaping (ReadOnlyPlan) -> Void,
+    onDidRequestToDoTransfer:
+      @escaping (
+        _ destinationGoal: ReadOnlyGoal, _ transferredToDos: [ReadOnlyToDo], _ newStatus: Status
+      )
+      -> Void
+  ) {
     self.plans = plans
-    self.onPlanAdditionRequest = onPlanAdditionRequest
+    self.onDidRequestPlanAddition = onDidRequestPlanAddition
+    self.onDidRequestToDoAddition = onDidRequestToDoAddition
+    self.onDidRequestToDoTransfer = onDidRequestToDoTransfer
   }
 }
 
 private struct EmptyPlanList: View {
   var body: some View {
     Callout {
-      Button(action: onPlanAdditionRequest) { Image(systemName: "plus") }
+      Button(action: onDidRequestPlanAddition) { Image(systemName: "plus") }
     } title: {
       Text("No plans in sight… for now.")
     } description: {
@@ -56,14 +91,14 @@ private struct EmptyPlanList: View {
   @Environment(\.layoutDirection)
   private var layoutDirection
 
-  private let onPlanAdditionRequest: () -> Void
+  private let onDidRequestPlanAddition: () -> Void
 
-  init(onPlanAdditionRequest: @escaping () -> Void) {
-    self.onPlanAdditionRequest = onPlanAdditionRequest
+  init(onDidRequestPlanAddition: @escaping () -> Void) {
+    self.onDidRequestPlanAddition = onDidRequestPlanAddition
   }
 }
 
-private struct PopulatedPlanList<PlanType>: View where PlanType: Plan {
+private struct PopulatedPlanList: View {
   var body: some View {
     GeometryReader { proxy in
       NavigationSplitView {
@@ -88,7 +123,13 @@ private struct PopulatedPlanList<PlanType>: View where PlanType: Plan {
           LazyVStack(alignment: .leading, spacing: 32) {
             ForEach(Array(zip(selectedPlan.goals.indices, selectedPlan.goals)), id: \.1.id) {
               (index, goal) in
-              GoalBoard(goal: goal, onToDoAdditionRequest: {}).padding(.horizontal, 32).padding(
+              GoalBoard(
+                goal: goal,
+                onDidRequestToDoAddition: { onDidRequestToDoAddition(selectedPlan) },
+                onDidRequestStatusChange: { toDos, newStatus in
+                  onDidRequestToDoTransfer(goal, toDos, newStatus)
+                }
+              ).padding(.horizontal, 32).padding(
                 .top,
                 index == selectedPlan.goals.startIndex ? 32 : 0
               ).padding(
@@ -102,14 +143,27 @@ private struct PopulatedPlanList<PlanType>: View where PlanType: Plan {
     }
   }
 
-  private let plans: [PlanType]
+  private let plans: [ReadOnlyPlan]
+  private let onDidRequestToDoAddition: (ReadOnlyPlan) -> Void
+  private let onDidRequestToDoTransfer:
+    (_ destinationGoal: ReadOnlyGoal, _ transferredToDos: [ReadOnlyToDo], _ newStatus: Status) ->
+      Void
 
   @State
-  private var selectedPlan: PlanType
+  private var selectedPlan: ReadOnlyPlan
 
-  init(plans: [PlanType]) {
+  init(
+    plans: [ReadOnlyPlan],
+    onDidRequestToDoAddition: @escaping (ReadOnlyPlan) -> Void,
+    onDidRequestToDoTransfer:
+      @escaping (
+        _ destinationGoal: ReadOnlyGoal, _ transferredToDos: [ReadOnlyToDo], _ newStatus: Status
+      ) -> Void
+  ) {
     self.plans = plans
     self.selectedPlan = plans[0]
+    self.onDidRequestToDoAddition = onDidRequestToDoAddition
+    self.onDidRequestToDoTransfer = onDidRequestToDoTransfer
   }
 }
 
