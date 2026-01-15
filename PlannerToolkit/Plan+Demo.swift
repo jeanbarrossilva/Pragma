@@ -261,17 +261,18 @@ public struct DemoToDo: ToDo {
   public let id = UUID()
   public private(set) var title: String
   public private(set) var description: String
+  public private(set) var status: Status
   public private(set) var deadline: Date
-  public private(set) var isDone: Bool = false
 
   public static let description = "to-do"
 
-  fileprivate init(title: String, description: String, deadline: Date) {
+  fileprivate init(title: String, description: String, status: Status = .idle, deadline: Date) {
     var title = title
     var description = description
     Self.normalize(&title, &description)
     self.title = title
     self.description = description
+    self.status = status
     self.deadline = deadline
   }
 
@@ -287,6 +288,6 @@ public struct DemoToDo: ToDo {
     description = newDescription
   }
 
+  public mutating func setStatus(to newStatus: Status) async { status = newStatus }
   public mutating func setDeadline(to newDeadline: Date) async { deadline = newDeadline }
-  public mutating func toggle() async { isDone.toggle() }
 }

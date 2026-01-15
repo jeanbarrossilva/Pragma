@@ -45,10 +45,10 @@ struct DemoToDoTests {
   }
 
   @Test
-  func toggles() async {
+  func setsStatus() async {
     var toDo = DemoPlanning.toDos[0]
-    let wasDone = toDo.isDone
-    await toDo.toggle()
-    #expect(toDo.isDone == !wasDone)
+    let newStatus = Status.allCases.first(where: { status in toDo.status != status })!
+    await toDo.setStatus(to: newStatus)
+    #expect(toDo.status == newStatus)
   }
 }

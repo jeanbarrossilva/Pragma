@@ -80,11 +80,11 @@ public struct ReadOnlyToDo: Codable, Headlined, @unchecked Sendable {
   /// detailing the process for mere posterior reading or as a basis for other plans.
   public let description: String
 
+  /// Stage of completion of this to-do.
+  let status: Status
+
   /// Date at which this to-do is expected to be or have been done.
   let deadline: Date
-
-  /// Whether this to-do has been done.
-  let isDone: Bool
 
   public static var description: String { "to-do" }
 
@@ -95,7 +95,7 @@ public struct ReadOnlyToDo: Codable, Headlined, @unchecked Sendable {
     self.id = toDo.id as? AnyCodable ?? .init(toDo.id)
     self.title = toDo.title
     self.description = toDo.description
+    self.status = toDo.status
     self.deadline = toDo.deadline
-    self.isDone = toDo.isDone
   }
 }

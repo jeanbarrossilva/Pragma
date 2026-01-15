@@ -15,7 +15,6 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import os
 import PlannerToolkit
 import SwiftUI
 
@@ -66,7 +65,7 @@ public struct GoalBoard: View {
 
   /// Callback called whenever to-dos are requested to have their status changed to another
   /// different from their current one.
-  private let onToDoStatusChangeRequest: ([ReadOnlyToDo], Status) -> Void
+  private let onToDoStatusChangeRequest: (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
 
   /// Initializes a ``GoalBoard`` for displaying the headline and the to-dos of a given goal.
   ///
@@ -79,7 +78,7 @@ public struct GoalBoard: View {
   public init(
     goal: ReadOnlyGoal,
     onDidRequestToDoAddition: @escaping () -> Void,
-    onDidRequestStatusChange: @escaping ([ReadOnlyToDo], Status) -> Void
+    onDidRequestStatusChange: @escaping (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
   ) {
     self.goal = goal
     self.onDidRequestToDoAddition = onDidRequestToDoAddition
@@ -164,21 +163,28 @@ private struct Headline: View {
 /// in a column of this view respective to its status. These to-dos may be dragged from where they
 /// are to either other colums, which would trigger a request for changing their status to that of
 /// the column to which they were moved.
-private struct PopulatedGoalBoard: View {
+private struct PopulatedGoalBoard<ToDos>: View
+where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
   var body: some View {
-    HStack(alignment: .top, spacing: 16) {
-      ForEach(Status.allCases, id: \.self) { status in
-        StatusColumn(
-          status: status,
-          toDos: toDos,
-          onDidRequestStatusChange: onDidRequestStatusChange
-        )
+    HStack(alignment: .top) {
+      ForEach(Array(zip(Status.allCases.indices, Status.allCases)), id: \.1.self) { index, status in
+        HStack {
+          StatusColumn(
+            status: status,
+            toDos: toDos.filter { toDo in status == toDo.status },
+            onDidRequestStatusChange: { toDos in onDidRequestStatusChange(toDos, status) }
+          )
+          .frame(maxWidth: .infinity)
+          if index < Status.allCases.indices.index(before: Status.allCases.endIndex) {
+            Divider()
+          }
+        }
       }
     }
   }
 
-  /// Non-empty array of to-dos of a goal.
-  private let toDos: [ReadOnlyToDo]
+  /// Non-empty collection of to-dos of a goal.
+  private let toDos: ToDos
 
   /// Callback called whenever to-dos are requested to have their status changed to another
   /// different from their current one.
@@ -188,15 +194,17 @@ private struct PopulatedGoalBoard: View {
   /// such to-dos.
   ///
   /// - Parameters:
-  ///   - toDos: Non-empty array of to-dos of the goal. This initializer does not check
+  ///   - toDos: Non-empty collection of to-dos of the goal. This initializer does not check
   ///     whether the array is, in fact, empty, as this condition is assumed to already be satisfied
   ///     and have been asserted against by the caller. For goals without to-dos, display an
   ///     ``EmptyGoalBoard`` (outside of the group box inside which a populated board should be)
   ///     instead.
   ///   - onDidRequestStatusChange: Callback called whenever to-dos are requested to have their
   ///     status changed to another different from their current one.
-  init(toDos: [ReadOnlyToDo], onDidRequestStatusChange: @escaping ([ReadOnlyToDo], Status) -> Void)
-  {
+  init(
+    toDos: ToDos,
+    onDidRequestStatusChange: @escaping (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
+  ) {
     self.toDos = toDos
     self.onDidRequestStatusChange = onDidRequestStatusChange
   }
@@ -205,27 +213,28 @@ private struct PopulatedGoalBoard: View {
 /// One of the three columns rendered by a ``PopulatedGoalBoard``, pertaining to the status of
 /// completion of a to-do of a goal. Vertically displays a label for the status and the to-dos
 /// whose status is such.
-private struct StatusColumn: View {
+private struct StatusColumn<ToDos>: View
+where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
   var body: some View {
-    VStack(alignment: .leading) {
-      StatusLabel(status: status)
-      VStack {
-        ForEach(Array(zip(toDos.indices, toDos)), id: \.1.id) { index, toDo in
-          withDropDestinationIndication(
-            forCardOf: toDo,
-            isForFirstCard: index == toDos.startIndex,
-            indicatorAbsoluteYOffset: { position in
-              // This is just a guess for the half of the SwiftUI-defined amount of points
-              // separating each view, which is unknown to the author.
-              index == toDos.startIndex && position == .before ? 4 : 1.5
-            }
-          ) {
-            ToDoCard(toDo: toDo)
-              .draggable(toDo)
+    VStack {
+      ForEach(ToDoCardDropIndicatorTarget.allCases(for: toDos)) { target in
+        withDropDestinationIndication(for: target) {
+          switch target {
+          case .label(_):
+            StatusLabel(status: status)
+              .frame(maxWidth: .infinity, alignment: .topLeading)
               .onGeometryChange(for: CGRect.self) { geometry in
                 geometry.frame(in: .global)
+              } action: { frame in
+                labelFrame = frame
+              }
+          case .toDoCard(let toDo, _, _):
+            ToDoCard(toDo: toDo)
+              .draggable(toDo)
+              .onGeometryChange(for: CGRect?.self) { geometry in
+                geometry.frame(in: .global)
               } action: { toDoCardFrame in
-                if let frame, frame.intersects(toDoCardFrame) {
+                if let frame, let toDoCardFrame, frame.intersects(toDoCardFrame) {
                   toDoCardFraming[toDo] = toDoCardFrame
                 } else {
                   toDoCardFraming.removeValue(forKey: toDo)
@@ -234,21 +243,22 @@ private struct StatusColumn: View {
           }
         }
       }
-      .dropDestination(for: ReadOnlyToDo.self) { droppedToDos, _ in
-        onDidRequestStatusChange(droppedToDos, status)
-        return true
-      }
-      .onDropSessionUpdated { session in
-        switch session.phase {
-        case .entering, .active:
-          guard let frame else { return }
-          toDoCardDragLocation = .init(
-            x: frame.minX + session.location.x,
-            y: frame.minY + session.location.y
-          )
-        case .exiting, .ended(_), .dataTransferCompleted: toDoCardDragLocation = nil
-        @unknown default: ()
-        }
+    }
+    .frame(maxHeight: .infinity, alignment: .top)
+    .dropDestination(for: ReadOnlyToDo.self) { droppedToDos, _ in
+      onDidRequestStatusChange(droppedToDos)
+      return true
+    }
+    .onDropSessionUpdated { session in
+      switch session.phase {
+      case .entering, .active:
+        guard let frame else { return }
+        toDoCardDragLocation = .init(
+          x: frame.minX + session.location.x,
+          y: frame.minY + session.location.y
+        )
+      case .exiting, .ended(_), .dataTransferCompleted: toDoCardDragLocation = nil
+      @unknown default: ()
       }
     }
     .onGeometryChange(for: CGRect.self) { geometry in
@@ -263,6 +273,11 @@ private struct StatusColumn: View {
   @State
   private var frame: CGRect?
 
+  /// Rectangle of the label preceding the to-dos in this column in the global coordinate space.
+  /// Is initially `nil` and set when this column is displayed.
+  @State
+  private var labelFrame: CGRect?
+
   /// Relation between each of the `toDos` and the frame of its card in the global coordinate space.
   /// This dictionary is empty by default, and gets populated according to the appearance of each
   /// card; entries are removed whenever the card of the respective to-do is made invisible.
@@ -271,7 +286,7 @@ private struct StatusColumn: View {
 
   /// Point in the global coordinate space at which to-dos being dragged from some ``StatusColumn``
   /// (which may be the same one in which they already were) are at the moment. `nil` when no
-  /// drag-and-drop session is taking place or the to-dos being draggered are not hovering existing
+  /// drag-and-drop session is taking place or the to-dos being dragged are not hovering existing
   /// ones.
   @State
   private var toDoCardDragLocation: CGPoint?
@@ -282,29 +297,174 @@ private struct StatusColumn: View {
   private let status: Status
 
   /// Subset of to-dos of a goal, whose status is that of this column.
-  private let toDos: [ReadOnlyToDo]
+  private let toDos: ToDos
 
-  /// Callback called whenever to-dos are requested to have their status changed to another
-  /// different from their current one.
-  private let onDidRequestStatusChange: (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
+  /// Callback called whenever to-dos are requested to have their status changed to that of this
+  /// column.
+  private let onDidRequestStatusChange: (_ toDos: [ReadOnlyToDo]) -> Void
 
   /// Height of the indicator rendered whenever to-dos are being dragged from one ``StatusColumn``
   /// into another, communicating the position at which they will be placed in the destination
   /// column after such drag-and-drop session.
-  private static let toDoCardDropDestinationIndicatorHeight: CGFloat = 2
+  private static var toDoCardDropDestinationIndicatorHeight: CGFloat { 2 }
 
-  /// Description of the location at which to-dos being dropped into another ``StatusColumn`` would
-  /// be placed relative to the position of a given to-do already at that column. Because there is
-  /// no actual implementation of custom ordering of to-dos of a goal yet, this is a mere visual
-  /// detail.
-  private enum ToDoCardPredictedDropPosition {
-    /// To-dos have been dragged from their ``StatusColumn`` and are hovering another column. These
-    /// to-dos, if dropped, would be placed before the to-do to which this position is relative.
-    case before
+  /// Node of a linked-list-like data structure which indicates the view onto which an indicator
+  /// for communicating the position at which to-dos being dragged in a drag-and-drop session would
+  /// be placed in relation to such view (either above or below it).
+  private indirect enum ToDoCardDropIndicatorTarget: Hashable, Identifiable {
+    var id: AnyHashable {
+      switch self {
+      case .label(_): self
+      case .toDoCard(let toDo, _, _): toDo.id
+      }
+    }
 
-    /// To-dos have been dragged from their ``StatusColumn`` and are hovering another column. These
-    /// to-dos, if dropped, would be placed after the to-do to which this position is relative.
-    case after
+    /// Target by which this one is anteceded in the sequence.
+    private var previous: Self? {
+      switch self {
+      case .label(_): nil
+      case .toDoCard(_, let previous, _): previous
+      }
+    }
+
+    /// Whether this target is the only one in the sequence, i.e., is both the first and the last
+    /// one, for which ``isLast`` returns `true`.
+    private var isSingle: Bool {
+      switch self {
+      case .label(let isLast): isLast
+      case .toDoCard(_, _, _): false
+      }
+    }
+
+    /// Whether this target is the last in the sequence.
+    private var isLast: Bool {
+      switch self {
+      case .label(let isLast): isLast
+      case .toDoCard(_, _, let isLast): isLast
+      }
+    }
+
+    /// Target of the ``StatusLabel`` of a column.
+    ///
+    /// - Parameter isLast: Whether the sequence is not followed by targets of to-do cards.
+    /// - SeeAlso: ``toDoCard(toDo:previous:isLast:)``
+    case label(isLast: Bool)
+
+    /// Target of a ``ToDoCard`` in a column.
+    ///
+    /// - Parameters:
+    ///   - toDo: To-do whose card is the view of this target.
+    ///   - previous: Target before this one in the sequence. This being ``label(isLast:)`` means
+    ///     that the card is the first being displayed.
+    ///   - isLast: Whether the card is the last in the sequence.
+    /// - SeeAlso: ``allCases(for:)``
+    case toDoCard(toDo: ReadOnlyToDo, previous: Self, isLast: Bool)
+
+    /// Calculates the amount of points by which the indicator should be offset vertically, with the
+    /// minimum coordinate in the Y-axis of the view of this target as the origin. Applying it to
+    /// the indicator positions it below the target after which the to-dos being dragged would be
+    /// placed if dropped.
+    ///
+    /// - Parameter parent: Column responsible for rendering the view.
+    /// - Returns: The offset in the Y-axis for the indicator, or `nil` any of the required views
+    ///   are not being displayed by the `parent`.
+    @MainActor
+    func indicatorOffset(in parent: StatusColumn) -> CGFloat? {
+      guard let reference = reference(in: parent) else { return nil }
+      guard reference == self else { return reference.spacing(in: parent)?.scaled(by: -1) }
+      guard let frame = reference.frame(in: parent) else { return nil }
+      return frame.height
+    }
+
+    /// Obtains the target after which the indicator should be displayed, which may be this target
+    /// or that which antecedes it. The resulting target is considered the reference one based on
+    /// the location over which the to-do cards are being dragged during a drag-and-drop session.
+    ///
+    /// - Parameter parent: Column responsible for rendering the view.
+    /// - Returns: The reference target; or `nil` if any of the required views (mandatorily
+    ///   including the `parent`, and may also include the view of this target or that of the
+    ///   ``previous`` target) are not being displayed.
+    @MainActor
+    private func reference(in parent: StatusColumn) -> Self? {
+      guard let dragLocation = parent.toDoCardDragLocation,
+        let parentFrame = parent.frame,
+        parentFrame.contains(dragLocation),
+        let frame = frame(in: parent)
+      else { return nil }
+      return
+        if dragLocation.y < frame.midY,
+        let previous,
+        let previousFrame = previous.frame(in: parent),
+        dragLocation.y > previousFrame.midY
+      {
+        previous
+      } else if dragLocation.y < frame.maxY, dragLocation.y > frame.midY {
+        self
+      } else {
+        nil
+      }
+    }
+
+    /// Calculates the spacing between the view of this target and either that of the next target or
+    /// the maximum coordinate of the given column in the Y-axis in case no other target follows
+    /// this one in the sequence.
+    ///
+    /// - Parameter parent: Column responsible for rendering the view.
+    /// - Returns: The spacing, or `nil` if the view of this target or that of the ``previous`` one
+    ///   is not being displayed while this target is neither single nor the last in the sequence.
+    /// - SeeAlso: ``isSingle``
+    /// - SeeAlso: ``isLast``
+    @MainActor
+    private func spacing(in parent: StatusColumn) -> CGFloat? {
+      guard let frame = frame(in: parent) else { return nil }
+      guard !isSingle else {
+        return if let parentFrame = parent.frame { frame.minY - parentFrame.minY } else { nil }
+      }
+      guard !isLast else {
+        return if let parentFrame = parent.frame { parentFrame.maxY - frame.maxY } else { nil }
+      }
+      guard let previousFrame = previous?.frame(in: parent) else { return nil }
+      return frame.minY - previousFrame.maxY
+    }
+
+    /// Obtains the rectangle of this target in the global coordinate space.
+    ///
+    /// - Parameter parent: Column responsible for rendering the view.
+    /// - Returns: The frame, or `nil` if the view is not being displayed.
+    @MainActor
+    private func frame(in parent: StatusColumn) -> CGRect? {
+      switch self {
+      case .label(_): parent.labelFrame
+      case .toDoCard(let toDo, _, _): parent.toDoCardFraming[toDo]
+      }
+    }
+
+    /// Produces an array containing one target for every to-do in a given collection. The
+    /// predecessor of the second target in the returned array is the label target; that of a target
+    /// after the second one is the to-do card target produced before it.
+    ///
+    /// - Parameter toDos: To-dos for which targets will be produced.
+    /// - SeeAlso: ``label(isLast:)``
+    static func allCases(for toDos: some RandomAccessCollection<ReadOnlyToDo>) -> [Self] {
+      let count = toDos.count + 1
+      return unsafe [Self](unsafeUninitializedCapacity: count) { buffer, initializedCount in
+        guard var address = buffer.baseAddress else { return }
+        var previousTarget = Self.label(isLast: toDos.isEmpty)
+        unsafe address.initialize(to: previousTarget)
+        unsafe address = address.successor()
+        for toDo in toDos {
+          let currentTarget = Self.toDoCard(
+            toDo: toDo,
+            previous: previousTarget,
+            isLast: toDo == toDos.last
+          )
+          unsafe address.initialize(to: currentTarget)
+          previousTarget = currentTarget
+          unsafe address = address.successor()
+        }
+        initializedCount = count
+      }
+    }
   }
 
   /// Initializes a view which lays out the to-dos with a given status.
@@ -315,11 +475,11 @@ private struct StatusColumn: View {
   ///     to-dos will not be checked by this initializer; therefore, it is implicit that theirs and
   ///     the status of this column do, indeed, match.
   ///   - onDidRequestStatusChange: Callback called whenever to-dos are requested to have their
-  ///     status changed to another different from their current one.
+  ///     status changed to that of this column.
   init(
     status: Status,
-    toDos: [ReadOnlyToDo],
-    onDidRequestStatusChange: @escaping (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
+    toDos: ToDos,
+    onDidRequestStatusChange: @escaping ([ReadOnlyToDo]) -> Void
   ) {
     self.status = status
     self.toDos = toDos
@@ -332,37 +492,17 @@ private struct StatusColumn: View {
   /// effect for now. If no drag-and-drop session is ongoing, the `content` is laid out unchanged.
   ///
   /// - Parameters:
-  ///   - toDo: To-do whose card is being hovered by the to-dos being dragged.
-  ///   - isFirstCard: Whether the card of the `toDo` is the first one in the layout stack.
-  ///   - calculateIndicatorAbsoluteYOffset: Produces the amount of points by which the destination
-  ///     indicator will be offset in the Y-axis.
+  ///   - target: Indicates which view the `content` is, allowing for adapting the display of the
+  ///     indicator (e.g., its position) in relation to the views in the column.
   /// - Returns: The `content` itself in case no drag-and-drop session is ongoing; otherwise, the
   ///   the `content` overlaid by an indicator for the destination of the to-dos being dragged in
   ///   the session.
   @ViewBuilder
   private func withDropDestinationIndication(
-    forCardOf toDo: ReadOnlyToDo,
-    isForFirstCard: Bool,
-    indicatorAbsoluteYOffset calculateIndicatorAbsoluteYOffset: (ToDoCardPredictedDropPosition) ->
-      CGFloat,
+    for target: ToDoCardDropIndicatorTarget,
     @ViewBuilder content: () -> some View
   ) -> some View {
-    if let dragLocation = toDoCardDragLocation,
-      let toDoCardFrame = toDoCardFraming[toDo],
-      toDoCardFrame.contains(dragLocation)
-    {
-      let position =
-        isForFirstCard && dragLocation.y < toDoCardFrame.minY + toDoCardFrame.height / 2
-        ? ToDoCardPredictedDropPosition.before : .after
-      let absoluteYOffset =
-        (position == .before ? 0 : toDoCardFrame.height)
-        + Self.toDoCardDropDestinationIndicatorHeight
-        + calculateIndicatorAbsoluteYOffset(position)
-      let yOffset =
-        switch position {
-        case .before: -absoluteYOffset
-        case .after: absoluteYOffset
-        }
+    if let indicatorOffset = target.indicatorOffset(in: self) {
       content()
         .overlay(alignment: .top) {
           LinearGradient(
@@ -370,8 +510,8 @@ private struct StatusColumn: View {
             startPoint: .leading,
             endPoint: .trailing
           )
-          .frame(width: toDoCardFrame.width, height: Self.toDoCardDropDestinationIndicatorHeight)
-          .offset(y: yOffset)
+          .frame(height: Self.toDoCardDropDestinationIndicatorHeight)
+          .offset(y: indicatorOffset)
         }
     } else {
       content()
@@ -415,17 +555,7 @@ private struct StatusLabel: View {
   init(status: Status) { self.status = status }
 }
 
-/// Stage of completion of a to-do, denoting whether it is *idle*, *ongoing* or *done*. For each
-/// status, a column is drawn in the ``GoalBoard``, from which each of the to-dos with such status
-/// can be dragged onto the column of another status and be requested to have its own status changed
-/// to that of such column to which it was moved.
-///
-/// ## Disclaimer
-///
-/// This is part of PlannerUI temporarily; instead, a status will be a property of every to-do in
-/// the domain layer. As of now, because to-dos are binarily deemed "not done" or "done", they are
-/// repeated in each column respective to each status in a board.
-public enum Status: CaseIterable {
+extension Status {
   /// General, short and displayable description of this ``Status``.
   var title: String {
     switch self {
@@ -444,15 +574,6 @@ public enum Status: CaseIterable {
     case .done: .green
     }
   }
-
-  /// Denotes that the to-do has been added to the goal, but no progress on it has been done yet.
-  case idle
-
-  /// Denotes that the to-do is being worked on and is not yet done.
-  case ongoing
-
-  /// Denotes that the to-do has been worked on and is done.
-  case done
 }
 
 extension ReadOnlyToDo: Transferable {

@@ -153,21 +153,21 @@ public protocol ToDo: Headlineable {
   /// done, detailing the process for mere posterior reading or as a basis for other plans.
   var description: String { get }
 
+  /// Stage of completion of this ``ToDo``.
+  var status: Status { get }
+
   /// Date at which this ``ToDo`` is expected to be or have been done.
   var deadline: Date { get }
 
-  /// Whether this ``ToDo`` has been done.
-  var isDone: Bool { get }
+  /// Changes the ``status``.
+  ///
+  /// - Parameter newStatus: Status by which the current one will be replaced.
+  mutating func setStatus(to newStatus: Status) async
 
   /// Changes the ``deadline``.
   ///
   /// - Parameter newDeadline: Deadline by which the current one will be replaced.
   mutating func setDeadline(to newDeadline: Date) async
-
-  /// Marks this ``ToDo`` as done in case it is not done; otherwise, marks it as not done.
-  ///
-  /// - SeeAlso: ``isDone``
-  mutating func toggle() async
 }
 
 extension ToDo where Self: Comparable {
@@ -185,9 +185,23 @@ extension ToDo where Self: Hashable {
     id.hash(into: &hasher)
     title.hash(into: &hasher)
     description.hash(into: &hasher)
+    status.hash(into: &hasher)
     deadline.hash(into: &hasher)
-    isDone.hash(into: &hasher)
   }
+}
+
+/// Stage of completion of a to-do which determines whether such to-do is *idle*, *ongoing* or
+/// *done*.
+@frozen
+public enum Status: CaseIterable, Codable, Comparable {
+  /// Denotes that the to-do has been added to the goal, but no progress on it has been done yet.
+  case idle
+
+  /// Denotes that the to-do is being worked on and is not yet done.
+  case ongoing
+
+  /// Denotes that the to-do has been worked on and is done.
+  case done
 }
 
 /// ``Headlined`` which allows for asynchronous modifications of its ``Headlined/title`` and
@@ -235,4 +249,8 @@ extension Headlined where Self: Comparable {
   }
 
   public static func < (lhs: Self, rhs: Self) -> Bool { lhs.isLesser(than: rhs) }
+}
+
+extension Headlined where Self: Equatable {
+  public static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
 }
