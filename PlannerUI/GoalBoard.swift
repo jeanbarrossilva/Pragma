@@ -29,14 +29,13 @@ internal import Collections
   .padding()
 }
 
-#Preview("With to-dos") {
+#Preview("With to-dos", traits: .sizeThatFitsLayout) {
   GoalBoard(
     goal: .init(from: DemoPlanning.goals.first(where: { goal in !goal.toDos.isEmpty })!),
     onDidRequestToDoAddition: {},
     onDidRequestStatusChange: { _, _ in }
   )
   .padding()
-  .padding(.vertical, 8)
 }
 
 /// Board view for the headline of a goal and its to-dos based on their status. Such layout is
