@@ -41,8 +41,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4952C73D2F0BF6AB00BFFB49"
-               BuildableName = "PlansKitTests.xctest"
-               BlueprintName = "PlansKitTests"
+               BuildableName = "PlansUITests.xctest"
+               BlueprintName = "PlansUITests"
                ReferencedContainer = "container:Pragma.xcodeproj">
             </BuildableReference>
          </TestableReference>

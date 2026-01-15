@@ -16,7 +16,7 @@
 // ===-------------------------------------------------------------------------------------------===
 
 import PlannerKit
-import PlansKit
+import PlansUI
 import SwiftUI
 
 #Preview { ContentView() }
