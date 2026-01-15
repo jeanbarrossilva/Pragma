@@ -16,6 +16,9 @@
 // ===-------------------------------------------------------------------------------------------===
 
 import Planner
+import SwiftUI
+
+internal import UniformTypeIdentifiers
 
 /// Immutable metadata about a plan displayable by some client.
 public struct ReadOnlyPlan: Headlined, @unchecked Sendable {
@@ -97,5 +100,11 @@ public struct ReadOnlyToDo: Codable, Headlined, @unchecked Sendable {
     self.description = toDo.description
     self.status = toDo.status
     self.deadline = toDo.deadline
+  }
+}
+
+extension ReadOnlyToDo: Transferable {
+  public static var transferRepresentation: some TransferRepresentation {
+    CodableRepresentation(contentType: .propertyList).visibility(.ownProcess)
   }
 }

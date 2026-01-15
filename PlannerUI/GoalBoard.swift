@@ -19,7 +19,6 @@ import PlannerToolkit
 import SwiftUI
 
 internal import Collections
-internal import UniformTypeIdentifiers
 
 #Preview("Without to-dos") {
   GoalBoard(
@@ -576,12 +575,6 @@ extension Status {
     case .ongoing: .yellow
     case .done: .green
     }
-  }
-}
-
-extension ReadOnlyToDo: Transferable {
-  public static var transferRepresentation: some TransferRepresentation {
-    CodableRepresentation(contentType: .propertyList).visibility(.ownProcess)
   }
 }
 
