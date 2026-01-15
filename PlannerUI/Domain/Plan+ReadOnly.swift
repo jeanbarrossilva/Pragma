@@ -15,7 +15,7 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import Planner
+import CorePlanner
 import SwiftUI
 
 internal import UniformTypeIdentifiers
@@ -28,7 +28,7 @@ public struct ReadOnlyPlan: Headlined, @unchecked Sendable {
 
   /// Each of the goals laid out, whose achievement was deemed required by the user in order for
   /// this plan to be successful. Their sorting in the array is the same as that of the original
-  /// ``Planner/Plan/goals``.
+  /// ``CorePlanner/Plan/goals``.
   public let goals: [ReadOnlyGoal]
 
   public static var description: String { "plan" }
@@ -56,7 +56,7 @@ public struct ReadOnlyGoal: Headlined, @unchecked Sendable {
 
   /// To-dos related to the achievement of the defined objective, sorted ascendingly by their
   /// deadline. Their sorting in the array is the same as that of the original
-  /// ``Planner/Goal/toDos``.
+  /// ``CorePlanner/Goal/toDos``.
   public let toDos: [ReadOnlyToDo]
 
   public static var description: String { "goal" }

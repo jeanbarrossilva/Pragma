@@ -15,4 +15,4 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-@_exported import Planner
+@_exported import CorePlanner

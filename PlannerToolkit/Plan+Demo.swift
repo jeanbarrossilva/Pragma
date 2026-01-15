@@ -15,7 +15,7 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-/// Central static utility from which sample ``Planner``-related structures can be generated for
+/// Central static utility from which sample ``CorePlanner``-related structures can be generated for
 /// demonstration purposes, useful for populating a client of the API with pre-existing data for
 /// previewing UI and overall behavior. Any changes to the generated structures are performed in
 /// memory and are not persisted after their deinitialization.

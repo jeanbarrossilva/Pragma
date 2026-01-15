@@ -16,4 +16,4 @@
 // ===-------------------------------------------------------------------------------------------===
 
 @_exported import Foundation
-@_exported import Planner
+@_exported import CorePlanner

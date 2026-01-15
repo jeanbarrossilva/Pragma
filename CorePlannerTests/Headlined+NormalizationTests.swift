@@ -15,7 +15,7 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-@testable import Planner
+@testable import CorePlanner
 import Testing
 
 @Suite("Headlined+Normalization tests")

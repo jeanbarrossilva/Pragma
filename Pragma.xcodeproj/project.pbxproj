@@ -15,7 +15,7 @@
 		495FB9952F19595300154BF5 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 495FB9942F19595300154BF5 /* Collections */; };
 		49DCA0EA2F0A65BC00274F58 /* .swift-format in Resources */ = {isa = PBXBuildFile; fileRef = 49DCA0E82F0A65B700274F58 /* .swift-format */; };
 		49DCA0EC2F0A669700274F58 /* .gitignore in Sources */ = {isa = PBXBuildFile; fileRef = 49DCA0EB2F0A669000274F58 /* .gitignore */; };
-		49DCA0FB2F0A679100274F58 /* Planner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DCA0F22F0A679100274F58 /* Planner.framework */; };
+		49DCA0FB2F0A679100274F58 /* CorePlanner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DCA0F22F0A679100274F58 /* CorePlanner.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -137,8 +137,8 @@
 		49DCA0CE2F0A60F200274F58 /* Pragma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pragma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49DCA0E82F0A65B700274F58 /* .swift-format */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".swift-format"; sourceTree = "<group>"; };
 		49DCA0EB2F0A669000274F58 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		49DCA0F22F0A679100274F58 /* Planner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Planner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		49DCA0FA2F0A679100274F58 /* PlannerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlannerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		49DCA0F22F0A679100274F58 /* CorePlanner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CorePlanner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		49DCA0FA2F0A679100274F58 /* CorePlannerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CorePlannerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -157,11 +157,6 @@
 			path = PlansKit;
 			sourceTree = "<group>";
 		};
-		4952C7442F0BF6AB00BFFB49 /* PlansKitTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PlansKitTests;
-			sourceTree = "<group>";
-		};
 		4952C7602F0C7C9900BFFB49 /* PlannerToolkit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = PlannerToolkit;
@@ -177,14 +172,14 @@
 			path = Pragma;
 			sourceTree = "<group>";
 		};
-		49DCA0F32F0A679100274F58 /* Planner */ = {
+		49DCA0F32F0A679100274F58 /* CorePlanner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Planner;
+			path = CorePlanner;
 			sourceTree = "<group>";
 		};
-		49DCA0FE2F0A679100274F58 /* PlannerTests */ = {
+		49DCA0FE2F0A679100274F58 /* CorePlannerTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PlannerTests;
+			path = CorePlannerTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -255,7 +250,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49DCA0FB2F0A679100274F58 /* Planner.framework in Frameworks */,
+				49DCA0FB2F0A679100274F58 /* CorePlanner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,10 +262,9 @@
 			children = (
 				495888D62F0A92A900ACB0A8 /* Pragma.xctestplan */,
 				49DCA0D02F0A60F200274F58 /* Pragma */,
-				49DCA0F32F0A679100274F58 /* Planner */,
-				49DCA0FE2F0A679100274F58 /* PlannerTests */,
+				49DCA0F32F0A679100274F58 /* CorePlanner */,
+				49DCA0FE2F0A679100274F58 /* CorePlannerTests */,
 				4952C7372F0BF6AB00BFFB49 /* PlansKit */,
-				4952C7442F0BF6AB00BFFB49 /* PlansKitTests */,
 				4952C7602F0C7C9900BFFB49 /* PlannerToolkit */,
 				4952C76B2F0C7C9900BFFB49 /* PlannerToolkitTests */,
 				491005932F10575200896DDF /* PlannerUI */,
@@ -285,8 +279,8 @@
 			isa = PBXGroup;
 			children = (
 				49DCA0CE2F0A60F200274F58 /* Pragma.app */,
-				49DCA0F22F0A679100274F58 /* Planner.framework */,
-				49DCA0FA2F0A679100274F58 /* PlannerTests.xctest */,
+				49DCA0F22F0A679100274F58 /* CorePlanner.framework */,
+				49DCA0FA2F0A679100274F58 /* CorePlannerTests.xctest */,
 				4952C7362F0BF6AB00BFFB49 /* PlansKit.framework */,
 				4952C73E2F0BF6AB00BFFB49 /* PlansKitTests.xctest */,
 				4952C75F2F0C7C9900BFFB49 /* PlannerToolkit.framework */,
@@ -420,9 +414,6 @@
 				4952C7412F0BF6AB00BFFB49 /* PBXTargetDependency */,
 				4952C7432F0BF6AB00BFFB49 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				4952C7442F0BF6AB00BFFB49 /* PlansKitTests */,
-			);
 			name = PlansKitTests;
 			packageProductDependencies = (
 			);
@@ -502,9 +493,9 @@
 			productReference = 49DCA0CE2F0A60F200274F58 /* Pragma.app */;
 			productType = "com.apple.product-type.application";
 		};
-		49DCA0F12F0A679100274F58 /* Planner */ = {
+		49DCA0F12F0A679100274F58 /* CorePlanner */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 49DCA1012F0A679100274F58 /* Build configuration list for PBXNativeTarget "Planner" */;
+			buildConfigurationList = 49DCA1012F0A679100274F58 /* Build configuration list for PBXNativeTarget "CorePlanner" */;
 			buildPhases = (
 				49DCA0ED2F0A679100274F58 /* Headers */,
 				49DCA0EE2F0A679100274F58 /* Sources */,
@@ -516,18 +507,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				49DCA0F32F0A679100274F58 /* Planner */,
+				49DCA0F32F0A679100274F58 /* CorePlanner */,
 			);
-			name = Planner;
+			name = CorePlanner;
 			packageProductDependencies = (
 			);
 			productName = PlannerKit;
-			productReference = 49DCA0F22F0A679100274F58 /* Planner.framework */;
+			productReference = 49DCA0F22F0A679100274F58 /* CorePlanner.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		49DCA0F92F0A679100274F58 /* PlannerTests */ = {
+		49DCA0F92F0A679100274F58 /* CorePlannerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 49DCA1042F0A679100274F58 /* Build configuration list for PBXNativeTarget "PlannerTests" */;
+			buildConfigurationList = 49DCA1042F0A679100274F58 /* Build configuration list for PBXNativeTarget "CorePlannerTests" */;
 			buildPhases = (
 				49DCA0F62F0A679100274F58 /* Sources */,
 				49DCA0F72F0A679100274F58 /* Frameworks */,
@@ -539,13 +530,13 @@
 				49DCA0FD2F0A679100274F58 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				49DCA0FE2F0A679100274F58 /* PlannerTests */,
+				49DCA0FE2F0A679100274F58 /* CorePlannerTests */,
 			);
-			name = PlannerTests;
+			name = CorePlannerTests;
 			packageProductDependencies = (
 			);
 			productName = PlannerKitTests;
-			productReference = 49DCA0FA2F0A679100274F58 /* PlannerTests.xctest */;
+			productReference = 49DCA0FA2F0A679100274F58 /* CorePlannerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -608,8 +599,8 @@
 			projectRoot = "";
 			targets = (
 				49DCA0CD2F0A60F200274F58 /* Pragma */,
-				49DCA0F12F0A679100274F58 /* Planner */,
-				49DCA0F92F0A679100274F58 /* PlannerTests */,
+				49DCA0F12F0A679100274F58 /* CorePlanner */,
+				49DCA0F92F0A679100274F58 /* CorePlannerTests */,
 				4952C7352F0BF6AB00BFFB49 /* PlansKit */,
 				4952C73D2F0BF6AB00BFFB49 /* PlansKitTests */,
 				4952C75E2F0C7C9900BFFB49 /* PlannerToolkit */,
@@ -802,12 +793,12 @@
 		};
 		4952C77F2F0C7D7000BFFB49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 49DCA0F12F0A679100274F58 /* Planner */;
+			target = 49DCA0F12F0A679100274F58 /* CorePlanner */;
 			targetProxy = 4952C77E2F0C7D7000BFFB49 /* PBXContainerItemProxy */;
 		};
 		4952EB7E2F107E05006D660B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 49DCA0F12F0A679100274F58 /* Planner */;
+			target = 49DCA0F12F0A679100274F58 /* CorePlanner */;
 			targetProxy = 4952EB7D2F107E05006D660B /* PBXContainerItemProxy */;
 		};
 		4952EB8C2F1087D8006D660B /* PBXTargetDependency */ = {
@@ -817,7 +808,7 @@
 		};
 		49DCA0FD2F0A679100274F58 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 49DCA0F12F0A679100274F58 /* Planner */;
+			target = 49DCA0F12F0A679100274F58 /* CorePlanner */;
 			targetProxy = 49DCA0FC2F0A679100274F58 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1379,7 +1370,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerKit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.CorePlanner;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1417,7 +1408,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerKit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.CorePlanner;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1440,7 +1431,7 @@
 				DEVELOPMENT_TEAM = X5FKTSKM38;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerKitTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.CorePlannerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -1458,7 +1449,7 @@
 				DEVELOPMENT_TEAM = X5FKTSKM38;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerKitTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.CorePlannerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -1543,7 +1534,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49DCA1012F0A679100274F58 /* Build configuration list for PBXNativeTarget "Planner" */ = {
+		49DCA1012F0A679100274F58 /* Build configuration list for PBXNativeTarget "CorePlanner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49DCA1022F0A679100274F58 /* Debug */,
@@ -1552,7 +1543,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49DCA1042F0A679100274F58 /* Build configuration list for PBXNativeTarget "PlannerTests" */ = {
+		49DCA1042F0A679100274F58 /* Build configuration list for PBXNativeTarget "CorePlannerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49DCA1052F0A679100274F58 /* Debug */,
