@@ -15,7 +15,7 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-@testable import PlannerToolkit
+@testable import PlannerKit
 import Testing
 
 struct DemoGoalTests {

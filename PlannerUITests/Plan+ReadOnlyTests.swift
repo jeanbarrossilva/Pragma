@@ -15,7 +15,7 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import PlannerToolkit
+import PlannerKit
 @testable import PlannerUI
 import Testing
 
