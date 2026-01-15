@@ -18,6 +18,7 @@
 import PlannerToolkit
 import SwiftUI
 
+internal import Collections
 internal import UniformTypeIdentifiers
 
 #Preview("Without to-dos") {
@@ -167,21 +168,21 @@ private struct PopulatedGoalBoard<ToDos>: View
 where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
   var body: some View {
     HStack(alignment: .top) {
-      ForEach(Array(zip(Status.allCases.indices, Status.allCases)), id: \.1.self) { index, status in
-        HStack {
-          StatusColumn(
-            status: status,
-            toDos: toDos.filter { toDo in status == toDo.status },
-            onDidRequestStatusChange: { toDos in onDidRequestStatusChange(toDos, status) }
-          )
-          .frame(maxWidth: .infinity)
-          if index < Status.allCases.indices.index(before: Status.allCases.endIndex) {
-            Divider()
-          }
-        }
+      ForEach(completion.keys, id: \.self) { status in
+        StatusColumn(
+          status: status,
+          toDos: completion[status] ?? [],
+          onDidRequestStatusChange: { toDos in onDidRequestStatusChange(toDos, status) }
+        )
       }
     }
   }
+
+  /// Relation between all statuses and to-dos from the array passed into the initializer of this
+  /// board whose statuses match that to which they are associated. This dictionary is sorted when
+  /// set; therefore, the keys are *idle*, *ongoing* and *done*, in this order, regardless of
+  /// whether to-dos with the status were given (in this case, the value will be an empty array).
+  private let completion: OrderedDictionary<Status, [ReadOnlyToDo]>
 
   /// Non-empty collection of to-dos of a goal.
   private let toDos: ToDos
@@ -206,6 +207,9 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
     onDidRequestStatusChange: @escaping (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
   ) {
     self.toDos = toDos
+    var completion = OrderedDictionary(grouping: toDos, by: \.status)
+    completion.sort()
+    self.completion = completion
     self.onDidRequestStatusChange = onDidRequestStatusChange
   }
 }
@@ -244,7 +248,6 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
         }
       }
     }
-    .frame(maxHeight: .infinity, alignment: .top)
     .dropDestination(for: ReadOnlyToDo.self) { droppedToDos, _ in
       onDidRequestStatusChange(droppedToDos)
       return true
