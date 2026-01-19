@@ -16,11 +16,10 @@
 // ===-------------------------------------------------------------------------------------------===
 
 extension Headlined {
-  /// Ensures that the `title` is not empty and trims both the `title` and the `description`.
+  /// Ensures that the `title` is not empty and trims it.
   ///
-  /// This function *must* be called upon updates of either respective fields of each struct or
-  /// class containing a headline, and its ``title`` and its ``description`` *must* be set to the
-  /// corresponding values (potentially) modified by this function.
+  /// This function *must* be called upon updates of the ``title``, and the property *must* be set
+  /// to the resulting value.
   ///
   /// E.g.,
   ///
@@ -32,32 +31,73 @@ extension Headlined {
   ///
   ///  init(title: String, description: String) {
   ///    var title = title
-  ///    var description = description
-  ///    Self.normalize(&title, &description)
+  ///    Self.normalize(title: title)
   ///    self.title = title
+  ///    var description = description
+  ///    Self.normalize(description: description)
   ///    self.description = description
   ///  }
   ///
   ///   public mutating func setTitle(to newTitle: String) async {
   ///     var newTitle = newTitle
-  ///     Self.normalize(&newTitle, &description)
+  ///     Self.normalize(title: newTitle)
   ///     title = newTitle
   ///   }
   ///
   ///   public mutating func setDescription(to newDescription: String) async {
   ///     var newDescription = newDescription
-  ///     Self.normalize(&title, &newDescription)
+  ///     Self.normalize(description: newDescription)
   ///     description = newDescription
   ///   }
   /// }
   /// ```
   ///
   /// - Parameters:
-  ///   - title: Title suggested by the user for a ``Headlined``.
-  ///   - description: Description suggested by the user for a ``Headlined``.
-  public static func normalize(_ title: inout String, _ description: inout String) {
+  ///   - title: Title suggested for a ``Headlined``.
+  public static func normalize(title: inout String) {
     precondition(!title.isBlank, "Title of a \(Self.description) cannot be blank.")
     title.trim(.whitespacesAndNewlines)
+  }
+
+  /// Trims a description.
+  ///
+  /// This function *must* be called upon updates of the ``description``, and the property *must* be
+  /// set to the resulting value.
+  ///
+  /// E.g.,
+  ///
+  /// ```swift
+  /// struct Headline: Headlined {
+  ///  public let id = UUID()
+  ///  public private(set) var title: String
+  ///  public private(set) var description: String
+  ///
+  ///  init(title: String, description: String) {
+  ///    var title = title
+  ///    Self.normalize(title: title)
+  ///    self.title = title
+  ///    var description = description
+  ///    Self.normalize(description: description)
+  ///    self.description = description
+  ///  }
+  ///
+  ///   public mutating func setTitle(to newTitle: String) async {
+  ///     var newTitle = newTitle
+  ///     Self.normalize(title: newTitle)
+  ///     title = newTitle
+  ///   }
+  ///
+  ///   public mutating func setDescription(to newDescription: String) async {
+  ///     var newDescription = newDescription
+  ///     Self.normalize(description: newDescription)
+  ///     description = newDescription
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - description: Description suggested for a ``Headlined``.
+  public static func normalize(description: inout String) {
     description.trim(.whitespacesAndNewlines)
   }
 }

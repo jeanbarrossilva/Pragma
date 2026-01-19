@@ -22,7 +22,7 @@ internal import Collections
 
 #Preview("Without to-dos") {
   GoalBoard(
-    goal: .init(from: DemoPlanning.goals.first(where: \.toDos.isEmpty)!),
+    goal: .init(from: Planning.demo.goals.first(where: \.toDos.isEmpty)!),
     onDidRequestToDoAddition: {},
     onDidRequestStatusChange: { _, _ in }
   )
@@ -31,7 +31,7 @@ internal import Collections
 
 #Preview("With to-dos", traits: .sizeThatFitsLayout) {
   GoalBoard(
-    goal: .init(from: DemoPlanning.goals.first(where: { goal in !goal.toDos.isEmpty })!),
+    goal: .init(from: Planning.demo.goals.first(where: { goal in !goal.toDos.isEmpty })!),
     onDidRequestToDoAddition: {},
     onDidRequestStatusChange: { _, _ in }
   )

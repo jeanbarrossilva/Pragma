@@ -30,7 +30,7 @@ import SwiftUI
 
 #Preview("With plans") {
   PlanList(
-    plans: DemoPlanning.plans.map { plan in .init(from: plan) },
+    plans: Planning.demo.plans.map { plan in .init(from: plan) },
     onDidRequestPlanAddition: {},
     onDidRequestToDoAddition: { _ in },
     onDidRequestToDoTransfer: { _, _, _ in }

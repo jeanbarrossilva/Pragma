@@ -20,41 +20,41 @@ import Testing
 
 struct DemoPlanTests {
   @Test
-  func headlineIsNormalized() async {
+  func headlineIsNormalized() async throws {
     var plan = DemoPlanning.plans[0]
-    await plan.setTitle(to: " Title")
-    await plan.setDescription(to: "Description. ")
+    try await plan.setTitle(to: " Title")
+    try await plan.setDescription(to: "Description. ")
     #expect(plan.title == "Title")
     #expect(plan.description == "Description.")
   }
 
   @Test
-  func setsTitle() async {
+  func setsTitle() async throws {
     var plan = DemoPlanning.plans[0]
     let newTitle = "🥼"
-    await plan.setTitle(to: newTitle)
+    try await plan.setTitle(to: newTitle)
     #expect(plan.title == newTitle)
   }
 
   @Test
-  func setsDescription() async {
+  func setsDescription() async throws {
     var plan = DemoPlanning.plans[0]
     let newDescription = "⚓️"
-    await plan.setDescription(to: newDescription)
+    try await plan.setDescription(to: newDescription)
     #expect(plan.description == newDescription)
   }
 
   @Test
-  func addsGoal() async {
+  func addsGoal() async throws {
     var plan = DemoPlanning.plans[0]
-    let goal = await plan.addGoal(titled: "🐻", describedAs: "🐰")
+    let goal = try await plan.addGoal(titled: "🐻", describedAs: "🐰")
     #expect(plan.goals.contains(goal))
   }
 
   @Test
-  func addedGoalHasNoToDosByDefault() async {
+  func addedGoalHasNoToDosByDefault() async throws {
     var plan = DemoPlanning.plans[0]
-    let addedGoal = await plan.addGoal(titled: "🍦", describedAs: "🍨")
+    let addedGoal = try await plan.addGoal(titled: "🍦", describedAs: "🍨")
     #expect(plan.goals.first(where: { goal in goal == addedGoal })!.toDos.isEmpty)
     #expect(addedGoal.toDos.isEmpty)
   }

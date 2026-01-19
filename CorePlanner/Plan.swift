@@ -44,7 +44,10 @@ public protocol Plan: Headlineable {
   ///   - title: ``Headlineable/title`` of the ``Goal``.
   ///   - description: ``Headlineable/description`` of the ``Goal``.
   /// - Returns: The added ``Goal``.
-  mutating func addGoal(titled title: String, describedAs description: String) async -> GoalType
+  mutating func addGoal(
+    titled title: String,
+    describedAs description: String
+  ) async throws -> GoalType
 
   /// Removes the specified ``Goal`` from this ``Plan``.
   ///
@@ -55,7 +58,7 @@ public protocol Plan: Headlineable {
   /// according to the criteria of comparison of the type of ``Goal``.
   ///
   /// - Parameter id: ID of the ``Goal`` to be removed.
-  mutating func removeGoal(identifiedAs id: GoalType.ID) async
+  mutating func removeGoal(identifiedAs id: GoalType.ID) async throws
 }
 
 extension Plan where Self: Comparable {
@@ -107,7 +110,7 @@ public protocol Goal: Headlineable {
     titled title: String,
     describedAs description: String,
     due deadline: Date
-  ) async -> ToDoType
+  ) async throws -> ToDoType
 
   /// Removes the specified ``ToDo`` from this ``Goal``.
   ///
@@ -118,7 +121,7 @@ public protocol Goal: Headlineable {
   /// according to the criteria of comparison of the type of ``ToDo``.
   ///
   /// - Parameter id: ID of the ``ToDo`` to be removed.
-  mutating func removeToDo(identifiedAs id: ToDoType.ID) async
+  mutating func removeToDo(identifiedAs id: ToDoType.ID) async throws
 }
 
 extension Goal where Self: Comparable {
@@ -162,12 +165,12 @@ public protocol ToDo: Headlineable {
   /// Changes the ``status``.
   ///
   /// - Parameter newStatus: Status by which the current one will be replaced.
-  mutating func setStatus(to newStatus: Status) async
+  mutating func setStatus(to newStatus: Status) async throws
 
   /// Changes the ``deadline``.
   ///
   /// - Parameter newDeadline: Deadline by which the current one will be replaced.
-  mutating func setDeadline(to newDeadline: Date) async
+  mutating func setDeadline(to newDeadline: Date) async throws
 }
 
 extension ToDo where Self: Comparable {
@@ -210,18 +213,18 @@ public protocol Headlineable: Headlined {
   /// Changes the ``Headlined/title``.
   ///
   /// - Parameter newTitle: Title by which the current one will be replaced.
-  mutating func setTitle(to newTitle: String) async
+  mutating func setTitle(to newTitle: String) async throws
 
   /// Changes the ``Headlined/description``.
   ///
   /// - Parameter newDescription: Description by which the current one will be replaced.
-  mutating func setDescription(to newDescription: String) async
+  mutating func setDescription(to newDescription: String) async throws
 }
 
 /// Structs or classes conforming to this protocol are presentable by a general, short description;
 /// and a more descriptive, longer one. These may be mutable in case such structs or classes also
 /// conform to ``Headlineable``.
-public protocol Headlined: Comparable, Hashable, Identifiable {
+public protocol Headlined: Comparable, Hashable, Identifiable, SendableMetatype {
   /// Main, general, non-blank description.
   var title: String { get }
 

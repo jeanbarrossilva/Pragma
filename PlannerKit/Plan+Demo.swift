@@ -15,10 +15,17 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-/// Central static utility from which sample ``CorePlanner``-related structures can be generated for
-/// demonstration purposes, useful for populating a client of the API with pre-existing data for
-/// previewing UI and overall behavior. Any changes to the generated structures are performed in
-/// memory and are not persisted after their deinitialization.
+extension Planning {
+  /// Alias for `DemoPlanning.self`.
+  ///
+  /// - SeeAlso: ``DemoPlanning``
+  public static let demo = DemoPlanning.self
+}
+
+/// Central for static utilities by which sample ``CorePlanner``-related structures can be
+/// generated for demonstration purposes, useful for populating a client of the API with
+/// pre-existing data for previewing UI and overall behavior. Any changes to the generated
+/// structures are performed in memory and are not persisted after their deinitialization.
 public struct DemoPlanning {
   /// This is a static utility and, therefore, should not be initialized.
   private init() {}
@@ -487,7 +494,7 @@ public struct DemoPlanning {
 /// Plan whose modifications, including those on its goals and to-dos, are performed in-memory,
 /// maintained only for as long as the program is being executed, with changes on these structs
 /// being discarded upon their deinitialization.
-public struct DemoPlan: Plan {
+public struct DemoPlan: CorePlanner.Plan {
   public let id = UUID()
   public private(set) var title: String
   public private(set) var description: String
@@ -497,29 +504,30 @@ public struct DemoPlan: Plan {
 
   fileprivate init(title: String, description: String, goals: [DemoGoal] = []) {
     var title = title
-    var description = description
-    Self.normalize(&title, &description)
+    Self.normalize(title: &title)
     self.title = title
+    var description = description
+    Self.normalize(description: &description)
     self.description = description
     self.goals = goals
   }
 
-  public mutating func setTitle(to newTitle: String) async {
+  public mutating func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
-    Self.normalize(&newTitle, &description)
+    Self.normalize(title: &newTitle)
     title = newTitle
   }
 
-  public mutating func setDescription(to newDescription: String) async {
+  public mutating func setDescription(to newDescription: String) async throws {
     var newDescription = newDescription
-    Self.normalize(&title, &newDescription)
+    Self.normalize(description: &newDescription)
     description = newDescription
   }
 
   public mutating func addGoal(
     titled title: String,
     describedAs description: String
-  ) async -> DemoGoal {
+  ) async throws -> DemoGoal {
     let goal = DemoGoal(title: title, description: description)
     goals.append(goal)
     return goal
@@ -534,7 +542,7 @@ public struct DemoPlan: Plan {
 /// Goal whose modifications and those on its to-dos are performed in-memory, maintained only for as
 /// long as the program is being executed, with changes on these structs being discarded upon their
 /// deinitialization.
-public struct DemoGoal: Goal {
+public struct DemoGoal: CorePlanner.Goal {
   public let id = UUID()
   public private(set) var title: String
   public private(set) var description: String
@@ -544,22 +552,23 @@ public struct DemoGoal: Goal {
 
   fileprivate init(title: String, description: String, toDos: [DemoToDo] = []) {
     var title = title
-    var description = description
-    Self.normalize(&title, &description)
+    Self.normalize(title: &title)
     self.title = title
+    var description = description
+    Self.normalize(description: &description)
     self.description = description
     self.toDos = toDos
   }
 
-  public mutating func setTitle(to newTitle: String) async {
+  public mutating func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
-    Self.normalize(&newTitle, &description)
+    Self.normalize(title: &newTitle)
     title = newTitle
   }
 
-  public mutating func setDescription(to newDescription: String) async {
+  public mutating func setDescription(to newDescription: String) async throws {
     var newDescription = newDescription
-    Self.normalize(&title, &newDescription)
+    Self.normalize(description: &newDescription)
     description = newDescription
   }
 
@@ -567,13 +576,13 @@ public struct DemoGoal: Goal {
     titled title: String,
     describedAs description: String,
     due deadline: Date
-  ) async -> DemoToDo {
+  ) async throws -> DemoToDo {
     let toDo = DemoToDo(title: title, description: description, deadline: deadline)
     toDos.append(toDo)
     return toDo
   }
 
-  public mutating func removeToDo(identifiedAs id: UUID) async {
+  public mutating func removeToDo(identifiedAs id: UUID) async throws {
     guard let index = toDos.firstIndex(where: { toDo in toDo.id == id }) else { return }
     toDos.remove(at: index)
   }
@@ -581,7 +590,7 @@ public struct DemoGoal: Goal {
 
 /// To-do of a ``DemoGoal`` whose modifications are performed in-memory, maintained for as long as
 /// the program is being executed and discarted upon the deinitialization of this struct.
-public struct DemoToDo: ToDo {
+public struct DemoToDo: CorePlanner.ToDo {
   public let id = UUID()
   public private(set) var title: String
   public private(set) var description: String
@@ -592,26 +601,27 @@ public struct DemoToDo: ToDo {
 
   fileprivate init(title: String, description: String, status: Status = .idle, deadline: Date) {
     var title = title
-    var description = description
-    Self.normalize(&title, &description)
+    Self.normalize(title: &title)
     self.title = title
+    var description = description
+    Self.normalize(description: &description)
     self.description = description
     self.status = status
     self.deadline = deadline
   }
 
-  public mutating func setTitle(to newTitle: String) async {
+  public mutating func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
-    Self.normalize(&newTitle, &description)
+    Self.normalize(title: &newTitle)
     title = newTitle
   }
 
-  public mutating func setDescription(to newDescription: String) async {
+  public mutating func setDescription(to newDescription: String) async throws {
     var newDescription = newDescription
-    Self.normalize(&title, &newDescription)
+    Self.normalize(description: &newDescription)
     description = newDescription
   }
 
-  public mutating func setStatus(to newStatus: Status) async { status = newStatus }
-  public mutating func setDeadline(to newDeadline: Date) async { deadline = newDeadline }
+  public mutating func setStatus(to newStatus: Status) async throws { status = newStatus }
+  public mutating func setDeadline(to newDeadline: Date) async throws { deadline = newDeadline }
 }

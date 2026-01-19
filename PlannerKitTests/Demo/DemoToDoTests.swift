@@ -20,35 +20,35 @@ import Testing
 
 struct DemoToDoTests {
   @Test
-  func headlineIsNormalized() async {
+  func headlineIsNormalized() async throws {
     var toDo = DemoPlanning.toDos[0]
-    await toDo.setTitle(to: " Title")
-    await toDo.setDescription(to: "Description. ")
+    try await toDo.setTitle(to: " Title")
+    try await toDo.setDescription(to: "Description. ")
     #expect(toDo.title == "Title")
     #expect(toDo.description == "Description.")
   }
 
   @Test
-  func setsTitle() async {
+  func setsTitle() async throws {
     var toDo = DemoPlanning.toDos[0]
     let newTitle = "Title 🥸"
-    await toDo.setTitle(to: newTitle)
+    try await toDo.setTitle(to: newTitle)
     #expect(toDo.title == newTitle)
   }
 
   @Test
-  func setsDescription() async {
+  func setsDescription() async throws {
     var toDo = DemoPlanning.toDos[0]
     let newDescription = "Description. 🏎️"
-    await toDo.setDescription(to: newDescription)
+    try await toDo.setDescription(to: newDescription)
     #expect(toDo.description == newDescription)
   }
 
   @Test
-  func setsStatus() async {
+  func setsStatus() async throws {
     var toDo = DemoPlanning.toDos[0]
     let newStatus = Status.allCases.first(where: { status in toDo.status != status })!
-    await toDo.setStatus(to: newStatus)
+    try await toDo.setStatus(to: newStatus)
     #expect(toDo.status == newStatus)
   }
 }

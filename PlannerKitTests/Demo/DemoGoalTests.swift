@@ -20,54 +20,54 @@ import Testing
 
 struct DemoGoalTests {
   @Test
-  func headlineIsNormalized() async {
+  func headlineIsNormalized() async throws {
     var goal = DemoPlanning.goals[0]
-    await goal.setTitle(to: " Title")
-    await goal.setDescription(to: "Description. ")
+    try await goal.setTitle(to: " Title")
+    try await goal.setDescription(to: "Description. ")
     #expect(goal.title == "Title")
     #expect(goal.description == "Description.")
   }
 
   @Test
-  func setsTitle() async {
+  func setsTitle() async throws {
     var goal = DemoPlanning.goals[0]
     let newTitle = "🔥"
-    await goal.setTitle(to: newTitle)
+    try await goal.setTitle(to: newTitle)
     #expect(goal.title == newTitle)
   }
 
   @Test
-  func setsDescription() async {
+  func setsDescription() async throws {
     var goal = DemoPlanning.goals[0]
     let newDescription = "🐴"
-    await goal.setDescription(to: newDescription)
+    try await goal.setDescription(to: newDescription)
     #expect(goal.description == newDescription)
   }
 
   @Test
-  func addsToDo() async {
+  func addsToDo() async throws {
     var goal = DemoPlanning.goals[0]
-    let toDo = await goal.addToDo(titled: "🔭", describedAs: "🔬", due: .distantFuture)
+    let toDo = try await goal.addToDo(titled: "🔭", describedAs: "🔬", due: .distantFuture)
     #expect(goal.toDos.contains(toDo))
   }
 
   @Test
-  func addedToDoIsNotDoneByDefault() async {
+  func addedToDoIsIdleByDefault() async throws {
     var goal = DemoPlanning.goals[0]
-    let toDo = await goal.addToDo(
+    let toDo = try await goal.addToDo(
       titled: "To-do title",
       describedAs: "To-do description.",
       due: .distantFuture
     )
-    #expect(!goal.toDos[0].isDone)
-    #expect(!toDo.isDone)
+    #expect(goal.toDos[0].status == .idle)
+    #expect(toDo.status == .idle)
   }
 
   @Test
-  func removesToDo() async {
+  func removesToDo() async throws {
     var goal = DemoPlanning.goals.first(where: { goal in !goal.toDos.isEmpty })!
     let toDo = goal.toDos[0]
-    await goal.removeToDo(identifiedAs: toDo.id)
+    try await goal.removeToDo(identifiedAs: toDo.id)
     #expect(!goal.toDos.contains(toDo))
   }
 }

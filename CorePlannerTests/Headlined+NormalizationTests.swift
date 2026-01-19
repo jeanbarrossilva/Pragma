@@ -23,16 +23,14 @@ struct HeadlinedNormalizationTests {
   @Test(arguments: [" Title", "Title "])
   func trims(title: String) {
     var title = title
-    var description = ""
-    NoOpHeadline.normalize(&title, &description)
+    NoOpHeadline.normalize(title: &title)
     #expect(title == "Title")
   }
 
   @Test(arguments: [" Description.", "Description. "])
   func trims(description: String) {
-    var title = "Title"
     var description = description
-    NoOpHeadline.normalize(&title, &description)
+    NoOpHeadline.normalize(description: &description)
     #expect(description == "Description.")
   }
 }
