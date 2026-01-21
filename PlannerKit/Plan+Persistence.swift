@@ -52,6 +52,19 @@ public actor PlannerRepository {
   /// [*L13: SwiftData*](https://youtu.be/k9wjAdgUY0A?t=794)).
   public static let modelTypes: [any PersistentModel.Type] = [PlanModel.self]
 
+  /// Deletes an inserted plan from the underlying container.
+  ///
+  /// - Parameter id: ID of the plan to be deleted.
+  public func deletePlan(identifiedAs id: Any) throws {
+    guard let id = id as? PersistentIdentifier else { return }
+    try modelContext.delete(
+      model: PlanModel.self,
+      where: #Predicate { (model: PlanModel) in model.id == id }
+    )
+    guard modelContext.hasChanges else { return }
+    try modelContext.save()
+  }
+
   /// Inserts a plan without goals into the underlying container.
   ///
   /// - Parameters:
@@ -311,6 +324,10 @@ private protocol PersistedDomain: Headlineable where ID == PersistentIdentifier 
   /// Makes an instance of this type from the ID of the model persisted into the container, backing
   /// accesses to each of its properties, adding normalization to the headline of such model and
   /// overall domain-driven behavior (e.g., adding to-dos to goals and goals to plans).
+  ///
+  /// - Parameters:
+  ///   - id: The stable identity of the entity associated with this instance.
+  ///   - context: Context into which the model is inserted.
   init(
     identifiedAs id: PersistentIdentifier,
     insertedInto context: ModelContext
@@ -319,6 +336,8 @@ private protocol PersistedDomain: Headlineable where ID == PersistentIdentifier 
 
 extension PersistedDomain {
   /// Object persisted into the container and on which the headline of this implementation is based.
+  ///
+  /// - SeeAlso: ``backingModel(identifiedAs:insertedInto:)``
   var backingModel: BackingModel {
     get throws(PersistenceError) { try Self.backingModel(identifiedAs: id, insertedInto: context) }
   }
@@ -334,6 +353,11 @@ extension PersistedDomain {
 
   /// Retrieves the object persisted into the container and on which the headline of this
   /// implementation is based.
+  ///
+  /// - Parameters:
+  ///   - id: ID of the backing model.
+  ///   - context: Context into which the backing model is inserted.
+  /// - SeeAlso: ``backingModel``
   static func backingModel(
     identifiedAs id: PersistentIdentifier,
     insertedInto context: ModelContext

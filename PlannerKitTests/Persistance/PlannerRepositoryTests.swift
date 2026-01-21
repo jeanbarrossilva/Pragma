@@ -20,6 +20,14 @@ import Testing
 
 struct PlannerRepositoryTests {
   @Test
+  func retrievingNonInsertedPlanReturnsNil() async throws {
+    try await Planning.makeRepository(isInMemory: true).run { repository in
+      let plan = try await repository.plan(identifiedAs: 0)
+      #expect(plan == nil)
+    }
+  }
+
+  @Test
   func addsPlan() async throws {
     try await Planning.makeRepository(isInMemory: true).run { repository in
       let addedPlan = try await repository.insertPlan(titled: "🦇", summarizedBy: "🐞")
@@ -27,6 +35,16 @@ struct PlannerRepositoryTests {
       #expect(retrievedPlan?.title == addedPlan.title)
       #expect(retrievedPlan?.summary == addedPlan.summary)
       #expect(retrievedPlan?.goals == [] && addedPlan.goals == [])
+    }
+  }
+
+  @Test
+  func deletesPlan() async throws {
+    try await Planning.makeRepository(isInMemory: true).run { repository in
+      let addedPlan = try await repository.insertPlan(titled: "👽", summarizedBy: "🥄")
+      try repository.deletePlan(identifiedAs: addedPlan.id)
+      let retrievedPlan = try await repository.plan(identifiedAs: addedPlan.id)
+      #expect(retrievedPlan == nil)
     }
   }
 }
