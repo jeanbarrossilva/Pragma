@@ -15,7 +15,16 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
+import PlannerKit
+import SwiftData
 import SwiftUI
 
 @main
-struct PragmaApp: App { var body: some Scene { WindowGroup { ContentView() } } }
+struct PragmaApp: App {
+  var body: some Scene {
+    WindowGroup {
+      PragmaView()
+        .modelContainer(for: PlannerRepository.modelTypes)
+    }
+  }
+}

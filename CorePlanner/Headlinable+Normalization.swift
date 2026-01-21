@@ -16,7 +16,7 @@
 // ===-------------------------------------------------------------------------------------------===
 
 extension Headlined {
-  /// Ensures that the `title` is not empty and trims it.
+  /// Ensures that a title is not empty and trims it.
   ///
   /// This function *must* be called upon updates of the ``title``, and the property *must* be set
   /// to the resulting value.
@@ -27,15 +27,15 @@ extension Headlined {
   /// struct Headline: Headlined {
   ///  public let id = UUID()
   ///  public private(set) var title: String
-  ///  public private(set) var description: String
+  ///  public private(set) var summary: String
   ///
-  ///  init(title: String, description: String) {
+  ///  init(title: String, summary: String) {
   ///    var title = title
   ///    Self.normalize(title: title)
   ///    self.title = title
-  ///    var description = description
-  ///    Self.normalize(description: description)
-  ///    self.description = description
+  ///    var summary = summary
+  ///    Self.normalize(summary: summary)
+  ///    self.summary = summary
   ///  }
   ///
   ///   public mutating func setTitle(to newTitle: String) async {
@@ -44,10 +44,10 @@ extension Headlined {
   ///     title = newTitle
   ///   }
   ///
-  ///   public mutating func setDescription(to newDescription: String) async {
-  ///     var newDescription = newDescription
-  ///     Self.normalize(description: newDescription)
-  ///     description = newDescription
+  ///   public mutating func setSummary(to newSummary: String) async {
+  ///     var newSummary = newSummary
+  ///     Self.normalize(summary: newSummary)
+  ///     summary = newSummary
   ///   }
   /// }
   /// ```
@@ -59,9 +59,9 @@ extension Headlined {
     title.trim(.whitespacesAndNewlines)
   }
 
-  /// Trims a description.
+  /// Trims an ``summary``.
   ///
-  /// This function *must* be called upon updates of the ``description``, and the property *must* be
+  /// This function *must* be called upon updates of the ``summary``, and the property *must* be
   /// set to the resulting value.
   ///
   /// E.g.,
@@ -70,15 +70,15 @@ extension Headlined {
   /// struct Headline: Headlined {
   ///  public let id = UUID()
   ///  public private(set) var title: String
-  ///  public private(set) var description: String
+  ///  public private(set) var summary: String
   ///
-  ///  init(title: String, description: String) {
+  ///  init(title: String, summary: String) {
   ///    var title = title
   ///    Self.normalize(title: title)
   ///    self.title = title
-  ///    var description = description
-  ///    Self.normalize(description: description)
-  ///    self.description = description
+  ///    var summary = summary
+  ///    Self.normalize(summary: summary)
+  ///    self.summary = summary
   ///  }
   ///
   ///   public mutating func setTitle(to newTitle: String) async {
@@ -87,18 +87,18 @@ extension Headlined {
   ///     title = newTitle
   ///   }
   ///
-  ///   public mutating func setDescription(to newDescription: String) async {
-  ///     var newDescription = newDescription
-  ///     Self.normalize(description: newDescription)
-  ///     description = newDescription
+  ///   public mutating func setSummary(to newSummary: String) async {
+  ///     var newSummary = newSummary
+  ///     Self.normalize(summary: newSummary)
+  ///     summary = newSummary
   ///   }
   /// }
   /// ```
   ///
   /// - Parameters:
-  ///   - description: Description suggested for a ``Headlined``.
-  public static func normalize(description: inout String) {
-    description.trim(.whitespacesAndNewlines)
+  ///   - summary: Summary suggested for a ``Headlined``.
+  public static func normalize(summary: inout String) {
+    summary.trim(.whitespacesAndNewlines)
   }
 }
 

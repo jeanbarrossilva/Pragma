@@ -23,9 +23,9 @@ struct DemoGoalTests {
   func headlineIsNormalized() async throws {
     var goal = DemoPlanning.goals[0]
     try await goal.setTitle(to: " Title")
-    try await goal.setDescription(to: "Description. ")
+    try await goal.setSummary(to: "Summary. ")
     #expect(goal.title == "Title")
-    #expect(goal.description == "Description.")
+    #expect(goal.summary == "Summary.")
   }
 
   @Test
@@ -39,28 +39,28 @@ struct DemoGoalTests {
   @Test
   func setsDescription() async throws {
     var goal = DemoPlanning.goals[0]
-    let newDescription = "🐴"
-    try await goal.setDescription(to: newDescription)
-    #expect(goal.description == newDescription)
+    let newSummary = "🐴"
+    try await goal.setSummary(to: newSummary)
+    #expect(goal.summary == newSummary)
   }
 
   @Test
   func addsToDo() async throws {
     var goal = DemoPlanning.goals[0]
-    let toDo = try await goal.addToDo(titled: "🔭", describedAs: "🔬", due: .distantFuture)
+    let toDo = try await goal.addToDo(titled: "🔭", summarizedBy: "🔬", due: .distantFuture)
     #expect(goal.toDos.contains(toDo))
   }
 
   @Test
   func addedToDoIsIdleByDefault() async throws {
     var goal = DemoPlanning.goals[0]
-    let toDo = try await goal.addToDo(
+    let addedToDo = try await goal.addToDo(
       titled: "To-do title",
-      describedAs: "To-do description.",
+      summarizedBy: "To-do summary.",
       due: .distantFuture
     )
-    #expect(goal.toDos[0].status == .idle)
-    #expect(toDo.status == .idle)
+    #expect(goal.toDos.first(where: { toDo in toDo.id == addedToDo.id })?.status == .idle)
+    #expect(addedToDo.status == .idle)
   }
 
   @Test

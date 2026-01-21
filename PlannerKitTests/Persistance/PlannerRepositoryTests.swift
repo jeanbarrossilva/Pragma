@@ -15,30 +15,18 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import CoreData
+@testable import PlannerKit
+import Testing
 
-extension PlanEntity: NSCopying {
-  public func copy(with zone: NSZone? = nil) -> Any {
-    PlannerKit.copy(entity: self)
+struct PlannerRepositoryTests {
+  @Test
+  func addsPlan() async throws {
+    try await Planning.makeRepository(isInMemory: true).run { repository in
+      let addedPlan = try await repository.insertPlan(titled: "🦇", summarizedBy: "🐞")
+      let retrievedPlan = try await repository.plan(identifiedAs: addedPlan.id)
+      #expect(retrievedPlan?.title == addedPlan.title)
+      #expect(retrievedPlan?.summary == addedPlan.summary)
+      #expect(retrievedPlan?.goals == [] && addedPlan.goals == [])
+    }
   }
-}
-
-extension GoalEntity: NSCopying {
-  public func copy(with zone: NSZone? = nil) -> Any {
-    PlannerKit.copy(entity: self)
-  }
-}
-
-extension ToDoEntity: NSCopying {
-  public func copy(with zone: NSZone? = nil) -> Any {
-    PlannerKit.copy(entity: self)
-  }
-}
-
-private func copy<Entity>(entity: Entity) -> Entity where Entity: NSManagedObject {
-  let copy = Entity()
-  for (key, value) in entity.dictionaryWithValues(forKeys: entity.attributeKeys) {
-    copy[key] = value
-  }
-  return copy
 }

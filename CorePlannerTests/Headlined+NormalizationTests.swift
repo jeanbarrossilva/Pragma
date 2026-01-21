@@ -27,26 +27,26 @@ struct HeadlinedNormalizationTests {
     #expect(title == "Title")
   }
 
-  @Test(arguments: [" Description.", "Description. "])
-  func trims(description: String) {
-    var description = description
-    NoOpHeadline.normalize(description: &description)
-    #expect(description == "Description.")
+  @Test(arguments: [" Summary.", "Summary. "])
+  func trims(summary: String) {
+    var summary = summary
+    NoOpHeadline.normalize(summary: &summary)
+    #expect(summary == "Summary.")
   }
 }
 
-// This type exists merely for us to have access to the static normalize(_:_:) method. Its
-// implementation is incorrect — it is no-op, as the name suggests — and should not be taken as an
-// example for future implementations of Headlined.
+// This type exists merely for us to have access to the static normalize(title:) and
+// normalize(summary:) functions. Its implementation is incorrect — it is no-op, as the name
+// suggests — and should not be taken as an example for future implementations of Headlined.
 private struct NoOpHeadline: Headlined {
   let id: UUID
   let title: String
-  let description: String
+  let summary: String
 
   static let description = "no-op headline"
 
   func setTitle(to newTitle: String) async {}
-  func setDescription(to newDescription: String) async {}
+  func setSummary(to newSummary: String) async {}
 }
 
 extension NoOpHeadline: Comparable {

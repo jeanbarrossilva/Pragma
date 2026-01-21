@@ -23,9 +23,9 @@ struct DemoToDoTests {
   func headlineIsNormalized() async throws {
     var toDo = DemoPlanning.toDos[0]
     try await toDo.setTitle(to: " Title")
-    try await toDo.setDescription(to: "Description. ")
+    try await toDo.setSummary(to: "Summary. ")
     #expect(toDo.title == "Title")
-    #expect(toDo.description == "Description.")
+    #expect(toDo.summary == "Summary.")
   }
 
   @Test
@@ -39,9 +39,9 @@ struct DemoToDoTests {
   @Test
   func setsDescription() async throws {
     var toDo = DemoPlanning.toDos[0]
-    let newDescription = "Description. 🏎️"
-    try await toDo.setDescription(to: newDescription)
-    #expect(toDo.description == newDescription)
+    let newSummary = "Summary. 🏎️"
+    try await toDo.setSummary(to: newSummary)
+    #expect(toDo.summary == newSummary)
   }
 
   @Test

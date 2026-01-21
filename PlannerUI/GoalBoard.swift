@@ -143,7 +143,7 @@ private struct Headline: View {
     VStack(alignment: .leading, spacing: 4) {
       Text(goal.title)
         .font(.system(.title, weight: .heavy))
-      Text(goal.description)
+      Text(goal.summary)
         .font(.system(.headline, weight: .regular))
         .foregroundStyle(.secondary)
     }

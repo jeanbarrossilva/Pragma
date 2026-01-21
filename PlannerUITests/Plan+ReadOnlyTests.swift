@@ -26,6 +26,6 @@ private struct ReadOnlyPlanTests {
     let readOnlyPlan = ReadOnlyPlan(from: originalPlan)
     #expect(readOnlyPlan.id == .init(originalPlan.id))
     #expect(readOnlyPlan.title == originalPlan.title)
-    #expect(readOnlyPlan.description == originalPlan.description)
+    #expect(readOnlyPlan.summary == originalPlan.summary)
   }
 }

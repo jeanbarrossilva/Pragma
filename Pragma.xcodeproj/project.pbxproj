@@ -260,7 +260,6 @@
 		4932895F2F1E384D00F8FF2E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				493289602F1E384D00F8FF2E /* CoreData.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -461,7 +460,6 @@
 				4952C7632F0C7C9900BFFB49 /* Sources */,
 				4952C7642F0C7C9900BFFB49 /* Frameworks */,
 				4952C7652F0C7C9900BFFB49 /* Resources */,
-				4932896D2F1EC08200F8FF2E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

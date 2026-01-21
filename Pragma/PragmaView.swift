@@ -19,9 +19,9 @@ import PlannerKit
 import PlansUI
 import SwiftUI
 
-#Preview { ContentView() }
+#Preview { PragmaView() }
 
-struct ContentView: View {
+struct PragmaView: View {
   var body: some View {
     PlanList(
       plans: DemoPlanning.plans.map { plan in .init(from: plan) },

@@ -42,12 +42,9 @@ public protocol Plan: Headlineable {
   ///
   /// - Parameters:
   ///   - title: ``Headlineable/title`` of the ``Goal``.
-  ///   - description: ``Headlineable/description`` of the ``Goal``.
+  ///   - summary: ``Headlineable/summary`` of the ``Goal``.
   /// - Returns: The added ``Goal``.
-  mutating func addGoal(
-    titled title: String,
-    describedAs description: String
-  ) async throws -> GoalType
+  mutating func addGoal(titled title: String, summarizedBy summary: String) async throws -> GoalType
 
   /// Removes the specified ``Goal`` from this ``Plan``.
   ///
@@ -103,12 +100,12 @@ public protocol Goal: Headlineable {
   ///
   /// - Parameters:
   ///   - title: ``Headlined/title`` of the ``ToDo``.
-  ///   - description: ``Headlined/description`` of the ``ToDo``.
+  ///   - summary: ``Headlined/summary`` of the ``ToDo``.
   ///   - deadline: Date at which the ``ToDo`` is expected to be or have been done.
   /// - Returns: The added ``ToDo``.
   mutating func addToDo(
     titled title: String,
-    describedAs description: String,
+    summarizedBy summary: String,
     due deadline: Date
   ) async throws -> ToDoType
 
@@ -142,7 +139,7 @@ extension Goal where Self: Hashable {
   public func hash(into hasher: inout Hasher) {
     id.hash(into: &hasher)
     title.hash(into: &hasher)
-    description.hash(into: &hasher)
+    summary.hash(into: &hasher)
     toDos.hash(into: &hasher)
   }
 }
@@ -154,7 +151,7 @@ public protocol ToDo: Headlineable {
   /// Notes on the specifics of the achievement of this ``ToDo``, such as the prerequisites and
   /// prior preparations deemed necessary by the user. May also contain information about how it was
   /// done, detailing the process for mere posterior reading or as a basis for other plans.
-  var description: String { get }
+  var summary: String { get }
 
   /// Stage of completion of this ``ToDo``.
   var status: Status { get }
@@ -187,7 +184,7 @@ extension ToDo where Self: Hashable {
   public func hash(into hasher: inout Hasher) {
     id.hash(into: &hasher)
     title.hash(into: &hasher)
-    description.hash(into: &hasher)
+    summary.hash(into: &hasher)
     status.hash(into: &hasher)
     deadline.hash(into: &hasher)
   }
@@ -208,28 +205,28 @@ public enum Status: CaseIterable, Codable, Comparable {
 }
 
 /// ``Headlined`` which allows for asynchronous modifications of its ``Headlined/title`` and
-/// ``Headlined/description``.
+/// ``Headlined/summary``.
 public protocol Headlineable: Headlined {
   /// Changes the ``Headlined/title``.
   ///
   /// - Parameter newTitle: Title by which the current one will be replaced.
   mutating func setTitle(to newTitle: String) async throws
 
-  /// Changes the ``Headlined/description``.
+  /// Changes the ``Headlined/summary``.
   ///
-  /// - Parameter newDescription: Description by which the current one will be replaced.
-  mutating func setDescription(to newDescription: String) async throws
+  /// - Parameter newSummary: Summary by which the current one will be replaced.
+  mutating func setSummary(to newSummary: String) async throws
 }
 
-/// Structs or classes conforming to this protocol are presentable by a general, short description;
+/// Structs or classes conforming to this protocol are presentable by a general, short summary;
 /// and a more descriptive, longer one. These may be mutable in case such structs or classes also
 /// conform to ``Headlineable``.
 public protocol Headlined: Comparable, Hashable, Identifiable, SendableMetatype {
-  /// Main, general, non-blank description.
+  /// Main, general, non-blank summary.
   var title: String { get }
 
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
-  var description: String { get }
+  var summary: String { get }
 
   /// Human-readable name for this type, included mid-sentence in the message printed before the
   /// execution of the program is interrupted in a playground or `-Onone` build when the title is
@@ -240,7 +237,7 @@ public protocol Headlined: Comparable, Hashable, Identifiable, SendableMetatype 
 }
 
 extension Headlined where Self: Comparable {
-  /// Compares the ``title`` and the ``description`` of both objects, allowing for them to be sorted
+  /// Compares the ``title`` and the ``summary`` of both objects, allowing for them to be sorted
   /// alphabetically in an implementation of the ``<(_:_:)`` function. Should be called and have its
   /// return considered by every implementation of this type when a result of the latter function is
   /// given.
@@ -248,7 +245,7 @@ extension Headlined where Self: Comparable {
   /// - Parameter other: Right-hand-side of the comparison.
   public func isLesser(than other: Self) -> Bool {
     title[title.startIndex] < other.title[other.title.startIndex]
-      && description[description.startIndex] < other.description[other.description.startIndex]
+      && summary[summary.startIndex] < other.summary[other.summary.startIndex]
   }
 
   public static func < (lhs: Self, rhs: Self) -> Bool { lhs.isLesser(than: rhs) }
