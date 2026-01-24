@@ -23,7 +23,7 @@
 /// their type erased. In fact, due to the ID of every implementation of plan, goal and to-do being
 /// a UUID, that is the only supported type; an instance of any other codable being wrapped by this
 /// struct will throw upon encoding or decoding.
-public struct AnyCodable: @unchecked Sendable {
+struct AnyCodable: @unchecked Sendable {
   /// Codable whose type has been erased by this wrapper.
   let base: AnyHashable
 

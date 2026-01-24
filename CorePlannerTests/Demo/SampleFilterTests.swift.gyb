@@ -34,14 +34,14 @@
   _sample_plan_filter_types = [
     SampleFilterType(
       identifier='SamplePlanWithoutGoalsFilter',
-      target_type_identifier='ReadOnlyPlan',
+      target_type_identifier='AnyPlanDescriptor',
       initialization='()',
       accessor='withoutGoals',
       predicate='target.goals.isEmpty'
     ),
     SampleFilterType(
       identifier='SamplePlanWithGoalsFilter',
-      target_type_identifier='ReadOnlyPlan',
+      target_type_identifier='AnyPlanDescriptor',
       initialization='(nil)',
       accessor='withGoals',
       predicate='!target.goals.isEmpty'
@@ -50,14 +50,14 @@
   _sample_goal_filter_types = [
     SampleFilterType(
       identifier='SampleGoalWithoutToDosFilter',
-      target_type_identifier='ReadOnlyGoal',
+      target_type_identifier='AnyGoalDescriptor',
       initialization='()',
       accessor='withoutToDos',
       predicate='target.toDos.isEmpty'
     ),
     SampleFilterType(
       identifier='SampleGoalWithToDosFilter',
-      target_type_identifier='ReadOnlyGoal',
+      target_type_identifier='AnyGoalDescriptor',
       initialization='()',
       accessor='withToDos',
       predicate='!target.toDos.isEmpty'

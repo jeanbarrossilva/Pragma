@@ -17,7 +17,7 @@
 
 // MARK: - .withoutToDos
 
-extension ReadOnlyGoal {
+extension AnyGoalDescriptor {
   /// Obtains one sample from the ``samples`` that matches the predicate of a filter.
   ///
   /// - Parameter filter: The filter with which the matching sample will be obtained.
@@ -31,11 +31,11 @@ extension ReadOnlyGoal {
 public struct SampleGoalWithoutToDosFilter: SampleGoalFilter {
   public static let _errorMessage = "No goal without to-dos found."
 
-  public func isMatch(_ target: ReadOnlyGoal) -> Bool { target.toDos.isEmpty }
+  public func isMatch(_ target: AnyGoalDescriptor) -> Bool { target.toDos.isEmpty }
 }
 
 /// ``SampleFilter`` of goals.
-public protocol SampleGoalFilter: SampleFilter where Target == ReadOnlyGoal {}
+public protocol SampleGoalFilter: SampleFilter where Target == AnyGoalDescriptor {}
 
 extension SampleGoalFilter where Self == SampleGoalWithoutToDosFilter {
   /// Filter for obtaining the goal without to-dos.
@@ -48,7 +48,7 @@ extension SampleGoalFilter where Self == SampleGoalWithoutToDosFilter {
 public struct SampleGoalWithToDosFilter: SampleGoalFilter {
   public static let _errorMessage = "No goal with to-dos found."
 
-  public func isMatch(_ target: ReadOnlyGoal) -> Bool { !target.toDos.isEmpty }
+  public func isMatch(_ target: AnyGoalDescriptor) -> Bool { !target.toDos.isEmpty }
 }
 
 extension SampleGoalFilter where Self == SampleGoalWithToDosFilter {

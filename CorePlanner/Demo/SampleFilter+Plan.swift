@@ -15,7 +15,7 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-extension ReadOnlyPlan {
+extension AnyPlanDescriptor {
   /// Obtains one sample from the ``samples`` that matches the predicate of a filter.
   ///
   /// - Parameter filter: The filter with which the matching sample will be obtained.
@@ -26,7 +26,7 @@ extension ReadOnlyPlan {
 }
 
 /// ``SampleFilter`` of plans.
-public protocol SamplePlanFilter: SampleFilter where Target == ReadOnlyPlan {}
+public protocol SamplePlanFilter: SampleFilter where Target == AnyPlanDescriptor {}
 
 // MARK: - .withoutGoals
 
@@ -39,7 +39,7 @@ extension SamplePlanFilter where Self == SamplePlanWithoutGoalsFilter {
 public struct SamplePlanWithoutGoalsFilter: SamplePlanFilter {
   public static let _errorMessage = "No plan without goals found."
 
-  public func isMatch(_ target: ReadOnlyPlan) -> Bool { target.goals.isEmpty }
+  public func isMatch(_ target: AnyPlanDescriptor) -> Bool { target.goals.isEmpty }
 }
 
 // MARK: - .withGoals
@@ -63,7 +63,7 @@ public struct SamplePlanWithGoalsFilter: SamplePlanFilter {
 
   public static var _errorMessage: String { "No plan with goals found." }
 
-  public func isMatch(_ target: ReadOnlyPlan) -> Bool {
+  public func isMatch(_ target: AnyPlanDescriptor) -> Bool {
     guard let goals else { return !target.goals.isEmpty }
     return target.goals.contains(where: goals.isMatch)
   }

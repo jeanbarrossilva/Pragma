@@ -19,10 +19,10 @@
 import Testing
 
 fileprivate struct InMemoryGoalTests {
-  @Test(arguments: ReadOnlyGoal.samples)
-  func normalizesHeadline(of descriptor: ReadOnlyGoal) async throws(PlannerError<NSError>) {
+  @Test(arguments: AnyGoalDescriptor.samples)
+  func normalizesHeadline(of descriptor: AnyGoalDescriptor) async throws(PlannerError<NSError>) {
     let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(basedOn: .sample(.withoutGoals))
+    let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     let plan = try await planner.plan(identifiedAs: planID)
     let goalID = try await plan.addGoal(titled: " Title", summarizedBy: "Summary. ")
     let goal = try await plan.goal(identifiedAs: goalID)
@@ -33,7 +33,7 @@ fileprivate struct InMemoryGoalTests {
   @Test
   func setsTitle() async throws(PlannerError<NSError>) {
     let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(basedOn: .sample(.withGoals(.withToDos)))
+    let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
     let goal = await plan.goals[0]
     let newTitle = "🔥"
@@ -44,7 +44,7 @@ fileprivate struct InMemoryGoalTests {
   @Test
   func setsDescription() async throws(PlannerError<NSError>) {
     let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(basedOn: .sample(.withGoals(.withToDos)))
+    let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
     let goal = await plan.goals[0]
     let newSummary = "🐴"
@@ -55,7 +55,7 @@ fileprivate struct InMemoryGoalTests {
   @Test
   func addsToDo() async throws(PlannerError<NSError>) {
     let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(basedOn: .sample(.withGoals))
+    let planID = try await planner.addPlan(describedBy: .sample(.withGoals))
     let plan = try await planner.plan(identifiedAs: planID)
     let goal = await plan.goals[0]
     let toDoID = try await goal.addToDo(titled: "🔭", summarizedBy: "🔬", due: .distantFuture)
@@ -65,7 +65,7 @@ fileprivate struct InMemoryGoalTests {
   @Test
   func addedToDoIsIdleByDefault() async throws(PlannerError<NSError>) {
     let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(basedOn: .sample(.withGoals))
+    let planID = try await planner.addPlan(describedBy: .sample(.withGoals))
     let plan = try await planner.plan(identifiedAs: planID)
     let goal = await plan.goals[0]
     let toDoID = try await goal.addToDo(
@@ -80,7 +80,7 @@ fileprivate struct InMemoryGoalTests {
   @Test
   func removesToDo() async throws(PlannerError<NSError>) {
     let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(basedOn: .sample(.withGoals(.withToDos)))
+    let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
     let goal = await plan.goals[0]
     let toDoID = await goal.toDos[0].id

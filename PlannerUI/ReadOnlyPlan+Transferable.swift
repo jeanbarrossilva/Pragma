@@ -19,7 +19,7 @@ import SwiftUI
 
 internal import UniformTypeIdentifiers
 
-extension ReadOnlyToDo: @retroactive Transferable {
+extension AnyToDoDescriptor: @retroactive Transferable {
   public static var transferRepresentation: some TransferRepresentation {
     CodableRepresentation(contentType: .propertyList).visibility(.ownProcess)
   }

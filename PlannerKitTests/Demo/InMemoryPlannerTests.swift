@@ -19,17 +19,17 @@
 import Testing
 
 struct InMemoryPlannerTests {
-  @Test(arguments: ReadOnlyPlan.samples)
-  func addsPlan(basedOn descriptor: ReadOnlyPlan) async throws(PlannerError<NSError>) {
+  @Test(arguments: AnyPlanDescriptor.samples)
+  func addsPlan(basedOn descriptor: AnyPlanDescriptor) async throws(PlannerError<NSError>) {
     let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(basedOn: descriptor)
+    let planID = try await planner.addPlan(describedBy: descriptor)
     _ = try await planner.plan(identifiedAs: planID)
   }
 
-  @Test(arguments: ReadOnlyPlan.samples)
-  func removesPlan(basedOn descriptor: ReadOnlyPlan) async throws(PlannerError<NSError>) {
+  @Test(arguments: AnyPlanDescriptor.samples)
+  func removesPlan(basedOn descriptor: AnyPlanDescriptor) async throws(PlannerError<NSError>) {
     let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(basedOn: descriptor)
+    let planID = try await planner.addPlan(describedBy: descriptor)
     try await planner.removePlan(identifiedAs: planID)
     await #expect(throws: PlannerError<NSError>.nonexistent(type: InMemoryPlan.self, id: planID)) {
       try await planner.plan(identifiedAs: planID)
@@ -39,8 +39,8 @@ struct InMemoryPlannerTests {
   @Test
   func clears() async throws {
     let planner = InMemoryPlanner()
-    let planIDs = try await ReadOnlyPlan.samples.asyncMap { planDescriptor in
-      try await planner.addPlan(basedOn: planDescriptor)
+    let planIDs = try await AnyPlanDescriptor.samples.asyncMap { planDescriptor in
+      try await planner.addPlan(describedBy: planDescriptor)
     }
     try await planner.clear()
     for planID in planIDs {

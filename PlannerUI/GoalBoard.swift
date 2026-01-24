@@ -22,7 +22,7 @@ internal import Collections
 
 #Preview("Without to-dos") {
   GoalBoard(
-    goal: ReadOnlyGoal.sample(.withoutToDos),
+    goal: .sample(.withoutToDos),
     onDidRequestToDoAddition: {},
     onDidRequestStatusChange: { _, _ in }
   )
@@ -31,7 +31,7 @@ internal import Collections
 
 #Preview("With to-dos", traits: .sizeThatFitsLayout) {
   GoalBoard(
-    goal: ReadOnlyGoal.sample(.withToDos),
+    goal: .sample(.withToDos),
     onDidRequestToDoAddition: {},
     onDidRequestStatusChange: { _, _ in }
   )
@@ -57,14 +57,14 @@ public struct GoalBoard: View {
   }
 
   /// Goal for which this board is, whose information will be displayed.
-  private let goal: ReadOnlyGoal
+  private let goal: AnyGoalDescriptor
 
   /// Callback called whenever a to-do is requested to be added to the ``goal``.
   private let onDidRequestToDoAddition: () -> Void
 
   /// Callback called whenever to-dos are requested to have their status changed to another
   /// different from their current one.
-  private let onToDoStatusChangeRequest: (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
+  private let onToDoStatusChangeRequest: (_ toDos: [AnyToDoDescriptor], _ newStatus: Status) -> Void
 
   /// Initializes a ``GoalBoard`` for displaying the headline and the to-dos of a given goal.
   ///
@@ -75,9 +75,9 @@ public struct GoalBoard: View {
   ///   - onToDoStatusChangeRequest: Callback called whenever to-dos are requested to have their
   ///     status changed to another different from their current one.
   public init(
-    goal: ReadOnlyGoal,
+    goal: AnyGoalDescriptor,
     onDidRequestToDoAddition: @escaping () -> Void,
-    onDidRequestStatusChange: @escaping (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
+    onDidRequestStatusChange: @escaping (_ toDos: [AnyToDoDescriptor], _ newStatus: Status) -> Void
   ) {
     self.goal = goal
     self.onDidRequestToDoAddition = onDidRequestToDoAddition
@@ -108,7 +108,7 @@ private struct EmptyGoalBoard: View {
   }
 
   /// Goal without to-dos.
-  private let goal: ReadOnlyGoal
+  private let goal: AnyGoalDescriptor
 
   /// Callback called whenever a to-do is requested to be added to the ``goal``. In case the request
   /// results in a de facto addition of a to-do, this view should not be displayed for the ``goal``
@@ -124,7 +124,7 @@ private struct EmptyGoalBoard: View {
   ///   - onDidRequestToDoAddition: Callback called whenever a to-do is requested to be added to the
   ///     `goal`.  In case the request results in a de facto addition of a to-do, this view should
   ///     not be displayed for the `goal` anymore, as it will no longer be empty.
-  init(goal: ReadOnlyGoal, onDidRequestToDoAddition: @escaping () -> Void) {
+  init(goal: AnyGoalDescriptor, onDidRequestToDoAddition: @escaping () -> Void) {
     self.goal = goal
     self.onDidRequestToDoAddition = onDidRequestToDoAddition
   }
@@ -150,12 +150,12 @@ private struct Headline: View {
   }
 
   /// Goal whose title and description will be displayed by this view.
-  private let goal: ReadOnlyGoal
+  private let goal: AnyGoalDescriptor
 
   /// Initializes a view for displaying the headline of a goal.
   ///
   /// - Parameter goal: Goal whose title and description will be displayed by this view.
-  init(goal: ReadOnlyGoal) { self.goal = goal }
+  init(goal: AnyGoalDescriptor) { self.goal = goal }
 }
 
 /// View for displaying a goal containing at least one to-do, with each of its to-dos being laid out
@@ -163,7 +163,7 @@ private struct Headline: View {
 /// are to either other colums, which would trigger a request for changing their status to that of
 /// the column to which they were moved.
 private struct PopulatedGoalBoard<ToDos>: View
-where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
+where ToDos: RandomAccessCollection & Sendable, ToDos.Element == AnyToDoDescriptor {
   var body: some View {
     HStack(alignment: .top) {
       ForEach(completion.keys, id: \.self) { status in
@@ -180,14 +180,14 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
   /// board whose statuses match that to which they are associated. This dictionary is sorted when
   /// set; therefore, the keys are *idle*, *ongoing* and *done*, in this order, regardless of
   /// whether to-dos with the status were given (in this case, the value will be an empty array).
-  private let completion: OrderedDictionary<Status, [ReadOnlyToDo]>
+  private let completion: OrderedDictionary<Status, [AnyToDoDescriptor]>
 
   /// Non-empty collection of to-dos of a goal.
   private let toDos: ToDos
 
   /// Callback called whenever to-dos are requested to have their status changed to another
   /// different from their current one.
-  private let onDidRequestStatusChange: (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
+  private let onDidRequestStatusChange: (_ toDos: [AnyToDoDescriptor], _ newStatus: Status) -> Void
 
   /// Initializes a view which displays the to-dos of a goal in columns respective to the status of
   /// such to-dos.
@@ -202,7 +202,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
   ///     status changed to another different from their current one.
   init(
     toDos: ToDos,
-    onDidRequestStatusChange: @escaping (_ toDos: [ReadOnlyToDo], _ newStatus: Status) -> Void
+    onDidRequestStatusChange: @escaping (_ toDos: [AnyToDoDescriptor], _ newStatus: Status) -> Void
   ) {
     self.toDos = toDos
     var completion = OrderedDictionary(grouping: toDos, by: \.status)
@@ -216,7 +216,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
 /// completion of a to-do of a goal. Vertically displays a label for the status and the to-dos
 /// whose status is such.
 private struct StatusColumn<ToDos>: View
-where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
+where ToDos: RandomAccessCollection & Sendable, ToDos.Element == AnyToDoDescriptor {
   var body: some View {
     VStack {
       ForEach(ToDoCardDropIndicatorTarget.allCases(for: toDos)) { target in
@@ -246,7 +246,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
         }
       }
     }
-    .dropDestination(for: ReadOnlyToDo.self) { droppedToDos, _ in
+    .dropDestination(for: AnyToDoDescriptor.self) { droppedToDos, _ in
       onDidRequestStatusChange(droppedToDos)
       return true
     }
@@ -283,7 +283,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
   /// This dictionary is empty by default, and gets populated according to the appearance of each
   /// card; entries are removed whenever the card of the respective to-do is made invisible.
   @State
-  private var toDoCardFraming = [ReadOnlyToDo: CGRect]()
+  private var toDoCardFraming = [AnyToDoDescriptor: CGRect]()
 
   /// Point in the global coordinate space at which to-dos being dragged from some ``StatusColumn``
   /// (which may be the same one in which they already were) are at the moment. `nil` when no
@@ -302,7 +302,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
 
   /// Callback called whenever to-dos are requested to have their status changed to that of this
   /// column.
-  private let onDidRequestStatusChange: (_ toDos: [ReadOnlyToDo]) -> Void
+  private let onDidRequestStatusChange: (_ toDos: [AnyToDoDescriptor]) -> Void
 
   /// Height of the indicator rendered whenever to-dos are being dragged from one ``StatusColumn``
   /// into another, communicating the position at which they will be placed in the destination
@@ -316,7 +316,11 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
     var id: AnyHashable {
       switch self {
       case .label(_): self
-      case .toDoCard(let toDo, _, _): toDo.id
+
+      // TODO: This should return the ID of the to-do instead of the to-do itself, as it is legal
+      // for a goal to contain to-dos which are structurally equal. This is a temporary workaround
+      // for the refactoring of AnyGoalDescriptor (now GoalDescriptor).
+      case .toDoCard(let toDo, _, _): toDo
       }
     }
 
@@ -359,7 +363,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
     ///     that the card is the first being displayed.
     ///   - isLast: Whether the card is the last in the sequence.
     /// - SeeAlso: ``allCases(for:)``
-    case toDoCard(toDo: ReadOnlyToDo, previous: Self, isLast: Bool)
+    case toDoCard(toDo: AnyToDoDescriptor, previous: Self, isLast: Bool)
 
     /// Calculates the amount of points by which the indicator should be offset vertically, with the
     /// minimum coordinate in the Y-axis of the view of this target as the origin. Applying it to
@@ -446,7 +450,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
     ///
     /// - Parameter toDos: To-dos for which targets will be produced.
     /// - SeeAlso: ``label(isLast:)``
-    static func allCases(for toDos: some RandomAccessCollection<ReadOnlyToDo>) -> [Self] {
+    static func allCases(for toDos: some RandomAccessCollection<AnyToDoDescriptor>) -> [Self] {
       let count = toDos.count + 1
       return unsafe [Self](unsafeUninitializedCapacity: count) { buffer, initializedCount in
         guard var address = buffer.baseAddress else { return }
@@ -480,7 +484,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == ReadOnlyToDo {
   init(
     status: Status,
     toDos: ToDos,
-    onDidRequestStatusChange: @escaping ([ReadOnlyToDo]) -> Void
+    onDidRequestStatusChange: @escaping ([AnyToDoDescriptor]) -> Void
   ) {
     self.status = status
     self.toDos = toDos
@@ -597,10 +601,10 @@ private struct ToDoCard: View {
   }
 
   /// To-do whose information will be displayed.
-  private let toDo: ReadOnlyToDo
+  private let toDo: AnyToDoDescriptor
 
   /// Initializes a card for a to-do.
   ///
   /// - Parameter toDo: To-do whose information will be displayed.
-  init(toDo: ReadOnlyToDo) { self.toDo = toDo }
+  init(toDo: AnyToDoDescriptor) { self.toDo = toDo }
 }

@@ -30,7 +30,7 @@
 /// Without sample filters:
 ///
 /// ```swift
-/// let plan: ReadOnlyPlan = .samples.first(where: { plan in
+/// let plan: AnyPlanDescriptor = .samples.first(where: { plan in
 ///   !plan.goals.isEmpty && plan.goals.contains(where: { goal in !goal.toDos.isEmpty })
 /// })!
 /// ```
@@ -44,7 +44,7 @@
 /// Now, with sample filters:
 ///
 /// ```swift
-/// let plan: ReadOnlyPlan = .sample(.withGoals(.withToDos))
+/// let plan: AnyPlanDescriptor = .sample(.withGoals(.withToDos))
 /// ```
 ///
 /// A sample filter is a contract between its samples and you, the developer reading them. They
@@ -52,15 +52,15 @@
 /// elements matching it.
 ///
 /// - SeeAlso:
-///   - ``ReadOnlyPlan``
-///   - ``ReadOnlyGoal``
-///   - ``ReadOnlyToDo``
+///   - ``AnyPlanDescriptor``
+///   - ``AnyGoalDescriptor``
+///   - ``AnyToDoDescriptor``
 public protocol SampleFilter {
   /// Consequence of having filtered an array of ``Target``s.
   typealias Result = Target
 
   /// The element in the array of samples being transformed.
-  associatedtype Target: Codable & Identifiable & Sendable
+  associatedtype Target: Codable & Sendable
 
   /// The message with which the program will be terminated in case the contract of the predicate
   /// of this filter is broken. Such termination should never occur, as one of the purposes of a
@@ -77,7 +77,7 @@ public protocol SampleFilter {
   ///      one, the child filter. For example, in
   ///
   ///      ```swift
-  ///      ReadOnlyPlan.sample(.withGoals(.withToDos))
+  ///      AnyPlanDescriptor.sample(.withGoals(.withToDos))
   ///      ```
   ///
   ///      where ``GoalWithToDosFilter/withToDos`` is used to filter goals without to-dos out from
@@ -100,7 +100,7 @@ extension SampleFilter {
   /// referencing a ``PlanWithGoalsFilter`` directly and calling this function on it, as in
   ///
   /// ```swift
-  /// let plan: ReadOnlyPlan = PlanWithGoalsFilter()._apply(to: .samples)
+  /// let plan: AnyPlanDescriptor = PlanWithGoalsFilter()._apply(to: .samples)
   /// ```
   ///
   /// is discouraged (and also defeats one of the purposes of a filter of enhancing readability).
@@ -108,7 +108,7 @@ extension SampleFilter {
   /// an instance of the filter should be given by accessing the static variable:
   ///
   /// ```swift
-  /// let plan: ReadOnlyPlan = .sample(.withGoals)
+  /// let plan: AnyPlanDescriptor = .sample(.withGoals)
   /// ```
   ///
   /// - Parameter targets: Samples to be transformed into a ``Result``.

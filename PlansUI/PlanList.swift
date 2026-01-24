@@ -30,7 +30,7 @@ import SwiftUI
 
 #Preview("With plans") {
   PlanList(
-    plans: ReadOnlyPlan.samples,
+    plans: AnyPlanDescriptor.samples,
     onDidRequestPlanAddition: {},
     onDidRequestToDoAddition: { _ in },
     onDidRequestToDoTransfer: { _, _, _ in }
@@ -51,20 +51,24 @@ public struct PlanList: View {
     }
   }
 
-  private let plans: [ReadOnlyPlan]
+  private let plans: [AnyPlanDescriptor]
   private let onDidRequestPlanAddition: () -> Void
-  private let onDidRequestToDoAddition: (ReadOnlyPlan) -> Void
+  private let onDidRequestToDoAddition: (AnyPlanDescriptor) -> Void
   private let onDidRequestToDoTransfer:
-    (_ destinationGoal: ReadOnlyGoal, _ transferredToDos: [ReadOnlyToDo], _ newStatus: Status) ->
+    (
+      _ destinationGoal: AnyGoalDescriptor, _ transferredToDos: [AnyToDoDescriptor],
+      _ newStatus: Status
+    ) ->
       Void
 
   public init(
-    plans: [ReadOnlyPlan],
+    plans: [AnyPlanDescriptor],
     onDidRequestPlanAddition: @escaping () -> Void,
-    onDidRequestToDoAddition: @escaping (ReadOnlyPlan) -> Void,
+    onDidRequestToDoAddition: @escaping (AnyPlanDescriptor) -> Void,
     onDidRequestToDoTransfer:
       @escaping (
-        _ destinationGoal: ReadOnlyGoal, _ transferredToDos: [ReadOnlyToDo], _ newStatus: Status
+        _ destinationGoal: AnyGoalDescriptor, _ transferredToDos: [AnyToDoDescriptor],
+        _ newStatus: Status
       )
       -> Void
   ) {
@@ -103,7 +107,14 @@ private struct PopulatedPlanList: View {
   var body: some View {
     GeometryReader { geometry in
       NavigationSplitView {
-        List(plans) { plan in
+        List(
+          plans,
+
+          // TODO: This should be the ID of the plan instead of the plan itself, as it is legal for
+          // plans to be structurally equal. This is a temporary workaround for the refactoring of
+          // ReadOnlyPlan (now PlanDescriptor).
+          id: \.self
+        ) { plan in
           Button {
             selectedPlan = plan
           } label: {
@@ -126,7 +137,14 @@ private struct PopulatedPlanList: View {
       } detail: {
         ScrollView {
           LazyVStack(alignment: .leading, spacing: 32) {
-            ForEach(Array(zip(selectedPlan.goals.indices, selectedPlan.goals)), id: \.1.id) {
+            ForEach(
+              Array(zip(selectedPlan.goals.indices, selectedPlan.goals)),
+
+              // TODO: This should be the ID of the plan instead of the plan itself, as it is legal
+              // for plans to be structurally equal. This is a temporary workaround for the
+              // refactoring of ReadOnlyPlan (now PlanDescriptor).
+              id: \.1
+            ) {
               (index, goal) in
               GoalBoard(
                 goal: goal,
@@ -148,21 +166,26 @@ private struct PopulatedPlanList: View {
     }
   }
 
-  private let plans: [ReadOnlyPlan]
-  private let onDidRequestToDoAddition: (ReadOnlyPlan) -> Void
+  private let plans: [AnyPlanDescriptor]
+  private let onDidRequestToDoAddition: (AnyPlanDescriptor) -> Void
   private let onDidRequestToDoTransfer:
-    (_ destinationGoal: ReadOnlyGoal, _ transferredToDos: [ReadOnlyToDo], _ newStatus: Status) ->
-      Void
+    (
+      _ destinationGoal: AnyGoalDescriptor,
+      _ transferredToDos: [AnyToDoDescriptor],
+      _ newStatus: Status
+    ) -> Void
 
   @State
-  private var selectedPlan: ReadOnlyPlan
+  private var selectedPlan: AnyPlanDescriptor
 
   init(
-    plans: [ReadOnlyPlan],
-    onDidRequestToDoAddition: @escaping (ReadOnlyPlan) -> Void,
+    plans: [AnyPlanDescriptor],
+    onDidRequestToDoAddition: @escaping (AnyPlanDescriptor) -> Void,
     onDidRequestToDoTransfer:
       @escaping (
-        _ destinationGoal: ReadOnlyGoal, _ transferredToDos: [ReadOnlyToDo], _ newStatus: Status
+        _ destinationGoal: AnyGoalDescriptor,
+        _ transferredToDos: [AnyToDoDescriptor],
+        _ newStatus: Status
       ) -> Void
   ) {
     self.plans = plans
