@@ -141,6 +141,16 @@
 		49DCA0FA2F0A679100274F58 /* CorePlannerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CorePlannerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		49AEDB762F22670300EB350C /* Exceptions for "CorePlanner" folder in "Copy Bundle Resources" phase from "PlannerUI" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 491005902F10575200896DDF /* Resources */;
+			membershipExceptions = (
+				CollectionConcurrencyKit.swift,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		491005932F10575200896DDF /* PlannerUI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -150,6 +160,11 @@
 		4910059E2F10575300896DDF /* PlannerUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = PlannerUITests;
+			sourceTree = "<group>";
+		};
+		491D9AF92F23D81B00878762 /* tooling */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = tooling;
 			sourceTree = "<group>";
 		};
 		4952C7372F0BF6AB00BFFB49 /* PlansUI */ = {
@@ -174,6 +189,9 @@
 		};
 		49DCA0F32F0A679100274F58 /* CorePlanner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				49AEDB762F22670300EB350C /* Exceptions for "CorePlanner" folder in "Copy Bundle Resources" phase from "PlannerUI" target */,
+			);
 			path = CorePlanner;
 			sourceTree = "<group>";
 		};
@@ -267,6 +285,7 @@
 		49DCA0C52F0A60F200274F58 = {
 			isa = PBXGroup;
 			children = (
+				491D9AF92F23D81B00878762 /* tooling */,
 				495888D62F0A92A900ACB0A8 /* Pragma.xctestplan */,
 				49DCA0D02F0A60F200274F58 /* Pragma */,
 				49DCA0F32F0A679100274F58 /* CorePlanner */,
@@ -441,6 +460,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				491D9BB52F23EC6C00878762 /* PBXTargetDependency */,
 				4952C77F2F0C7D7000BFFB49 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -484,6 +504,7 @@
 				49DCA0CB2F0A60F200274F58 /* Frameworks */,
 				49DCA0CC2F0A60F200274F58 /* Resources */,
 				4952C74E2F0BF6AB00BFFB49 /* Embed Frameworks */,
+				491D9AFF2F23DCDE00878762 /* Code Generation */,
 			);
 			buildRules = (
 			);
@@ -492,6 +513,7 @@
 				4952C7482F0BF6AB00BFFB49 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				491D9AF92F23D81B00878762 /* tooling */,
 				49DCA0D02F0A60F200274F58 /* Pragma */,
 			);
 			name = Pragma;
@@ -686,6 +708,29 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		491D9AFF2F23DCDE00878762 /* Code Generation */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Code Generation";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "gyb=\"$SRCROOT\"/tooling/gyb.py\nfiles=(CorePlannerTests/Demo/SampleFilterTests.swift)\n\nset -e\nfor file in ${files[@]}; do\n  \"$gyb\" --line-directive '' '-o' \"$SRCROOT\"/$file \"$SRCROOT\"/$file.gyb\ndone\nwait\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		4910058E2F10575200896DDF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -773,6 +818,10 @@
 			isa = PBXTargetDependency;
 			target = 4952C75E2F0C7C9900BFFB49 /* PlannerKit */;
 			targetProxy = 491005AF2F105C9600896DDF /* PBXContainerItemProxy */;
+		};
+		491D9BB52F23EC6C00878762 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 491D9BB42F23EC6C00878762 /* Collections */;
 		};
 		4932896C2F1EC08200F8FF2E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1203,7 +1252,7 @@
 				DEVELOPMENT_TEAM = X5FKTSKM38;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1270,7 +1319,7 @@
 				DEVELOPMENT_TEAM = X5FKTSKM38;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1576,6 +1625,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		491D9BB42F23EC6C00878762 /* Collections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 495FB9932F19595300154BF5 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = Collections;
+		};
 		495FB9942F19595300154BF5 /* Collections */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 495FB9932F19595300154BF5 /* XCRemoteSwiftPackageReference "swift-collections" */;

@@ -1,0 +1,91 @@
+%{
+  # ===------------------------------------------------------------------------------------------===
+  # Copyright © 2025 Jean Silva
+  #
+  # This file is part of the Pragma open-source project.
+  #
+  # This program is free software: you can redistribute it and/or modify it under the terms of the
+  # GNU General Public License as published by the Free Software Foundation, either version 3 of the
+  # License, or (at your option) any later version.
+  #
+  # This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  # without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+  # the GNU General Public License for more details.
+  #
+  # You should have received a copy of the GNU General Public License along with this program. If
+  # not, see https://www.gnu.org/licenses.
+  # ===------------------------------------------------------------------------------------------===
+
+  class SampleFilterType:
+    def __init__(
+      self,
+      identifier: str,
+      target_type_identifier: str,
+      initialization: str,
+      accessor: str,
+      predicate: str
+    ):
+      self.identifier = identifier
+      self.target_type_identifier = target_type_identifier
+      self.initialization = initialization
+      self.accessor = accessor
+      self.predicate = predicate
+
+  _sample_plan_filter_types = [
+    SampleFilterType(
+      identifier='SamplePlanWithoutGoalsFilter',
+      target_type_identifier='ReadOnlyPlan',
+      initialization='()',
+      accessor='withoutGoals',
+      predicate='target.goals.isEmpty'
+    ),
+    SampleFilterType(
+      identifier='SamplePlanWithGoalsFilter',
+      target_type_identifier='ReadOnlyPlan',
+      initialization='(nil)',
+      accessor='withGoals',
+      predicate='!target.goals.isEmpty'
+    )
+  ]
+  _sample_goal_filter_types = [
+    SampleFilterType(
+      identifier='SampleGoalWithoutToDosFilter',
+      target_type_identifier='ReadOnlyGoal',
+      initialization='()',
+      accessor='withoutToDos',
+      predicate='target.toDos.isEmpty'
+    ),
+    SampleFilterType(
+      identifier='SampleGoalWithToDosFilter',
+      target_type_identifier='ReadOnlyGoal',
+      initialization='()',
+      accessor='withToDos',
+      predicate='!target.toDos.isEmpty'
+    )
+  ]
+
+  all_sample_filter_types = _sample_plan_filter_types + _sample_goal_filter_types
+}%
+@testable import CorePlanner
+import Testing
+
+% for index, type in enumerate(all_sample_filter_types):
+  % Self = type.identifier
+struct ${Self}Tests {
+  @Test
+  func transforms() {
+    let target = ${type.target_type_identifier}.sample(.${type.accessor})
+    #expect(${type.predicate})
+  }
+
+  @Test
+  func terminatesWhenTransformingTargetsAndNoneMatchThePredicate() async {
+    await #expect(processExitsWith: .failure) {
+      _ = ${Self}${type.initialization}._apply(to: [])
+    }
+  }
+}
+  % if index < len(all_sample_filter_types) - 1:
+
+  % end
+% end

@@ -15,17 +15,12 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import PlannerKit
-@testable import PlannerUI
-import Testing
+import SwiftUI
 
-private struct ReadOnlyPlanTests {
-  @Test
-  func isInitializedFromPlan() {
-    let originalPlan = DemoPlanning.plans[0]
-    let readOnlyPlan = ReadOnlyPlan(from: originalPlan)
-    #expect(readOnlyPlan.id == .init(originalPlan.id))
-    #expect(readOnlyPlan.title == originalPlan.title)
-    #expect(readOnlyPlan.summary == originalPlan.summary)
+internal import UniformTypeIdentifiers
+
+extension ReadOnlyToDo: @retroactive Transferable {
+  public static var transferRepresentation: some TransferRepresentation {
+    CodableRepresentation(contentType: .propertyList).visibility(.ownProcess)
   }
 }

@@ -1,0 +1,48 @@
+// ===-------------------------------------------------------------------------------------------===
+// Copyright © 2026 Jean Silva
+//
+// This file is part of the Pragma open-source project.
+//
+// This program is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License as published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+// even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with this program. If
+// not, see https://www.gnu.org/licenses.
+// ===-------------------------------------------------------------------------------------------===
+
+@testable import PlannerKit
+import Testing
+
+struct PersistentPlannerTests {
+  @Test(arguments: [ReadOnlyPlan.sample(.withoutGoals)])
+  func addsPlan(basedOn descriptor: ReadOnlyPlan) async throws {
+    try await PersistentPlanner.persistent(isInMemory: true).run { planner in
+      let addedPlanID = try await planner.addPlan(basedOn: descriptor)
+      let plan = try planner.plan(identifiedAs: addedPlanID)
+      #expect(plan.id == addedPlanID)
+      #expect(plan.title == descriptor.title)
+      #expect(plan.summary == descriptor.summary)
+    }
+  }
+
+  @Test(arguments: [ReadOnlyPlan.sample(.withoutGoals)])
+  func removesPlan(basedOn descriptor: ReadOnlyPlan) async throws {
+    try await PersistentPlanner.persistent(isInMemory: true).run { planner in
+      let addedPlanID = try await planner.addPlan(basedOn: descriptor)
+      try planner.removePlan(identifiedAs: addedPlanID)
+      #expect(
+        throws: PlannerError<PersistenceError>.nonexistent(
+          type: PersistedPlan.self,
+          id: addedPlanID
+        )
+      ) {
+        _ = try planner.plan(identifiedAs: addedPlanID)
+      }
+    }
+  }
+}

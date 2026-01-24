@@ -25,26 +25,30 @@ extension Headlined {
   ///
   /// ```swift
   /// struct Headline: Headlined {
-  ///  public let id = UUID()
-  ///  public private(set) var title: String
-  ///  public private(set) var summary: String
+  ///  typealias ImplementationError = Error
   ///
-  ///  init(title: String, summary: String) {
-  ///    var title = title
-  ///    Self.normalize(title: title)
-  ///    self.title = title
-  ///    var summary = summary
-  ///    Self.normalize(summary: summary)
-  ///    self.summary = summary
-  ///  }
+  ///   public let id = UUID()
+  ///   public private(set) var title: String
+  ///   public private(set) var summary: String
   ///
-  ///   public mutating func setTitle(to newTitle: String) async {
+  ///   public static let description = "headline"
+  ///
+  ///   init(title: String, summary: String) {
+  ///     var title = title
+  ///     Self.normalize(title: title)
+  ///     self.title = title
+  ///     var summary = summary
+  ///     Self.normalize(summary: summary)
+  ///     self.summary = summary
+  ///   }
+  ///
+  ///   public mutating func setTitle(to newTitle: String) async throws(PlannerError<Error>) {
   ///     var newTitle = newTitle
   ///     Self.normalize(title: newTitle)
   ///     title = newTitle
   ///   }
   ///
-  ///   public mutating func setSummary(to newSummary: String) async {
+  ///   public mutating func setSummary(to newSummary: String) async throws(PlannerError<Error>) {
   ///     var newSummary = newSummary
   ///     Self.normalize(summary: newSummary)
   ///     summary = newSummary
@@ -68,26 +72,30 @@ extension Headlined {
   ///
   /// ```swift
   /// struct Headline: Headlined {
-  ///  public let id = UUID()
-  ///  public private(set) var title: String
-  ///  public private(set) var summary: String
+  ///  typealias ImplementationError = Error
   ///
-  ///  init(title: String, summary: String) {
-  ///    var title = title
-  ///    Self.normalize(title: title)
-  ///    self.title = title
-  ///    var summary = summary
-  ///    Self.normalize(summary: summary)
-  ///    self.summary = summary
-  ///  }
+  ///   public let id = UUID()
+  ///   public private(set) var title: String
+  ///   public private(set) var summary: String
   ///
-  ///   public mutating func setTitle(to newTitle: String) async {
+  ///   public static let description = "headline"
+  ///
+  ///   init(title: String, summary: String) {
+  ///     var title = title
+  ///     Self.normalize(title: title)
+  ///     self.title = title
+  ///     var summary = summary
+  ///     Self.normalize(summary: summary)
+  ///     self.summary = summary
+  ///   }
+  ///
+  ///   public mutating func setTitle(to newTitle: String) async throws(PlannerError<Error>) {
   ///     var newTitle = newTitle
   ///     Self.normalize(title: newTitle)
   ///     title = newTitle
   ///   }
   ///
-  ///   public mutating func setSummary(to newSummary: String) async {
+  ///   public mutating func setSummary(to newSummary: String) async throws(PlannerError<Error>) {
   ///     var newSummary = newSummary
   ///     Self.normalize(summary: newSummary)
   ///     summary = newSummary

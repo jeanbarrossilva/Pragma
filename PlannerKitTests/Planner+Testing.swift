@@ -16,39 +16,12 @@
 // ===-------------------------------------------------------------------------------------------===
 
 @testable import PlannerKit
-import Testing
 
-struct DemoToDoTests {
-  @Test
-  func headlineIsNormalized() async throws {
-    var toDo = DemoPlanning.toDos[0]
-    try await toDo.setTitle(to: " Title")
-    try await toDo.setSummary(to: "Summary. ")
-    #expect(toDo.title == "Title")
-    #expect(toDo.summary == "Summary.")
-  }
-
-  @Test
-  func setsTitle() async throws {
-    var toDo = DemoPlanning.toDos[0]
-    let newTitle = "Title 🥸"
-    try await toDo.setTitle(to: newTitle)
-    #expect(toDo.title == newTitle)
-  }
-
-  @Test
-  func setsDescription() async throws {
-    var toDo = DemoPlanning.toDos[0]
-    let newSummary = "Summary. 🏎️"
-    try await toDo.setSummary(to: newSummary)
-    #expect(toDo.summary == newSummary)
-  }
-
-  @Test
-  func setsStatus() async throws {
-    var toDo = DemoPlanning.toDos[0]
-    let newStatus = Status.allCases.first(where: { status in toDo.status != status })!
-    try await toDo.setStatus(to: newStatus)
-    #expect(toDo.status == newStatus)
+extension Planner {
+  func test(
+    _ action: (isolated Self) async throws(PlannerError<ImplementationError>) -> Void
+  ) async throws {
+    try await action(self)
+    try clear()
   }
 }

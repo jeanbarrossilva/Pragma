@@ -22,14 +22,14 @@
       "target" : {
         "containerPath" : "container:Pragma.xcodeproj",
         "identifier" : "4952C73D2F0BF6AB00BFFB49",
-        "name" : "PlansKitTests"
+        "name" : "PlansUITests"
       }
     },
     {
       "target" : {
         "containerPath" : "container:Pragma.xcodeproj",
         "identifier" : "4952C7662F0C7C9900BFFB49",
-        "name" : "PlannerToolkitTests"
+        "name" : "PlannerKitTests"
       }
     },
     {
@@ -43,7 +43,7 @@
       "target" : {
         "containerPath" : "container:Pragma.xcodeproj",
         "identifier" : "49DCA0F92F0A679100274F58",
-        "name" : "PlannerTests"
+        "name" : "CorePlannerTests"
       }
     }
   ],

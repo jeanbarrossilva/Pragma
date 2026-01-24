@@ -24,7 +24,7 @@ struct PragmaApp: App {
   var body: some Scene {
     WindowGroup {
       PragmaView()
-        .modelContainer(for: PlannerRepository.modelTypes)
+        .modelContainer(for: PersistentPlanner.modelTypes)
     }
   }
 }

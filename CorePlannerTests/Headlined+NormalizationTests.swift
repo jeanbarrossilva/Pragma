@@ -39,16 +39,14 @@ struct HeadlinedNormalizationTests {
 // normalize(summary:) functions. Its implementation is incorrect — it is no-op, as the name
 // suggests — and should not be taken as an example for future implementations of Headlined.
 private struct NoOpHeadline: Headlined {
+  typealias ImplementationError = Error
+
   let id: UUID
   let title: String
   let summary: String
 
   static let description = "no-op headline"
 
-  func setTitle(to newTitle: String) async {}
-  func setSummary(to newSummary: String) async {}
-}
-
-extension NoOpHeadline: Comparable {
-  public static func < (lhs: Self, rhs: Self) -> Bool { lhs.isLesser(than: rhs) }
+  func setTitle(to newTitle: String) async throws(PlannerError<Error>) {}
+  func setSummary(to newSummary: String) async throws(PlannerError<Error>) {}
 }

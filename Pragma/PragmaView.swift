@@ -24,7 +24,7 @@ import SwiftUI
 struct PragmaView: View {
   var body: some View {
     PlanList(
-      plans: DemoPlanning.plans.map { plan in .init(from: plan) },
+      plans: ReadOnlyPlan.samples,
       onDidRequestPlanAddition: {},
       onDidRequestToDoAddition: { _ in },
       onDidRequestToDoTransfer: { _, _, _ in }
