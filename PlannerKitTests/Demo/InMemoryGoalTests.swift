@@ -24,7 +24,7 @@ fileprivate struct InMemoryGoalTests {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     let plan = try await planner.plan(identifiedAs: planID)
-    let goalID = try await plan.addGoal(titled: " Title", summarizedBy: "Summary. ")
+    let goalID = try await plan.addGoal(describedBy: .init(title: " Title", summary: "Summary. "))
     let goal = try await plan.goal(identifiedAs: goalID)
     #expect(await goal.title == "Title")
     #expect(await goal.summary == "Summary.")
@@ -58,23 +58,10 @@ fileprivate struct InMemoryGoalTests {
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals))
     let plan = try await planner.plan(identifiedAs: planID)
     let goal = await plan.goals[0]
-    let toDoID = try await goal.addToDo(titled: "🔭", summarizedBy: "🔬", due: .distantFuture)
-    _ = try await goal.toDo(identifiedAs: toDoID)
-  }
-
-  @Test
-  func addedToDoIsIdleByDefault() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(describedBy: .sample(.withGoals))
-    let plan = try await planner.plan(identifiedAs: planID)
-    let goal = await plan.goals[0]
     let toDoID = try await goal.addToDo(
-      titled: "To-do title",
-      summarizedBy: "To-do summary.",
-      due: .distantFuture
+      describedBy: .init(title: "🔭", summary: "🔬", status: .idle, deadline: .distantFuture)
     )
-    let toDo = try await goal.toDo(identifiedAs: toDoID)
-    #expect(await toDo.status == .idle)
+    _ = try await goal.toDo(identifiedAs: toDoID)
   }
 
   @Test

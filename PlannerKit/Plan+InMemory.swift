@@ -30,10 +30,9 @@ public actor InMemoryPlanner: Planner {
   private(set) public var plans = [InMemoryPlan]()
 
   public func addPlan(
-    titled title: String,
-    summarizedBy summary: String
-  ) throws(PlannerError<NSError>) -> UUID {
-    let plan = InMemoryPlan(title: title, summary: summary)
+    describedBy descriptor: AnyPlanDescriptor
+  ) async throws(PlannerError<NSError>) -> UUID {
+    let plan = InMemoryPlan(describedBy: descriptor)
     plans.append(plan)
     return plan.id
   }
@@ -56,6 +55,7 @@ public actor InMemoryPlanner: Planner {
 /// maintained only for as long as the program is being executed, with changes on these structs
 /// being discarded upon their deinitialization.
 public actor InMemoryPlan: Plan {
+  public typealias Descriptor = AnyPlanDescriptor
   public typealias ImplementationError = NSError
 
   public let id = UUID()
@@ -65,14 +65,18 @@ public actor InMemoryPlan: Plan {
 
   public static let description = "plan"
 
-  fileprivate init(title: String, summary: String, goals: [InMemoryGoal] = []) {
-    var title = title
+  /// Initializes this type of ``Plan`` from a ``Descriptor``.
+  ///
+  /// - Parameter descriptor: Immutable instance responsible for describing the user-defined values
+  ///   of properties of this ``Plan``.
+  fileprivate init(describedBy descriptor: AnyPlanDescriptor) {
+    var title = descriptor.title
     Self.normalize(title: &title)
     self.title = title
-    var summary = summary
+    var summary = descriptor.summary
     Self.normalize(summary: &summary)
     self.summary = summary
-    self.goals = goals
+    self.goals = descriptor.goals.map { goalDescriptor in .init(describedBy: goalDescriptor) }
   }
 
   public func setTitle(to newTitle: String) async throws(PlannerError<NSError>) {
@@ -88,10 +92,9 @@ public actor InMemoryPlan: Plan {
   }
 
   public func addGoal(
-    titled title: String,
-    summarizedBy summary: String
+    describedBy descriptor: AnyGoalDescriptor
   ) async throws(PlannerError<NSError>) -> UUID {
-    let goal = await InMemoryGoal(title: title, summary: summary)
+    let goal = InMemoryGoal(describedBy: descriptor)
     goals.append(goal)
     return goal.id
   }
@@ -112,6 +115,7 @@ public actor InMemoryPlan: Plan {
 /// long as the program is being executed, with changes on these structs being discarded upon their
 /// deinitialization.
 public actor InMemoryGoal: Goal {
+  public typealias Descriptor = AnyGoalDescriptor
   public typealias ImplementationError = NSError
 
   public let id = UUID()
@@ -121,14 +125,18 @@ public actor InMemoryGoal: Goal {
 
   public static let description = "goal"
 
-  fileprivate init(title: String, summary: String, toDos: [InMemoryToDo] = []) async {
-    var title = title
+  /// Initializes this type of ``Goal`` from a ``Descriptor``.
+  ///
+  /// - Parameter descriptor: Immutable instance responsible for describing the user-defined values
+  ///   of properties of this ``Goal``.
+  fileprivate init(describedBy descriptor: AnyGoalDescriptor) {
+    var title = descriptor.title
     Self.normalize(title: &title)
     self.title = title
-    var summary = summary
+    var summary = descriptor.summary
     Self.normalize(summary: &summary)
     self.summary = summary
-    self.toDos = toDos
+    self.toDos = descriptor.toDos.map { toDoDescriptor in .init(describedBy: toDoDescriptor) }
   }
 
   public func setTitle(to newTitle: String) async throws(PlannerError<NSError>) {
@@ -144,11 +152,9 @@ public actor InMemoryGoal: Goal {
   }
 
   public func addToDo(
-    titled title: String,
-    summarizedBy summary: String,
-    due deadline: Date
+    describedBy descriptor: AnyToDoDescriptor
   ) async throws(PlannerError<NSError>) -> UUID {
-    let toDo = InMemoryToDo(title: title, summary: summary, deadline: deadline)
+    let toDo = InMemoryToDo(describedBy: descriptor)
     toDos.append(toDo)
     return toDo.id
   }
@@ -168,6 +174,7 @@ public actor InMemoryGoal: Goal {
 /// To-do of a ``DemoGoal`` whose modifications are performed in-memory, maintained for as long as
 /// the program is being executed and discarted upon the deinitialization of this struct.
 public actor InMemoryToDo: ToDo {
+  public typealias Descriptor = AnyToDoDescriptor
   public typealias ImplementationError = NSError
 
   public let id = UUID()
@@ -178,15 +185,19 @@ public actor InMemoryToDo: ToDo {
 
   public static let description = "to-do"
 
-  fileprivate init(title: String, summary: String, status: Status = .idle, deadline: Date) {
-    var title = title
+  /// Initializes this type of ``ToDo`` from a ``Descriptor``.
+  ///
+  /// - Parameter descriptor: Immutable instance responsible for describing the user-defined values
+  ///   of properties of this ``ToDo``.
+  fileprivate init(describedBy descriptor: AnyToDoDescriptor) {
+    var title = descriptor.title
     Self.normalize(title: &title)
     self.title = title
-    var summary = summary
+    var summary = descriptor.summary
     Self.normalize(summary: &summary)
     self.summary = summary
-    self.status = status
-    self.deadline = deadline
+    self.status = descriptor.status
+    self.deadline = descriptor.deadline
   }
 
   public func setTitle(to newTitle: String) async throws(PlannerError<NSError>) {

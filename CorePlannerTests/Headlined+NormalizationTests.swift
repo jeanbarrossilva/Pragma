@@ -39,6 +39,7 @@ struct HeadlinedNormalizationTests {
 // normalize(summary:) functions. Its implementation is incorrect — it is no-op, as the name
 // suggests — and should not be taken as an example for future implementations of Headlined.
 private struct NoOpHeadline: Headlined {
+  typealias Descriptor = Never
   typealias ImplementationError = Error
 
   let id: UUID

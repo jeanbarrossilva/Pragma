@@ -36,7 +36,8 @@ public protocol Planner: Actor where PlanType.ImplementationError == Implementat
   /// ensured by the public initializer or factory function.
   var plans: [PlanType] { get throws(PlannerError<ImplementationError>) }
 
-  /// Adds a ``Plan`` to this ``Planner``.
+  /// Adds a ``Plan`` as described by its descriptor. All ``Goal``s described in it, alongside the
+  /// ``ToDo``s defined within these goals, will also be added.
   ///
   /// ###### Implementation notes
   ///
@@ -44,13 +45,12 @@ public protocol Planner: Actor where PlanType.ImplementationError == Implementat
   /// the ``Plan`` included in it. By the time this function returns, such array *must* be sorted
   /// according to the criteria of comparison of the type of ``Plan``.
   ///
-  /// - Parameters:
-  ///   - title: ``Headlineable/title`` of the ``Plan``.
-  ///   - summary: ``Headlineable/summary`` of the ``Plan``.
+  /// - Parameter descriptor: Descriptor based on which the ``Plan`` will be added.
+  /// - Returns: The ID of the added ``Plan``.
+  /// - SeeAlso: ``addGoal(describedBy:)``
   func addPlan(
-    titled title: String,
-    summarizedBy summary: String
-  ) throws(PlannerError<ImplementationError>) -> PlanType.ID
+    describedBy descriptor: PlanType.Descriptor
+  ) async throws(PlannerError<ImplementationError>) -> PlanType.ID
 
   /// Removes an added plan from this ``Planner``.
   ///
@@ -93,7 +93,8 @@ where GoalType.ImplementationError == ImplementationError {
   /// ensured by the public initializer or factory function.
   var goals: [GoalType] { get async throws(PlannerError<ImplementationError>) }
 
-  /// Adds a ``Goal`` to this ``Plan``.
+  /// Adds a ``Goal`` as described by its descriptor. All ``ToDo``s described in it will also be
+  /// added.
   ///
   /// ###### Implementation notes
   ///
@@ -101,12 +102,11 @@ where GoalType.ImplementationError == ImplementationError {
   /// the ``Goal`` included in it. By the time this function returns, such array *must* be sorted
   /// according to the criteria of comparison of the type of ``Goal``.
   ///
-  /// - Parameters:
-  ///   - title: ``Headlineable/title`` of the ``Goal``.
-  ///   - summary: ``Headlineable/summary`` of the ``Goal``.
+  /// - Parameter descriptor: Descriptor based on which the ``Goal`` will be added.
+  /// - Returns: The ID of the added ``Goal``.
+  /// - SeeAlso: ``addToDo(describedBy:)``
   func addGoal(
-    titled title: String,
-    summarizedBy summary: String
+    describedBy descriptor: GoalType.Descriptor
   ) async throws(PlannerError<ImplementationError>) -> GoalType.ID
 
   /// Retrieves an added ``Goal`` identified with a given ID.
@@ -148,7 +148,7 @@ where ToDoType.ImplementationError == ImplementationError {
   /// ensured by the public initializer or factory function.
   var toDos: [ToDoType] { get async throws(PlannerError<ImplementationError>) }
 
-  /// Adds a ``ToDo`` to this ``Goal``.
+  /// Adds a ``ToDo`` as described by its descriptor.
   ///
   /// ###### Implementation notes
   ///
@@ -156,14 +156,10 @@ where ToDoType.ImplementationError == ImplementationError {
   /// the ``ToDo`` included in it. By the time this function returns, such array *must* be sorted
   /// according to the criteria of comparison of the type of ``ToDo``.
   ///
-  /// - Parameters:
-  ///   - title: ``Headlined/title`` of the ``ToDo``.
-  ///   - summary: ``Headlined/summary`` of the ``ToDo``.
-  ///   - deadline: Date at which the ``ToDo`` is expected to be or have been done.
+  /// - Parameter descriptor: Descriptor based on which the ``ToDo`` will be added.
+  /// - Returns: The ID of the added ``ToDo``.
   func addToDo(
-    titled title: String,
-    summarizedBy summary: String,
-    due deadline: Date
+    describedBy descriptor: ToDoType.Descriptor
   ) async throws(PlannerError<ImplementationError>) -> ToDoType.ID
 
   /// Retrieves an added ``ToDo`` identified with a given ID.
@@ -244,6 +240,9 @@ public protocol Headlineable: Headlined {
 /// and a more descriptive, longer one. These may be mutable in case such structs or classes also
 /// conform to ``Headlineable``.
 public protocol Headlined: Identifiable where ID: Sendable {
+  /// Implementation-specific descriptor for describing an instance of this type.
+  associatedtype Descriptor: Sendable
+
   /// Error throwable by an implementation of this protocol when attempting to obtain its ``title``,
   /// ``summary`` or perform any other operation related to it.
   associatedtype ImplementationError: Error

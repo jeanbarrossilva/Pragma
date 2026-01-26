@@ -55,7 +55,7 @@ struct InMemoryPlanTests {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     let plan = try await planner.plan(identifiedAs: planID)
-    let goalID = try await plan.addGoal(titled: "🐻", summarizedBy: "🐰")
+    let goalID = try await plan.addGoal(describedBy: .init(title: "🐻", summary: "🐰"))
     _ = try await plan.goal(identifiedAs: goalID)
   }
 
@@ -64,7 +64,7 @@ struct InMemoryPlanTests {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     let plan = try await planner.plan(identifiedAs: planID)
-    let goalID = try await plan.addGoal(titled: "🍦", summarizedBy: "🍨")
+    let goalID = try await plan.addGoal(describedBy: .init(title: "🍦", summary: "🍨"))
     let goal = try await plan.goal(identifiedAs: goalID)
     #expect(await goal.toDos.isEmpty)
   }

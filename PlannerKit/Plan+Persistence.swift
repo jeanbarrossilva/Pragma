@@ -58,19 +58,31 @@ public actor PersistentPlanner: Planner {
   ///
   /// ###### Implmentation notes
   ///
-  /// `PersistedPlan` is the only type of model included in this array because SwiftData infers
-  /// others (`PersitedGoal`, `PersistedToDos`, …) based on the relationships of models whose types
-  /// is the ones given to the framework (Stanford University, 2025,
+  /// ``PlanModel`` is the only type of model included in this array because SwiftData infers others
+  /// (``GoalModel``, ``ToDoModel``, …) based on the relationships of models whose types is the ones
+  /// given to the framework (Stanford University, 2025,
   /// [*L13: SwiftData*](https://youtu.be/k9wjAdgUY0A?t=794)).
   public static let modelTypes: [any PersistentModel.Type] = [PlanModel.self]
 
   public func addPlan(
-    titled title: String,
-    summarizedBy summary: String
+    describedBy descriptor: AnyPlanDescriptor
   ) throws(PlannerError<PersistenceError>) -> UUID {
-    let model = PlanModel(title: title, summary: summary)
-    modelContext.insert(model)
-    try modelContext._save()
+    let model = PlanModel(describedBy: descriptor)
+    let planUUID = model.uuid
+    if descriptor.goals.isEmpty {
+      modelContext.insert(model)
+      try modelContext._save()
+    } else {
+      try modelContext._transaction {
+        for goalDescriptor in descriptor.goals {
+          let goalModel = GoalModel(describedBy: goalDescriptor, planUUID: planUUID)
+          modelContext.insert(goalModel)
+          for toDoDescriptor in goalDescriptor.toDos {
+            modelContext.insert(ToDoModel(describedBy: toDoDescriptor, goalUUID: goalModel.uuid))
+          }
+        }
+      }
+    }
     return model.uuid
   }
 
@@ -90,7 +102,7 @@ public actor PersistentPlanner: Planner {
     }
   }
 
-  /// Performs the given closure on this ``PlannerRepository``.
+  /// Performs the given action on this ``PersistentPlanner``.
   ///
   /// - Parameter action: Operation to be performed.
   public func run(
@@ -104,8 +116,9 @@ public actor PersistentPlanner: Planner {
   }
 }
 
-/// Plan persisted into a container by a ``PlannerRepository``.
+/// Plan persisted into a container by a ``PersistentPlanner``.
 public final class PersistedPlan: PersistedDomain, Plan {
+  public typealias Descriptor = AnyPlanDescriptor
   public typealias BackingModel = PlanModel
 
   public let context: ModelContext
@@ -147,12 +160,21 @@ public final class PersistedPlan: PersistedDomain, Plan {
   }
 
   public func addGoal(
-    titled title: String,
-    summarizedBy summary: String
+    describedBy descriptor: AnyGoalDescriptor
   ) async throws(PlannerError<PersistenceError>) -> UUID {
-    let goalModel = GoalModel(planID: id, title: title, summary: summary)
-    context.insert(goalModel)
-    try context._save()
+    let goalModel = GoalModel(describedBy: descriptor, planUUID: id)
+    let goalUUID = goalModel.uuid
+    if descriptor.toDos.isEmpty {
+      context.insert(goalModel)
+      try context._save()
+    } else {
+      try context._transaction {
+        for toDoDescriptor in descriptor.toDos {
+          let toDoModel = ToDoModel(describedBy: toDoDescriptor, goalUUID: goalUUID)
+          context.insert(toDoModel)
+        }
+      }
+    }
     return goalModel.uuid
   }
 
@@ -184,26 +206,26 @@ extension PersistedPlan: Hashable {
   }
 }
 
-/// Model of a plan persisted into a container by a ``PlannerRepository``.
+/// Model of a plan persisted into a container by a ``PersistentPlanner``.
 @Model
 public final class PlanModel: PartialHeadlined {
-  private(set) public var uuid: UUID
+  private(set) public var uuid = UUID()
 
-  fileprivate var title: String
+  private(set) fileprivate var title: String
   fileprivate var summary: String
 
   public static var titleKeyPath: KeyPath<PlanModel, String> { \.title }
   public static var summaryKeyPath: KeyPath<PlanModel, String> { \.summary }
 
-  init(uuid: UUID = .init(), title: String, summary: String) {
-    self.uuid = uuid
-    self.title = title
-    self.summary = summary
+  init(describedBy descriptor: AnyPlanDescriptor) {
+    self.title = descriptor.title
+    self.summary = descriptor.summary
   }
 }
 
 /// Goal persisted into a container by its ``PersistedPlan``.
 public final class PersistedGoal: PersistedDomain, Goal {
+  public typealias Descriptor = AnyGoalDescriptor
   public typealias BackingModel = GoalModel
 
   public let context: ModelContext
@@ -245,11 +267,9 @@ public final class PersistedGoal: PersistedDomain, Goal {
   }
 
   public func addToDo(
-    titled title: String,
-    summarizedBy summary: String,
-    due deadline: Date
+    describedBy descriptor: AnyToDoDescriptor
   ) async throws(PlannerError<PersistenceError>) -> UUID {
-    let toDoModel = ToDoModel(goalUUID: id, title: title, summary: summary, deadline: deadline)
+    let toDoModel = ToDoModel(describedBy: descriptor, goalUUID: id)
     context.insert(toDoModel)
     try context._save()
     return toDoModel.uuid
@@ -286,25 +306,25 @@ extension PersistedGoal: Hashable {
 /// Model of a goal persisted into a container by its ``PersistedPlan``.
 @Model
 public final class GoalModel: PartialHeadlined {
-  private(set) public var uuid: UUID
+  private(set) public var uuid = UUID()
 
-  fileprivate var planUUID: UUID
-  fileprivate var title: String
-  fileprivate var summary: String
+  private(set) fileprivate var planUUID: UUID
+  private(set) fileprivate var title: String
+  private(set) fileprivate var summary: String
 
   public static var titleKeyPath: KeyPath<GoalModel, String> { \.title }
   public static var summaryKeyPath: KeyPath<GoalModel, String> { \.summary }
 
-  fileprivate init(planID: UUID, uuid: UUID = .init(), title: String, summary: String) {
-    self.planUUID = planID
-    self.uuid = uuid
-    self.title = title
-    self.summary = summary
+  fileprivate init(describedBy descriptor: AnyGoalDescriptor, planUUID: UUID) {
+    self.planUUID = planUUID
+    self.title = descriptor.title
+    self.summary = descriptor.summary
   }
 }
 
 /// To-do persisted into a container by its ``PersistedGoal``.
 public final class PersistedToDo: PersistedDomain, ToDo {
+  public typealias Descriptor = AnyToDoDescriptor
   public typealias BackingModel = ToDoModel
 
   public let context: ModelContext
@@ -355,30 +375,23 @@ extension PersistedToDo: Hashable {
 /// Model of a to-do persisted into a container by its ``PersistedGoal``.
 @Model
 public final class ToDoModel: PartialHeadlined {
-  private(set) public var uuid: UUID
+  private(set) public var uuid = UUID()
 
-  fileprivate var goalUUID: UUID
-  fileprivate var title: String
-  fileprivate var summary: String
-  fileprivate var status: Status
-  fileprivate var deadline: Date
+  private(set) fileprivate var goalUUID: UUID
+  private(set) fileprivate var title: String
+  private(set) fileprivate var summary: String
+  private(set) fileprivate var status: Status
+  private(set) fileprivate var deadline: Date
 
   public static var titleKeyPath: KeyPath<ToDoModel, String> { \.title }
   public static var summaryKeyPath: KeyPath<ToDoModel, String> { \.summary }
 
-  fileprivate init(
-    goalUUID: UUID,
-    uuid: UUID = .init(),
-    title: String,
-    summary: String,
-    deadline: Date
-  ) {
+  fileprivate init(describedBy descriptor: AnyToDoDescriptor, goalUUID: UUID) {
     self.goalUUID = goalUUID
-    self.uuid = uuid
-    self.title = title
-    self.summary = summary
-    self.status = .idle
-    self.deadline = deadline
+    self.title = descriptor.title
+    self.summary = descriptor.summary
+    self.status = descriptor.status
+    self.deadline = descriptor.deadline
   }
 }
 
@@ -460,14 +473,14 @@ extension PersistedDomain where Self: Headlineable {
 /// Failure happened upon reading the value of a property of a model or a saving changes
 /// (insertions, updates or deletions) to a persistence container.
 public enum PersistenceError: Error {
-  /// An insertion of, an update to or a deletion of a model from the container has failed. The
-  /// documentation of neither
+  /// A single or batch insertion of, update to or deletion of models from the container has failed.
+  /// The documentation of neither
   /// [SwiftData](https://developer.apple.com/documentation/swiftdata/modelcontext/save()) nor
   /// [Core Data](https://developer.apple.com/documentation/coredata/nsmanagedobjectcontext/save())
   /// specify when, exactly, this error occurs; the empirical (and unverified) guess of the author
   /// of Pragma is that it may be thrown due to a migration failure or in case the device runs out
   /// of storage.
-  case cannotSave
+  case failedTransaction
 
   /// A predicate for retrieving or deleting one or more models from the container contains
   /// expressions which cannot be converted into an SQL query by SwiftData.
@@ -477,7 +490,7 @@ public enum PersistenceError: Error {
 extension PersistenceError: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     switch (lhs, rhs) {
-    case (.cannotSave, .cannotSave):
+    case (.failedTransaction, .failedTransaction):
       true
     case (.malformedPredicate(let lhsType), .malformedPredicate(let rhsType)):
       lhsType == rhsType
@@ -507,8 +520,14 @@ public protocol PartialHeadlined {
 }
 
 extension ModelContext {
+  fileprivate func _transaction(action: () -> Void) throws(PlannerError<PersistenceError>) {
+    do { try transaction(block: action) } catch {
+      throw .implementationSpecific(cause: .failedTransaction)
+    }
+  }
+
   fileprivate func _save() throws(PlannerError<PersistenceError>) {
     guard hasChanges else { return }
-    do { try save() } catch { throw .implementationSpecific(cause: .cannotSave) }
+    do { try save() } catch { throw .implementationSpecific(cause: .failedTransaction) }
   }
 }

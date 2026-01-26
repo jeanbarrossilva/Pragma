@@ -24,11 +24,14 @@ struct InMemoryToDoTests {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .samples[0])
     let plan = try await planner.plan(identifiedAs: planID)
-    var goal = await plan.goals[0]
+    let goal = await plan.goals[0]
     let toDoID = try await goal.addToDo(
-      titled: " Title",
-      summarizedBy: "Summary. ",
-      due: .distantFuture
+      describedBy: .init(
+        title: " Title",
+        summary: "Summary. ",
+        status: .idle,
+        deadline: .distantFuture
+      )
     )
     let toDo = try await goal.toDo(identifiedAs: toDoID)
     #expect(await toDo.title == "Title")

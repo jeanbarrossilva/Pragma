@@ -22,7 +22,7 @@ struct PersistentPlannerTests {
   @Test(arguments: [AnyPlanDescriptor.sample(.withoutGoals)])
   func addsPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
     try await PersistentPlanner.persistent(isInMemory: true).run { planner in
-      let addedPlanID = try await planner.addPlan(describedBy: descriptor)
+      let addedPlanID = try planner.addPlan(describedBy: descriptor)
       let plan = try planner.plan(identifiedAs: addedPlanID)
       #expect(plan.id == addedPlanID)
       #expect(plan.title == descriptor.title)
@@ -33,7 +33,7 @@ struct PersistentPlannerTests {
   @Test(arguments: [AnyPlanDescriptor.sample(.withoutGoals)])
   func removesPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
     try await PersistentPlanner.persistent(isInMemory: true).run { planner in
-      let addedPlanID = try await planner.addPlan(describedBy: descriptor)
+      let addedPlanID = try planner.addPlan(describedBy: descriptor)
       try planner.removePlan(identifiedAs: addedPlanID)
       #expect(
         throws: PlannerError<PersistenceError>.nonexistent(
