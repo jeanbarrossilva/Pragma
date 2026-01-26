@@ -73,7 +73,7 @@ fileprivate struct InMemoryGoalTests {
     let toDoID = await goal.toDos[0].id
     try await goal.removeToDo(identifiedAs: toDoID)
     try await #expect(
-      throws: PlannerError<NSError>.nonexistent(type: InMemoryToDo.self, id: await toDoID)
+      throws: PlannerError<NSError>.nonexistent(type: InMemoryToDo.self, id: toDoID)
     ) {
       try await goal.toDo(identifiedAs: toDoID)
     }
