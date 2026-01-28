@@ -15,19 +15,22 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import PlannerKit
-import PlansUI
-import SwiftUI
+extension Status {
+  /// General, short and displayable description of this status.
+  var title: String {
+    switch self {
+    case .idle: "Idle"
+    case .ongoing: "Ongoing"
+    case .done: "Done"
+    }
+  }
 
-#Preview { PragmaView() }
-
-struct PragmaView: View {
-  var body: some View {
-    PlanList(
-      plans: AnyPlanDescriptor.samples,
-      onDidRequestPlanAddition: {},
-      onDidRequestToDoAddition: { _, _ in },
-      onDidRequestToDoTransfer: { _, _, _ in }
-    )
+  /// Detailed explanation of what this status means.
+  var summary: String {
+    switch self {
+    case .idle: "The task will be added to the goal, but no progress on it has been done yet."
+    case .ongoing: "The task is being worked on and is not yet done."
+    case .done: "The task has been worked on and is done."
+    }
   }
 }

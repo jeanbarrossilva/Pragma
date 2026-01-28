@@ -23,6 +23,8 @@ import SwiftUI
     } label: {
       Image(systemName: "plus")
     }
+  } icon: {
+    Image(systemName: "lightbulb.max.fill").imageScale(.large)
   } title: {
     Text("Here goes some clever title.")
   } description: {
@@ -34,12 +36,12 @@ import SwiftUI
 /// feature of the application to be taken advantage of, alongside a button for performing the
 /// action when triggered. This is for hinting toward an aspect of such feature only, and should not
 /// be employed for displaying critical information such as errors.
-public struct Callout<Title, Description, ActionButton>: View
-where Title: View, Description: View, ActionButton: View {
+public struct Callout<Icon, Title, Description, ActionButton>: View
+where Icon: View, Title: View, Description: View, ActionButton: View {
   public var body: some View {
     GroupBox {
       HStack(spacing: 24) {
-        Image(systemName: "lightbulb.max.fill").imageScale(.large)
+        icon()
         VStack(alignment: .leading, spacing: 4) {
           title().font(.system(.headline, weight: .medium))
           description()
@@ -50,8 +52,8 @@ where Title: View, Description: View, ActionButton: View {
     }
   }
 
-  /// Button which performs the action related to this ``Callout`` when triggered.
-  private let actionButton: () -> ActionButton
+  /// Image representing the action.
+  private let icon: () -> Icon
 
   /// General explanation about or comment on the feature.
   private let title: () -> Title
@@ -59,20 +61,26 @@ where Title: View, Description: View, ActionButton: View {
   /// Details on how the feature works and, ideally, what the ``actionButton`` does.
   private let description: () -> Description
 
+  /// Button which performs the action related to this ``Callout`` when triggered.
+  private let actionButton: () -> ActionButton
+
   /// Initializes a container with a hint for guiding the user toward the usage of a given feature
   /// of the application.
   ///
   /// - Parameters:
   ///   - actionButton: Button which performs the action related to this ``Callout`` when triggered.
+  ///   - icon: Image representing the action.
   ///   - title: General explanation about or comment on the feature.
   ///   - description: Details on how the feature works and, ideally, what the `actionButton` does.
   public init(
     @ViewBuilder actionButton: @escaping () -> ActionButton,
+    @ViewBuilder icon: @escaping () -> Icon,
     @ViewBuilder title: @escaping () -> Title,
     @ViewBuilder description: @escaping () -> Description
   ) {
-    self.actionButton = actionButton
+    self.icon = icon
     self.title = title
     self.description = description
+    self.actionButton = actionButton
   }
 }

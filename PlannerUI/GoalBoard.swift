@@ -23,7 +23,7 @@ internal import Collections
 #Preview("Without to-dos") {
   GoalBoard(
     goal: .sample(.withoutToDos),
-    onDidRequestToDoAddition: {},
+    onDidRequestToDoAddition: { _ in },
     onDidRequestStatusChange: { _, _ in }
   )
   .padding()
@@ -32,7 +32,7 @@ internal import Collections
 #Preview("With to-dos", traits: .sizeThatFitsLayout) {
   GoalBoard(
     goal: .sample(.withToDos),
-    onDidRequestToDoAddition: {},
+    onDidRequestToDoAddition: { _ in },
     onDidRequestStatusChange: { _, _ in }
   )
   .padding()
@@ -60,7 +60,7 @@ public struct GoalBoard: View {
   private let goal: AnyGoalDescriptor
 
   /// Callback called whenever a to-do is requested to be added to the ``goal``.
-  private let onDidRequestToDoAddition: () -> Void
+  private let onDidRequestToDoAddition: (AnyToDoDescriptor) -> Void
 
   /// Callback called whenever to-dos are requested to have their status changed to another
   /// different from their current one.
@@ -76,7 +76,7 @@ public struct GoalBoard: View {
   ///     status changed to another different from their current one.
   public init(
     goal: AnyGoalDescriptor,
-    onDidRequestToDoAddition: @escaping () -> Void,
+    onDidRequestToDoAddition: @escaping (AnyToDoDescriptor) -> Void,
     onDidRequestStatusChange: @escaping (_ toDos: [AnyToDoDescriptor], _ newStatus: Status) -> Void
   ) {
     self.goal = goal
@@ -98,14 +98,28 @@ private struct EmptyGoalBoard: View {
     VStack(alignment: .leading, spacing: 18) {
       Headline(goal: goal)
       Callout {
-        Button(action: onDidRequestToDoAddition) { Image(systemName: "plus") }
+        Button {
+          isAddingGoal = true
+        } label: {
+          Image(systemName: "plus")
+        }
+        .popover(isPresented: $isAddingGoal, arrowEdge: .bottom) {
+          ToDoEditor(isAppearing: $isAddingGoal, onSubmit: onDidRequestToDoAddition)
+            .frame(width: 256)
+            .padding()
+        }
+      } icon: {
+        Image(systemName: "lightbulb.max.fill").imageScale(.large)
       } title: {
-        Text("No to-dos yet!")
+        Text("No tasks yet!")
       } description: {
         Text("Think about the minimal steps you have to take in order to achieve this goal.")
       }
     }
   }
+
+  @State
+  private var isAddingGoal = false
 
   /// Goal without to-dos.
   private let goal: AnyGoalDescriptor
@@ -113,7 +127,7 @@ private struct EmptyGoalBoard: View {
   /// Callback called whenever a to-do is requested to be added to the ``goal``. In case the request
   /// results in a de facto addition of a to-do, this view should not be displayed for the ``goal``
   /// anymore, as it will no longer be empty.
-  private let onDidRequestToDoAddition: () -> Void
+  private let onDidRequestToDoAddition: (AnyToDoDescriptor) -> Void
 
   /// Initializes an ``EmptyGoalBoard`` for displaying the details of a goal which has no to-dos.
   ///
@@ -124,13 +138,16 @@ private struct EmptyGoalBoard: View {
   ///   - onDidRequestToDoAddition: Callback called whenever a to-do is requested to be added to the
   ///     `goal`.  In case the request results in a de facto addition of a to-do, this view should
   ///     not be displayed for the `goal` anymore, as it will no longer be empty.
-  init(goal: AnyGoalDescriptor, onDidRequestToDoAddition: @escaping () -> Void) {
+  init(
+    goal: AnyGoalDescriptor,
+    onDidRequestToDoAddition: @escaping (_ toDoDescriptor: AnyToDoDescriptor) -> Void
+  ) {
     self.goal = goal
     self.onDidRequestToDoAddition = onDidRequestToDoAddition
   }
 }
 
-/// View which displays the headline (i.e., title and description) of a goal, with both of its
+/// View which displays the headline (i.e., title and summary) of a goal, with both of its
 /// components laid out vertically.
 ///
 /// Centralizing such implementation of the display of a headline here was made necessary because of
@@ -561,15 +578,6 @@ private struct StatusLabel: View {
 }
 
 extension Status {
-  /// General, short and displayable description of this ``Status``.
-  var title: String {
-    switch self {
-    case .idle: "Idle"
-    case .ongoing: "Ongoing"
-    case .done: "Done"
-    }
-  }
-
   /// Color by which this status is represented. Used for coloring the indicator beside the title in
   /// the label of a ``StatusColumn``.
   var color: Color {

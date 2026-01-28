@@ -23,7 +23,7 @@ import SwiftUI
   PlanList(
     plans: [],
     onDidRequestPlanAddition: {},
-    onDidRequestToDoAddition: { _ in },
+    onDidRequestToDoAddition: { _, _ in },
     onDidRequestToDoTransfer: { _, _, _ in }
   )
 }
@@ -32,7 +32,7 @@ import SwiftUI
   PlanList(
     plans: AnyPlanDescriptor.samples,
     onDidRequestPlanAddition: {},
-    onDidRequestToDoAddition: { _ in },
+    onDidRequestToDoAddition: { _, _ in },
     onDidRequestToDoTransfer: { _, _, _ in }
   )
 }
@@ -53,7 +53,7 @@ public struct PlanList: View {
 
   private let plans: [AnyPlanDescriptor]
   private let onDidRequestPlanAddition: () -> Void
-  private let onDidRequestToDoAddition: (AnyPlanDescriptor) -> Void
+  private let onDidRequestToDoAddition: (AnyPlanDescriptor, AnyToDoDescriptor) -> Void
   private let onDidRequestToDoTransfer:
     (
       _ destinationGoal: AnyGoalDescriptor, _ transferredToDos: [AnyToDoDescriptor],
@@ -64,7 +64,7 @@ public struct PlanList: View {
   public init(
     plans: [AnyPlanDescriptor],
     onDidRequestPlanAddition: @escaping () -> Void,
-    onDidRequestToDoAddition: @escaping (AnyPlanDescriptor) -> Void,
+    onDidRequestToDoAddition: @escaping (AnyPlanDescriptor, AnyToDoDescriptor) -> Void,
     onDidRequestToDoTransfer:
       @escaping (
         _ destinationGoal: AnyGoalDescriptor, _ transferredToDos: [AnyToDoDescriptor],
@@ -83,6 +83,8 @@ private struct EmptyPlanList: View {
   var body: some View {
     Callout {
       Button(action: onDidRequestPlanAddition) { Image(systemName: "plus") }
+    } icon: {
+      Image(systemName: "lightbulb.max.fill").imageScale(.large)
     } title: {
       Text("No plans in sight… for now.")
     } description: {
@@ -148,7 +150,7 @@ private struct PopulatedPlanList: View {
               (index, goal) in
               GoalBoard(
                 goal: goal,
-                onDidRequestToDoAddition: { onDidRequestToDoAddition(selectedPlan) },
+                onDidRequestToDoAddition: { toDo in onDidRequestToDoAddition(selectedPlan, toDo) },
                 onDidRequestStatusChange: { toDos, newStatus in
                   onDidRequestToDoTransfer(goal, toDos, newStatus)
                 }
@@ -167,7 +169,7 @@ private struct PopulatedPlanList: View {
   }
 
   private let plans: [AnyPlanDescriptor]
-  private let onDidRequestToDoAddition: (AnyPlanDescriptor) -> Void
+  private let onDidRequestToDoAddition: (AnyPlanDescriptor, AnyToDoDescriptor) -> Void
   private let onDidRequestToDoTransfer:
     (
       _ destinationGoal: AnyGoalDescriptor,
@@ -180,7 +182,7 @@ private struct PopulatedPlanList: View {
 
   init(
     plans: [AnyPlanDescriptor],
-    onDidRequestToDoAddition: @escaping (AnyPlanDescriptor) -> Void,
+    onDidRequestToDoAddition: @escaping (AnyPlanDescriptor, AnyToDoDescriptor) -> Void,
     onDidRequestToDoTransfer:
       @escaping (
         _ destinationGoal: AnyGoalDescriptor,

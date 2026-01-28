@@ -15,19 +15,14 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import PlannerKit
-import PlansUI
-import SwiftUI
-
-#Preview { PragmaView() }
-
-struct PragmaView: View {
-  var body: some View {
-    PlanList(
-      plans: AnyPlanDescriptor.samples,
-      onDidRequestPlanAddition: {},
-      onDidRequestToDoAddition: { _, _ in },
-      onDidRequestToDoTransfer: { _, _, _ in }
-    )
+extension StringProtocol {
+  /// A copy of the string with each word changed to its corresponding decapitalized spelling.
+  ///
+  /// This is the inverse of ``capitalized``.
+  var decapitalized: String {
+    guard let first else { return self as? String ?? .init(self) }
+    var decapitalized = first.lowercased()
+    if count > 1 { decapitalized += self[index(after: startIndex)...] }
+    return decapitalized
   }
 }

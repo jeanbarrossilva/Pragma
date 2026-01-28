@@ -212,6 +212,9 @@ public protocol ToDo: AnyObject, Headlineable {
 /// *done*.
 @frozen
 public enum Status: CaseIterable, Codable, Comparable {
+  /// ``Status`` of a ``ToDo`` when none has been set.
+  public static let `default` = Self.idle
+
   /// Denotes that the to-do has been added to the goal, but no progress on it has been done yet.
   case idle
 
