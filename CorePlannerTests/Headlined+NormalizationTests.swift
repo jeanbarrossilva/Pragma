@@ -46,8 +46,6 @@ private struct NoOpHeadline: Headlined {
   let title: String
   let summary: String
 
-  static let description = "no-op headline"
-
   func setTitle(to newTitle: String) async throws(PlannerError<Error>) {}
   func setSummary(to newSummary: String) async throws(PlannerError<Error>) {}
 }

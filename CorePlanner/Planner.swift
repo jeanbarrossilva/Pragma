@@ -266,13 +266,6 @@ public protocol Headlined: Identifiable where ID: Sendable {
 
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
   var summary: String { get async throws(PlannerError<ImplementationError>) }
-
-  /// Human-readable name for this type, included mid-sentence in the message printed before the
-  /// execution of the program is interrupted in a playground or `-Onone` build when the title is
-  /// empty upon normalization.
-  ///
-  /// - SeeAlso: ``normalize(_:_:)``
-  static var description: String { get }
 }
 
 extension Headlined where Self: Equatable {

@@ -59,7 +59,7 @@ extension Headlined {
   /// - Parameters:
   ///   - title: Title suggested for a ``Headlined``.
   public static func normalize(title: inout String) {
-    precondition(!title.isBlank, "Title of a \(Self.description) cannot be blank.")
+    precondition(!title.isBlank, "Title of a headlined (of type \(Self.self)) cannot be blank.")
     title.trim(.whitespacesAndNewlines)
   }
 

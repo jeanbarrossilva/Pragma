@@ -63,8 +63,6 @@ public actor InMemoryPlan: Plan {
   public private(set) var summary: String
   public private(set) var goals: [InMemoryGoal]
 
-  public static let description = "plan"
-
   /// Initializes this type of ``Plan`` from a ``Descriptor``.
   ///
   /// - Parameter descriptor: Immutable instance responsible for describing the user-defined values
@@ -123,8 +121,6 @@ public actor InMemoryGoal: Goal {
   public private(set) var summary: String
   public private(set) var toDos: [InMemoryToDo]
 
-  public static let description = "goal"
-
   /// Initializes this type of ``Goal`` from a ``Descriptor``.
   ///
   /// - Parameter descriptor: Immutable instance responsible for describing the user-defined values
@@ -182,8 +178,6 @@ public actor InMemoryToDo: ToDo {
   public private(set) var summary: String
   public private(set) var status: Status
   public private(set) var deadline: Date
-
-  public static let description = "to-do"
 
   /// Initializes this type of ``ToDo`` from a ``Descriptor``.
   ///

@@ -135,8 +135,6 @@ public final class PersistedPlan: PersistedDomain, Plan {
     }
   }
 
-  public static let description = "plan"
-
   public init(
     identifiedAs id: UUID,
     insertedInto context: ModelContext
@@ -242,8 +240,6 @@ public final class PersistedGoal: PersistedDomain, Goal {
     }
   }
 
-  public static let description = "goal"
-
   public init(
     identifiedAs id: UUID,
     insertedInto context: ModelContext
@@ -326,8 +322,6 @@ public final class PersistedToDo: PersistedDomain, ToDo {
   public let summary: String
   public let status: Status
   public let deadline: Date
-
-  public static let description = "to-do"
 
   public init(
     identifiedAs id: UUID,
