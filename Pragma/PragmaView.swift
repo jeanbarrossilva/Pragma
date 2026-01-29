@@ -19,15 +19,8 @@ import PlannerKit
 import PlansUI
 import SwiftUI
 
-#Preview { PragmaView() }
+struct PragmaView<PlannerType>: View where PlannerType: Planner {
+  var body: some View { PlanList(viewModel: plansViewModel) }
 
-struct PragmaView: View {
-  var body: some View {
-    PlanList(
-      plans: AnyPlanDescriptor.samples,
-      onDidRequestPlanAddition: {},
-      onDidRequestToDoAddition: { _, _ in },
-      onDidRequestToDoTransfer: { _, _, _ in }
-    )
-  }
+  let plansViewModel: PlansViewModel<PlannerType>
 }

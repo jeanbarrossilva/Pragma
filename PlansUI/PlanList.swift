@@ -53,24 +53,25 @@ public struct PlanList: View {
 
   private let plans: [AnyPlanDescriptor]
   private let onDidRequestPlanAddition: () -> Void
-  private let onDidRequestToDoAddition: (AnyPlanDescriptor, AnyToDoDescriptor) -> Void
+  private let onDidRequestToDoAddition: (_ goalID: AnyHashable, _ toDo: AnyToDoDescriptor) -> Void
   private let onDidRequestToDoTransfer:
-    (
-      _ destinationGoal: AnyGoalDescriptor, _ transferredToDos: [AnyToDoDescriptor],
-      _ newStatus: Status
-    ) ->
-      Void
+    (_ goalID: AnyHashable, _ toDoIDs: [AnyHashable], _ newStatus: Status) -> Void
 
-  public init(
+  public init<PlannerType>(viewModel: PlansViewModel<PlannerType>) where PlannerType: Planner {
+    self.plans = viewModel.plans
+    self.onDidRequestPlanAddition = {}
+    self.onDidRequestToDoAddition = { goalID, toDo in viewModel.add(toDo: toDo, to: goalID) }
+    self.onDidRequestToDoTransfer = { goalID, toDoIDs, newStatus in
+      viewModel.transfer(toDos: toDoIDs, withStatus: newStatus, to: goalID)
+    }
+  }
+
+  init(
     plans: [AnyPlanDescriptor],
     onDidRequestPlanAddition: @escaping () -> Void,
-    onDidRequestToDoAddition: @escaping (AnyPlanDescriptor, AnyToDoDescriptor) -> Void,
+    onDidRequestToDoAddition: @escaping (_ goalID: AnyHashable, _ toDo: AnyToDoDescriptor) -> Void,
     onDidRequestToDoTransfer:
-      @escaping (
-        _ destinationGoal: AnyGoalDescriptor, _ transferredToDos: [AnyToDoDescriptor],
-        _ newStatus: Status
-      )
-      -> Void
+      @escaping (_ goalID: AnyHashable, _ toDoIDs: [AnyHashable], _ newStatus: Status) -> Void
   ) {
     self.plans = plans
     self.onDidRequestPlanAddition = onDidRequestPlanAddition

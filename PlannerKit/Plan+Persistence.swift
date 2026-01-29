@@ -19,7 +19,9 @@ import SwiftData
 
 extension Planner where Self == PersistentPlanner {
   /// Alias for the initialization of a ``PersistentPlanner``.
-  public static func persistent() throws -> Self { try persistent(isInMemory: false) }
+  public static var persistent: PersistentPlanner {
+    get throws { try persistent(isInMemory: false) }
+  }
 
   /// Produces an instance of a ``PersistentPlanner``.
   ///
@@ -100,15 +102,6 @@ public actor PersistentPlanner: Planner {
     } catch {
       throw .implementationSpecific(cause: .malformedPredicate(modelType: PlanModel.self))
     }
-  }
-
-  /// Performs the given action on this ``PersistentPlanner``.
-  ///
-  /// - Parameter action: Operation to be performed.
-  public func run(
-    _ action: @Sendable (isolated PersistentPlanner) async throws -> Void
-  ) async rethrows {
-    try await action(self)
   }
 
   public func clear() throws(PlannerError<PersistenceError>) {

@@ -15,24 +15,26 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-import PlannerKit
-import PlansUI
-import SwiftData
-import SwiftUI
+import Combine
+import CorePlanner
 
-@main
-struct PragmaApp: App {
-  var body: some Scene {
-    WindowGroup {
-      Group {
-        if let viewModel {
-          PragmaView(plansViewModel: viewModel)
-            .modelContainer(for: PersistentPlanner.modelTypes)
-        }
-      }
-      .task {
+@MainActor
+public struct PlansViewModel<PlannerType> where PlannerType: Planner {
+  var plans: [AnyPlanDescriptor]
+
+  private var planner: PlannerType
+
+  public init(planner: PlannerType) async throws(PlannerError<PlannerType.ImplementationError>) {
+    self.planner = planner
+    self.plans = try await unsafe callWithTypedThrowsCast(
+      to: PlannerError<PlannerType.ImplementationError>.self
+    ) {
+      try await planner.run {
+        planner throws(PlannerError<PlannerType.ImplementationError>) in
         do {
-          viewModel = try await .init(planner: .persistent)
+          return try await planner.plans.asyncMap { plan in try await .init(of: plan) }
+        } catch let error as PlannerError<PlannerType.ImplementationError> {
+          throw error
         } catch {
           fatalError(error.localizedDescription)
         }
@@ -40,6 +42,7 @@ struct PragmaApp: App {
     }
   }
 
-  @State
-  private var viewModel: PlansViewModel<PersistentPlanner>?
+  func add(toDo: AnyToDoDescriptor, to goalID: AnyHashable) {}
+
+  func transfer(toDos toDoIDs: [AnyHashable], withStatus status: Status, to goalID: AnyHashable) {}
 }

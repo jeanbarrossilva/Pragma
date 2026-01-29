@@ -75,6 +75,17 @@ public protocol Planner: Actor where PlanType.ImplementationError == Implementat
   func clear() throws(PlannerError<ImplementationError>)
 }
 
+extension Planner {
+  /// Performs the given action on this ``Planner`` in isolation.
+  ///
+  /// - Parameter action: Operation to be performed.
+  public func run<Result>(
+    _ action: @Sendable (isolated Self) async throws(PlannerError<ImplementationError>) -> Result
+  ) async rethrows -> Result {
+    try await action(self)
+  }
+}
+
 /// Plans are groups of ``Goal``s which may be related by category (e.g., an academic plan, focused
 /// on studies of subjects of a given course and overall enhancement of received grades) or time
 /// (e.g., a plan with resolutions for the upcoming year).
