@@ -20,7 +20,7 @@ import PlannerUI
 import SwiftUI
 
 #Preview("Without plans") {
-  PlanList(
+  Plans(
     plans: [],
     onDidRequestPlanAddition: {},
     onDidRequestToDoAddition: { _, _ in },
@@ -29,7 +29,7 @@ import SwiftUI
 }
 
 #Preview("With plans") {
-  PlanList(
+  Plans(
     plans: AnyPlanDescriptor.samples,
     onDidRequestPlanAddition: {},
     onDidRequestToDoAddition: { _, _ in },
@@ -37,7 +37,7 @@ import SwiftUI
   )
 }
 
-public struct PlanList: View {
+public struct Plans: View {
   public var body: some View {
     if plans.isEmpty {
       EmptyPlanList(onDidRequestPlanAddition: onDidRequestPlanAddition)

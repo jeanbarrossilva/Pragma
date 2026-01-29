@@ -16,7 +16,7 @@
 // ===-------------------------------------------------------------------------------------------===
 
 import PlannerKit
-import PlansUI
+import PlansFeature
 import SwiftData
 import SwiftUI
 

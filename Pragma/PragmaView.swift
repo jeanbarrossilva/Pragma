@@ -16,11 +16,11 @@
 // ===-------------------------------------------------------------------------------------------===
 
 import PlannerKit
-import PlansUI
+import PlansFeature
 import SwiftUI
 
 struct PragmaView<PlannerType>: View where PlannerType: Planner {
-  var body: some View { PlanList(viewModel: plansViewModel) }
+  var body: some View { Plans(viewModel: plansViewModel) }
 
   let plansViewModel: PlansViewModel<PlannerType>
 }

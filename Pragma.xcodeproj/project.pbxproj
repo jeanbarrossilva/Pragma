@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		4910059B2F10575300896DDF /* PlannerUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 491005922F10575200896DDF /* PlannerUI.framework */; };
 		493289692F1EC08200F8FF2E /* PlannerKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C75F2F0C7C9900BFFB49 /* PlannerKit.framework */; };
-		4952C73F2F0BF6AB00BFFB49 /* PlansUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansUI.framework */; };
-		4952C7492F0BF6AB00BFFB49 /* PlansUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansUI.framework */; };
-		4952C74A2F0BF6AB00BFFB49 /* PlansUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4952C73F2F0BF6AB00BFFB49 /* PlansFeature.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */; };
+		4952C7492F0BF6AB00BFFB49 /* PlansFeature.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */; };
+		4952C74A2F0BF6AB00BFFB49 /* PlansFeature.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		495FB9952F19595300154BF5 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 495FB9942F19595300154BF5 /* Collections */; };
 		49DCA0EA2F0A65BC00274F58 /* .swift-format in Resources */ = {isa = PBXBuildFile; fileRef = 49DCA0E82F0A65B700274F58 /* .swift-format */; };
 		49DCA0EC2F0A669700274F58 /* .gitignore in Sources */ = {isa = PBXBuildFile; fileRef = 49DCA0EB2F0A669000274F58 /* .gitignore */; };
@@ -119,7 +119,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4952C74A2F0BF6AB00BFFB49 /* PlansUI.framework in Embed Frameworks */,
+				4952C74A2F0BF6AB00BFFB49 /* PlansFeature.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -129,8 +129,8 @@
 /* Begin PBXFileReference section */
 		491005922F10575200896DDF /* PlannerUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlannerUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4910059A2F10575300896DDF /* PlannerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlannerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4952C7362F0BF6AB00BFFB49 /* PlansUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlansUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4952C73E2F0BF6AB00BFFB49 /* PlansUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlansUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlansFeature.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4952C73E2F0BF6AB00BFFB49 /* PlansFeatureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlansFeatureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4952C75F2F0C7C9900BFFB49 /* PlannerKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlannerKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4952C7672F0C7C9900BFFB49 /* PlannerKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlannerKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		495888D62F0A92A900ACB0A8 /* Pragma.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Pragma.xctestplan; sourceTree = "<group>"; };
@@ -167,9 +167,9 @@
 			path = tooling;
 			sourceTree = "<group>";
 		};
-		4952C7372F0BF6AB00BFFB49 /* PlansUI */ = {
+		4952C7372F0BF6AB00BFFB49 /* PlansFeature */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PlansUI;
+			path = PlansFeature;
 			sourceTree = "<group>";
 		};
 		4952C7602F0C7C9900BFFB49 /* PlannerKit */ = {
@@ -230,7 +230,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4952C73F2F0BF6AB00BFFB49 /* PlansUI.framework in Frameworks */,
+				4952C73F2F0BF6AB00BFFB49 /* PlansFeature.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,7 +253,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4952C7492F0BF6AB00BFFB49 /* PlansUI.framework in Frameworks */,
+				4952C7492F0BF6AB00BFFB49 /* PlansFeature.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,7 +290,7 @@
 				49DCA0D02F0A60F200274F58 /* Pragma */,
 				49DCA0F32F0A679100274F58 /* CorePlanner */,
 				49DCA0FE2F0A679100274F58 /* CorePlannerTests */,
-				4952C7372F0BF6AB00BFFB49 /* PlansUI */,
+				4952C7372F0BF6AB00BFFB49 /* PlansFeature */,
 				4952C7602F0C7C9900BFFB49 /* PlannerKit */,
 				4952C76B2F0C7C9900BFFB49 /* PlannerKitTests */,
 				491005932F10575200896DDF /* PlannerUI */,
@@ -308,8 +308,8 @@
 				49DCA0CE2F0A60F200274F58 /* Pragma.app */,
 				49DCA0F22F0A679100274F58 /* CorePlanner.framework */,
 				49DCA0FA2F0A679100274F58 /* CorePlannerTests.xctest */,
-				4952C7362F0BF6AB00BFFB49 /* PlansUI.framework */,
-				4952C73E2F0BF6AB00BFFB49 /* PlansUITests.xctest */,
+				4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */,
+				4952C73E2F0BF6AB00BFFB49 /* PlansFeatureTests.xctest */,
 				4952C75F2F0C7C9900BFFB49 /* PlannerKit.framework */,
 				4952C7672F0C7C9900BFFB49 /* PlannerKitTests.xctest */,
 				491005922F10575200896DDF /* PlannerUI.framework */,
@@ -402,9 +402,9 @@
 			productReference = 4910059A2F10575300896DDF /* PlannerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		4952C7352F0BF6AB00BFFB49 /* PlansUI */ = {
+		4952C7352F0BF6AB00BFFB49 /* PlansFeature */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4952C74B2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansUI" */;
+			buildConfigurationList = 4952C74B2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansFeature" */;
 			buildPhases = (
 				4952C7312F0BF6AB00BFFB49 /* Headers */,
 				4952C7322F0BF6AB00BFFB49 /* Sources */,
@@ -418,18 +418,18 @@
 				4952C77D2F0C7D5A00BFFB49 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				4952C7372F0BF6AB00BFFB49 /* PlansUI */,
+				4952C7372F0BF6AB00BFFB49 /* PlansFeature */,
 			);
-			name = PlansUI;
+			name = PlansFeature;
 			packageProductDependencies = (
 			);
 			productName = GoalsKit;
-			productReference = 4952C7362F0BF6AB00BFFB49 /* PlansUI.framework */;
+			productReference = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		4952C73D2F0BF6AB00BFFB49 /* PlansUITests */ = {
+		4952C73D2F0BF6AB00BFFB49 /* PlansFeatureTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4952C74F2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansUITests" */;
+			buildConfigurationList = 4952C74F2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansFeatureTests" */;
 			buildPhases = (
 				4952C73A2F0BF6AB00BFFB49 /* Sources */,
 				4952C73B2F0BF6AB00BFFB49 /* Frameworks */,
@@ -441,11 +441,11 @@
 				4952C7412F0BF6AB00BFFB49 /* PBXTargetDependency */,
 				4952C7432F0BF6AB00BFFB49 /* PBXTargetDependency */,
 			);
-			name = PlansUITests;
+			name = PlansFeatureTests;
 			packageProductDependencies = (
 			);
 			productName = GoalsKitTests;
-			productReference = 4952C73E2F0BF6AB00BFFB49 /* PlansUITests.xctest */;
+			productReference = 4952C73E2F0BF6AB00BFFB49 /* PlansFeatureTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		4952C75E2F0C7C9900BFFB49 /* PlannerKit */ = {
@@ -631,8 +631,8 @@
 				49DCA0CD2F0A60F200274F58 /* Pragma */,
 				49DCA0F12F0A679100274F58 /* CorePlanner */,
 				49DCA0F92F0A679100274F58 /* CorePlannerTests */,
-				4952C7352F0BF6AB00BFFB49 /* PlansUI */,
-				4952C73D2F0BF6AB00BFFB49 /* PlansUITests */,
+				4952C7352F0BF6AB00BFFB49 /* PlansFeature */,
+				4952C73D2F0BF6AB00BFFB49 /* PlansFeatureTests */,
 				4952C75E2F0C7C9900BFFB49 /* PlannerKit */,
 				4952C7662F0C7C9900BFFB49 /* PlannerKitTests */,
 				491005912F10575200896DDF /* PlannerUI */,
@@ -830,7 +830,7 @@
 		};
 		4952C7412F0BF6AB00BFFB49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4952C7352F0BF6AB00BFFB49 /* PlansUI */;
+			target = 4952C7352F0BF6AB00BFFB49 /* PlansFeature */;
 			targetProxy = 4952C7402F0BF6AB00BFFB49 /* PBXContainerItemProxy */;
 		};
 		4952C7432F0BF6AB00BFFB49 /* PBXTargetDependency */ = {
@@ -840,7 +840,7 @@
 		};
 		4952C7482F0BF6AB00BFFB49 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4952C7352F0BF6AB00BFFB49 /* PlansUI */;
+			target = 4952C7352F0BF6AB00BFFB49 /* PlansFeature */;
 			targetProxy = 4952C7472F0BF6AB00BFFB49 /* PBXContainerItemProxy */;
 		};
 		4952C77D2F0C7D5A00BFFB49 /* PBXTargetDependency */ = {
@@ -1009,7 +1009,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlansUI;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlansFeature;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1070,7 +1070,7 @@
 				DEVELOPMENT_TEAM = X5FKTSKM38;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlansUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlansFeatureTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -1539,7 +1539,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4952C74B2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansUI" */ = {
+		4952C74B2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansFeature" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4952C74C2F0BF6AB00BFFB49 /* Debug */,
@@ -1548,7 +1548,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4952C74F2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansUITests" */ = {
+		4952C74F2F0BF6AB00BFFB49 /* Build configuration list for PBXNativeTarget "PlansFeatureTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4952C7502F0BF6AB00BFFB49 /* Debug */,
