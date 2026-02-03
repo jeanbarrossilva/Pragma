@@ -17,7 +17,7 @@
 
 import SwiftData
 
-public extension PersistenceContext {
+public extension ConcurrentContext {
   /// Pseudo-type-erased version of a strategy for fetching models. Ultimately, acts as a wrapper
   /// which allows for static access to the implementations of the strategy protocol.
   struct AnyFetchStrategy<Base, Model>: FetchStrategy
@@ -25,15 +25,15 @@ public extension PersistenceContext {
     /// The backing, delegate strategy.
     private let base: Base
 
-    public func _fetch(
+    public func fetch(
       in backingContext: ModelContext,
       with fetchDescriptor: FetchDescriptor<Model>
     ) throws -> Base.Result {
-      try base._fetch(in: backingContext, with: fetchDescriptor)
+      try base.fetch(in: backingContext, with: fetchDescriptor)
     }
   }
 
-  /// Fetcher and transformer of the result of having fetched models from a persistence context,
+  /// Fetcher and transformer of the result of having fetched models from a concurrent context,
   /// providing to the user of the API for choosing the amount of models to fetch and returning a
   /// result of an appropriate type for that amount (e.g., `.one` yields a model; `.all` yields an
   /// array of models).
@@ -44,66 +44,35 @@ public extension PersistenceContext {
     /// Instance produced as a consequence of having performed a fetch.
     associatedtype Result
 
-    /// Calls the appropriate functions on the SwiftData context backing the persistence one in
-    /// order to fetch model(s) in an amount equivalent to that of this strategy (e.g., one, many,
-    /// …).
-    ///
-    /// > Important: This function should not be called by callers external to the implementation of
-    /// the fetch strategy API. Rather, refer to ``fetch(in:with:)``.
+    /// Calls the appropriate functions on the SwiftData context backing the concurrent one in order
+    /// to fetch model(s) in an amount equivalent to that of this strategy (e.g., one, many, …).
     ///
     /// - Parameters:
-    ///   - backingContext: Underlying context backing the persistent one from which the fetch is
+    ///   - backingContext: Underlying context backing the concurrent one from which the fetch is
     ///     being performed.
     ///   - fetchDescriptor: Descriptor with the predicate and the sorting of the models to be
     ///     fetched.
     /// - Throws: The error thrown by any throwing function of the `backingContext` called by the
     ///   implementation.
-    func _fetch(
+    func fetch(
       in backingContext: ModelContext,
       with fetchDescriptor: FetchDescriptor<Model>
     ) throws -> Result
   }
 }
 
-public extension PersistenceContext.FetchStrategy {
-  /// Calls the appropriate functions on the SwiftData context backing the persistence one in
-  /// order to fetch model(s) in an amount equivalent to that of this strategy (e.g., one, many,
-  /// …). This overload calls ``_fetch(in:with:)``, mapping any thrown errors to a domain-specifc
-  /// one.
-  ///
-  /// - Parameters:
-  ///   - backingContext: Underlying context backing the persistent one from which the fetch is
-  ///     being performed.
-  ///   - fetchDescriptor: Descriptor with the predicate and the sorting of the models to be
-  ///     fetched.
-  /// - Throws: The error thrown by any throwing function of the `backingContext` called by the
-  ///   implementation.
-  func fetch(
-    in backingContext: ModelContext,
-    with fetchDescriptor: FetchDescriptor<Model>
-  ) throws -> Result {
-    do {
-      return try _fetch(in: backingContext, with: fetchDescriptor)
-    } catch let error as SwiftDataError {
-      throw PlannerError<SwiftDataError>.implementationSpecific(cause: error)
-    } catch {
-      fatalError("\(error)")
-    }
-  }
-}
-
 // MARK: .count
 
-public extension PersistenceContext.AnyFetchStrategy
-where Base == PersistenceContext.CountFetchStrategy<Model> {
+public extension ConcurrentContext.AnyFetchStrategy
+where Base == ConcurrentContext.CountFetchStrategy<Model> {
   /// Fetches the amount of models matching the predicate.
   static var count: Self { .init(base: .init()) }
 }
 
-public extension PersistenceContext {
+public extension ConcurrentContext {
   /// Fetch strategy of ``AnyFetchStrategy/count``.
   struct CountFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
-    public func _fetch(
+    public func fetch(
       in backingContext: ModelContext,
       with fetchDescriptor: FetchDescriptor<Model>
     ) throws -> Int {
@@ -114,16 +83,16 @@ public extension PersistenceContext {
 
 // MARK: .one
 
-public extension PersistenceContext.AnyFetchStrategy
-where Base == PersistenceContext.OneFetchStrategy<Model> {
+public extension ConcurrentContext.AnyFetchStrategy
+where Base == ConcurrentContext.OneFetchStrategy<Model> {
   /// Fetches a single model matching the predicate.
   static var one: Self { .init(base: .init()) }
 }
 
-public extension PersistenceContext {
+public extension ConcurrentContext {
   /// Fetch strategy of ``AnyFetchStrategy/one``.
   struct OneFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
-    public func _fetch(
+    public func fetch(
       in backingContext: ModelContext,
       with fetchDescriptor: FetchDescriptor<Model>
     ) throws -> Model? {
@@ -134,16 +103,16 @@ public extension PersistenceContext {
 
 // MARK: .all
 
-public extension PersistenceContext.AnyFetchStrategy
-where Base == PersistenceContext.AllFetchStrategy<Model> {
+public extension ConcurrentContext.AnyFetchStrategy
+where Base == ConcurrentContext.AllFetchStrategy<Model> {
   /// Fetches every model matching the predicate.
   static var all: Self { .init(base: .init()) }
 }
 
-public extension PersistenceContext {
+public extension ConcurrentContext {
   /// Fetch strategy of ``AnyFetchStrategy/all``.
   struct AllFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
-    public func _fetch(
+    public func fetch(
       in backingContext: ModelContext,
       with fetchDescriptor: FetchDescriptor<Model>
     ) throws -> [Model] {

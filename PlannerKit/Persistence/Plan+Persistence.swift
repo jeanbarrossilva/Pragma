@@ -20,14 +20,14 @@ import SwiftData
 extension Planner where Self == PersistentPlanner {
   /// Alias for the initialization of a ``PersistentPlanner``.
   public static var persistent: PersistentPlanner {
-    get throws(SwiftDataError) { try persistent(isInMemory: false) }
+    get throws { try persistent(isInMemory: false) }
   }
 
   /// Produces an instance of a ``PersistentPlanner``.
   ///
   /// - Parameter isInMemory: Whether plans, goals and to-dos are stored in memory, as opposed to
   ///   persisted.
-  static func persistent(isInMemory: Bool) throws(SwiftDataError) -> Self {
+  static func persistent(isInMemory: Bool) throws -> Self {
     try PersistentPlanner(isInMemory: isInMemory)
   }
 }
@@ -37,13 +37,20 @@ extension Planner where Self == PersistentPlanner {
 /// implementations of ``CorePlanner/Plan``, ``CorePlanner/Goal`` and ``CorePlanner/ToDo``.
 public struct PersistentPlanner: Planner {
   /// Context by which all standalone and batched operations are performed.
-  public let context: PersistenceContext
+  public let context: ConcurrentContext
 
-  /// Types of models insertable into this planner.
-  public static let modelTypes = PersistenceContext.modelTypes
+  /// Types of models insertable into a ``PersistentPlanner``.
+  ///
+  /// ###### Implmentation notes
+  ///
+  /// ``PlanModel`` is the only type of model included in this array because SwiftData infers others
+  /// (``GoalModel``, ``ToDoModel``, …) based on the relationships of models whose types is the ones
+  /// given to the framework (Stanford University, 2025,
+  /// [*L13: SwiftData*](https://youtu.be/k9wjAdgUY0A?t=794)).
+  private static let modelTypes: [any PersistentModel.Type] = [PlanModel.self]
 
-  fileprivate init(isInMemory: Bool) throws(SwiftDataError) {
-    self.context = try .init(isInMemory: isInMemory)
+  fileprivate init(isInMemory: Bool) throws {
+    self.context = try .init(container: Self.makeContainer(isInMemory: isInMemory))
   }
 
   public mutating func addPlan(
@@ -55,7 +62,7 @@ public struct PersistentPlanner: Planner {
       if descriptor.goals.isEmpty {
         try context.insert(model)
       } else {
-        try context.batch { context in
+        try context.transaction { context in
           for goalDescriptor in descriptor.goals {
             let goalModel = GoalModel(describedBy: goalDescriptor, planUUID: modelUUID)
             try context.insert(goalModel)
@@ -105,7 +112,18 @@ public struct PersistentPlanner: Planner {
   }
 
   public consuming func clear() async throws {
-    try await context.clear()
+    for modelType in Self.modelTypes {
+      try await context.deleteAll(ofType: modelType)
+    }
+  }
+
+  /// Produces a container into which models of persisted implementations of ``CorePlanner`` are
+  /// inserted.
+  static func makeContainer(isInMemory: Bool) throws -> ModelContainer {
+    try .init(
+      for: .init(Self.modelTypes),
+      configurations: .init(isStoredInMemoryOnly: isInMemory)
+    )
   }
 }
 
@@ -113,7 +131,7 @@ public struct PersistentPlanner: Planner {
 public final class PersistedPlan: PersistedDomain, Plan {
   public typealias BackingModel = PlanModel
 
-  public let context: PersistenceContext
+  public let context: ConcurrentContext
   public let id: UUID
   public let title: String
   public let abstract: String
@@ -132,7 +150,7 @@ public final class PersistedPlan: PersistedDomain, Plan {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: PersistenceContext
+    insertedInto context: ConcurrentContext
   ) async throws {
     self.id = id
     self.context = context
@@ -154,7 +172,7 @@ public final class PersistedPlan: PersistedDomain, Plan {
       if descriptor.toDos.isEmpty {
         try context.insert(goalModel)
       } else {
-        try context.batch { context in
+        try context.transaction { context in
           for toDoDescriptor in descriptor.toDos {
             let toDoModel = ToDoModel(describedBy: toDoDescriptor, goalUUID: goalModelUUID)
             try context.insert(toDoModel)
@@ -237,14 +255,14 @@ extension PlanModel: NSCopying {
 public final class PersistedGoal: PersistedDomain, Goal {
   public typealias BackingModel = GoalModel
 
-  public let context: PersistenceContext
+  public let context: ConcurrentContext
   public let id: UUID
   public let title: String
   public let abstract: String
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: PersistenceContext
+    insertedInto context: ConcurrentContext
   ) async throws {
     self.id = id
     self.context = context
@@ -345,7 +363,7 @@ extension GoalModel: NSCopying {
 public final class PersistedToDo: PersistedDomain, ToDo {
   public typealias BackingModel = ToDoModel
 
-  public let context: PersistenceContext
+  public let context: ConcurrentContext
   public let id: UUID
   public let title: String
   public let abstract: String
@@ -354,7 +372,7 @@ public final class PersistedToDo: PersistedDomain, ToDo {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: PersistenceContext
+    insertedInto context: ConcurrentContext
   ) async throws {
     self.id = id
     self.context = context
@@ -457,7 +475,7 @@ public protocol PersistedDomain: ~Copyable, Hashable, Sendable, SendableMetatype
   associatedtype BackingModel: PartialHeadlined & PersistentModel & NSCopying
 
   /// Context of the model backing this implementation.
-  var context: PersistenceContext { get }
+  var context: ConcurrentContext { get }
 
   var id: UUID { get }
 
@@ -470,7 +488,7 @@ public protocol PersistedDomain: ~Copyable, Hashable, Sendable, SendableMetatype
   ///   - context: Context into which the model is inserted.
   init(
     identifiedAs id: UUID,
-    insertedInto context: PersistenceContext
+    insertedInto context: ConcurrentContext
   ) async throws
 }
 
@@ -504,7 +522,7 @@ extension PersistedDomain {
   /// - SeeAlso: ``backingModel``
   fileprivate static func backingModel(
     identifiedAs id: UUID,
-    insertedInto context: PersistenceContext
+    insertedInto context: ConcurrentContext
   ) async throws -> BackingModel {
     let snapshot = try await context.run { context in
       guard
