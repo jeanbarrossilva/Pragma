@@ -15,22 +15,13 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-extension Status {
-  /// General, short and displayable description of this status.
-  var title: String {
-    switch self {
-    case .idle: "Idle"
-    case .ongoing: "Ongoing"
-    case .done: "Done"
-    }
-  }
-
-  /// Detailed explanation of what this status means.
-  var abstract: String {
-    switch self {
-    case .idle: "The task will be added to the goal, but no progress on it has been done yet."
-    case .ongoing: "The task is being worked on and is not yet done."
-    case .done: "The task has been worked on and is done."
-    }
+extension Actor {
+  /// Performs the given closure on this actor in isolation.
+  ///
+  /// - Parameter action: Operation to be performed.
+  public func run<Result>(
+    _ action: @Sendable (isolated Self) async throws -> Result
+  ) async rethrows -> Result where Result: Sendable {
+    try await action(self)
   }
 }

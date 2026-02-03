@@ -1,6 +1,15 @@
 {
-  "originHash" : "51f90653b2c9f9f7064c0d52159b40bf7d222e5f314be23e62fe28520fec03db",
+  "originHash" : "fc9227f0867381e71e85b72f51eb2e08726451c82663397cf9f0591cbab3c953",
   "pins" : [
+    {
+      "identity" : "swift-async-queue",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dfed/swift-async-queue",
+      "state" : {
+        "revision" : "721e823ee0e19ca64d1c983347c26aacdf9afddd",
+        "version" : "1.0.1"
+      }
+    },
     {
       "identity" : "swift-collections",
       "kind" : "remoteSourceControl",

@@ -15,13 +15,9 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-@testable import PlannerKit
+import Foundation
+import SwiftData
 
-extension Planner {
-  func test(
-    _ action: (isolated Self) async throws(PlannerError<ImplementationError>) -> Void
-  ) async throws {
-    try await action(self)
-    try clear()
-  }
+nonisolated extension ModelContext: @retroactive NSCopying {
+  public func copy(with zone: NSZone? = nil) -> Any { ModelContext(container) }
 }

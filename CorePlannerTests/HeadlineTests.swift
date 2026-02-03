@@ -18,34 +18,18 @@
 @testable import CorePlanner
 import Testing
 
-@Suite("Headlined+Normalization tests")
-struct HeadlinedNormalizationTests {
+struct HeadlineTests {
   @Test(arguments: [" Title", "Title "])
   func trims(title: String) {
     var title = title
-    NoOpHeadline.normalize(title: &title)
+    normalize(title: &title)
     #expect(title == "Title")
   }
 
-  @Test(arguments: [" Summary.", "Summary. "])
-  func trims(summary: String) {
-    var summary = summary
-    NoOpHeadline.normalize(summary: &summary)
-    #expect(summary == "Summary.")
+  @Test(arguments: [" Abstract.", "Abstract. "])
+  func trims(abstract: String) {
+    var abstract = abstract
+    normalize(abstract: &abstract)
+    #expect(abstract == "Abstract.")
   }
-}
-
-// This type exists merely for us to have access to the static normalize(title:) and
-// normalize(summary:) functions. Its implementation is incorrect — it is no-op, as the name
-// suggests — and should not be taken as an example for future implementations of Headlined.
-private struct NoOpHeadline: Headlined {
-  typealias Descriptor = Never
-  typealias ImplementationError = Error
-
-  let id: UUID
-  let title: String
-  let summary: String
-
-  func setTitle(to newTitle: String) async throws(PlannerError<Error>) {}
-  func setSummary(to newSummary: String) async throws(PlannerError<Error>) {}
 }

@@ -17,34 +17,28 @@
 
 @testable import PlannerKit
 import Testing
+import SwiftData
 
 struct PersistentPlannerTests {
   @Test(arguments: [AnyPlanDescriptor.sample(.withoutGoals)])
   func addsPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
-    try await PersistentPlanner.persistent(isInMemory: true).run {
-      planner throws(PlannerError<PersistenceError>) in
-      let addedPlanID = try planner.addPlan(describedBy: descriptor)
-      let plan = try planner.plan(identifiedAs: addedPlanID)
-      #expect(plan.id == addedPlanID)
-      #expect(plan.title == descriptor.title)
-      #expect(plan.summary == descriptor.summary)
-    }
+    let planner = try PersistentPlanner.persistent(isInMemory: true)
+    let addedPlanID = try await planner.addPlan(describedBy: descriptor)
+    let plan = try await planner.plan(identifiedAs: addedPlanID)
+    #expect(plan.id == addedPlanID)
+    #expect(plan.title == descriptor.title)
+    #expect(plan.abstract == descriptor.abstract)
   }
 
   @Test(arguments: [AnyPlanDescriptor.sample(.withoutGoals)])
   func removesPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
-    try await PersistentPlanner.persistent(isInMemory: true).run {
-      planner throws(PlannerError<PersistenceError>) in
-      let addedPlanID = try planner.addPlan(describedBy: descriptor)
-      try planner.removePlan(identifiedAs: addedPlanID)
-      #expect(
-        throws: PlannerError<PersistenceError>.nonexistent(
-          type: PersistedPlan.self,
-          id: addedPlanID
-        )
-      ) {
-        _ = try planner.plan(identifiedAs: addedPlanID)
-      }
+    let planner = try PersistentPlanner.persistent(isInMemory: true)
+    let addedPlanID = try await planner.addPlan(describedBy: descriptor)
+    try await planner.removePlan(identifiedAs: addedPlanID)
+    await #expect(
+      throws: PlannerError<SwiftDataError>.nonexistent(type: PersistedPlan.self, id: addedPlanID)
+    ) {
+      _ = try await planner.plan(identifiedAs: addedPlanID)
     }
   }
 }

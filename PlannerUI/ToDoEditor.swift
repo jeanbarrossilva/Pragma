@@ -39,7 +39,7 @@ struct ToDoEditor: View {
       VStack(alignment: .leading, spacing: 16) {
         VStack(alignment: .leading) {
           TextField("Title", text: $title)
-          TextField("Description", text: $summary)
+          TextField("Description", text: $abstract)
           StatusSection(status: $status)
             .padding(.top)
           DeadlineSection(deadline: $deadline)
@@ -50,7 +50,7 @@ struct ToDoEditor: View {
           Button(role: .confirm) {
             isAppearing = false
             onSubmit(
-              .init(title: title, summary: summary, status: status, deadline: deadline)
+              .init(title: title, abstract: abstract, status: status, deadline: deadline)
             )
           }
           .buttonStyle(.borderedProminent)
@@ -66,7 +66,7 @@ struct ToDoEditor: View {
       Text(mode.title)
         .font(.system(.title2, weight: .bold))
         .foregroundStyle(color)
-    } summary: {
+    } abstract: {
       Text("A task is the minimal step toward the achievement of a goal.")
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -83,9 +83,9 @@ struct ToDoEditor: View {
   @State
   private var title: String
 
-  /// Summary to be set as that of the to-do being edited.
+  /// abstract to be set as that of the to-do being edited.
   @State
-  private var summary: String
+  private var abstract: String
 
   /// Status to be set as that of the to-do being edited.
   @State
@@ -114,7 +114,7 @@ struct ToDoEditor: View {
   init(isAppearing: Binding<Bool>, onSubmit: @escaping (AnyToDoDescriptor) -> Void) {
     self.mode = .addition
     self.title = ""
-    self.summary = ""
+    self.abstract = ""
     self.status = .default
     self.deadline = .now
     self._isAppearing = isAppearing
@@ -137,7 +137,7 @@ struct ToDoEditor: View {
   ) {
     self.mode = .editing
     self.title = toDo.title
-    self.summary = toDo.summary
+    self.abstract = toDo.abstract
     self.status = toDo.status
     self.deadline = toDo.deadline
     self._isAppearing = isAppearing
@@ -165,8 +165,8 @@ private struct StatusSection: View {
           .settingAttributes(.init().font(.system(.body, weight: .medium)))
           + .init(": \(status.title.decapitalized)")
       )
-    } summary: {
-      Text(status.summary)
+    } abstract: {
+      Text(status.abstract)
         .fixedSize(horizontal: false, vertical: true)
       if let statusIndex = Status.allCases.firstIndex(of: status),
         statusIndex > Status.allCases.startIndex
@@ -212,7 +212,7 @@ private struct DeadlineSection: View {
     } title: {
       Text("Deadline")
         .fontWeight(.medium)
-    } summary: {
+    } abstract: {
       Text("Date at which this task is expected to be or have been done.")
     }
   }
@@ -227,13 +227,13 @@ private struct DeadlineSection: View {
   init(deadline: Binding<Date>) { self._deadline = deadline }
 }
 
-private struct Section<Title, Summary, Content>: View
-where Title: View, Summary: View, Content: View {
+private struct Section<Title, Abstract, Content>: View
+where Title: View, Abstract: View, Content: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
       VStack(alignment: .leading, spacing: 4) {
         title()
-        summary()
+        abstract()
           .fixedSize(horizontal: false, vertical: true)
       }
       content()
@@ -241,16 +241,16 @@ where Title: View, Summary: View, Content: View {
   }
 
   private let title: () -> Title
-  private let summary: () -> Summary
+  private let abstract: () -> Abstract
   private let content: () -> Content
 
   init(
     @ViewBuilder content: @escaping () -> Content,
     @ViewBuilder title: @escaping () -> Title,
-    @ViewBuilder summary: @escaping () -> Summary
+    @ViewBuilder abstract: @escaping () -> Abstract
   ) {
     self.title = title
-    self.summary = summary
+    self.abstract = abstract
     self.content = content
   }
 }

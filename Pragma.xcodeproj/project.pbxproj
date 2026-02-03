@@ -12,7 +12,9 @@
 		4952C73F2F0BF6AB00BFFB49 /* PlansFeature.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */; };
 		4952C7492F0BF6AB00BFFB49 /* PlansFeature.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */; };
 		4952C74A2F0BF6AB00BFFB49 /* PlansFeature.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4956A6632F3265D9000B4CFE /* .swift-version in Resources */ = {isa = PBXBuildFile; fileRef = 4956A6622F3265D9000B4CFE /* .swift-version */; };
 		495FB9952F19595300154BF5 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 495FB9942F19595300154BF5 /* Collections */; };
+		49B34D392F314F5D0063C012 /* AsyncQueue in Frameworks */ = {isa = PBXBuildFile; productRef = 49B34D382F314F5D0063C012 /* AsyncQueue */; };
 		49DCA0EA2F0A65BC00274F58 /* .swift-format in Resources */ = {isa = PBXBuildFile; fileRef = 49DCA0E82F0A65B700274F58 /* .swift-format */; };
 		49DCA0EC2F0A669700274F58 /* .gitignore in Sources */ = {isa = PBXBuildFile; fileRef = 49DCA0EB2F0A669000274F58 /* .gitignore */; };
 		49DCA0FB2F0A679100274F58 /* CorePlanner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DCA0F22F0A679100274F58 /* CorePlanner.framework */; };
@@ -133,6 +135,7 @@
 		4952C73E2F0BF6AB00BFFB49 /* PlansFeatureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlansFeatureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4952C75F2F0C7C9900BFFB49 /* PlannerKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PlannerKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4952C7672F0C7C9900BFFB49 /* PlannerKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlannerKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4956A6622F3265D9000B4CFE /* .swift-version */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".swift-version"; sourceTree = "<group>"; };
 		495888D62F0A92A900ACB0A8 /* Pragma.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Pragma.xctestplan; sourceTree = "<group>"; };
 		49DCA0CE2F0A60F200274F58 /* Pragma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pragma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49DCA0E82F0A65B700274F58 /* .swift-format */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".swift-format"; sourceTree = "<group>"; };
@@ -146,7 +149,7 @@
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 491005902F10575200896DDF /* Resources */;
 			membershipExceptions = (
-				CollectionConcurrencyKit.swift,
+				Internal/CollectionConcurrencyKit.swift,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -238,6 +241,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49B34D392F314F5D0063C012 /* AsyncQueue in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +289,7 @@
 		49DCA0C52F0A60F200274F58 = {
 			isa = PBXGroup;
 			children = (
+				4956A6622F3265D9000B4CFE /* .swift-version */,
 				491D9AF92F23D81B00878762 /* tooling */,
 				495888D62F0A92A900ACB0A8 /* Pragma.xctestplan */,
 				49DCA0D02F0A60F200274F58 /* Pragma */,
@@ -468,6 +473,7 @@
 			);
 			name = PlannerKit;
 			packageProductDependencies = (
+				49B34D382F314F5D0063C012 /* AsyncQueue */,
 			);
 			productName = PlannerToolkit;
 			productReference = 4952C75F2F0C7C9900BFFB49 /* PlannerKit.framework */;
@@ -622,6 +628,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				495FB9932F19595300154BF5 /* XCRemoteSwiftPackageReference "swift-collections" */,
+				49B34D372F314F5D0063C012 /* XCRemoteSwiftPackageReference "swift-async-queue" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 49DCA0CF2F0A60F200274F58 /* Products */;
@@ -688,6 +695,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4956A6632F3265D9000B4CFE /* .swift-version in Resources */,
 				49DCA0EA2F0A65BC00274F58 /* .swift-format in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1123,6 +1131,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				OTHER_SWIFT_FLAGS = "-enable-experimental-feature SuppressedAssociatedTypesWithDefaults";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerKit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -1161,6 +1170,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				OTHER_SWIFT_FLAGS = "-enable-experimental-feature SuppressedAssociatedTypesWithDefaults";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.PlannerKit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -1429,6 +1439,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				OTHER_SWIFT_FLAGS = "-enable-experimental-feature SuppressedAssociatedTypesWithDefaults";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.CorePlanner;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -1438,7 +1449,7 @@
 				SWIFT_INSTALL_MODULE = YES;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1467,6 +1478,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				OTHER_SWIFT_FLAGS = "-enable-experimental-feature SuppressedAssociatedTypesWithDefaults";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jeanbarrossilva.pragma.CorePlanner;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -1476,7 +1488,7 @@
 				SWIFT_INSTALL_MODULE = YES;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1622,6 +1634,14 @@
 				minimumVersion = 1.3.0;
 			};
 		};
+		49B34D372F314F5D0063C012 /* XCRemoteSwiftPackageReference "swift-async-queue" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dfed/swift-async-queue";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1634,6 +1654,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 495FB9932F19595300154BF5 /* XCRemoteSwiftPackageReference "swift-collections" */;
 			productName = Collections;
+		};
+		49B34D382F314F5D0063C012 /* AsyncQueue */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49B34D372F314F5D0063C012 /* XCRemoteSwiftPackageReference "swift-async-queue" */;
+			productName = AsyncQueue;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

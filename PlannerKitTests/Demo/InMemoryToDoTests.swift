@@ -20,52 +20,84 @@ import Testing
 
 struct InMemoryToDoTests {
   @Test
-  func headlineIsNormalized() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func headlineIsNormalized() async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .samples[0])
-    let plan = try await planner.plan(identifiedAs: planID)
-    let goal = await plan.goals[0]
-    let toDoID = try await goal.addToDo(
-      describedBy: .init(
-        title: " Title",
-        summary: "Summary. ",
-        status: .idle,
-        deadline: .distantFuture
-      )
-    )
-    let toDo = try await goal.toDo(identifiedAs: toDoID)
-    #expect(await toDo.title == "Title")
-    #expect(await toDo.summary == "Summary.")
+    try await planner.withPlan(identifiedAs: planID) { plan in
+      try await plan.withGoals { goals in
+        try await goals.withElement(at: 0) { goal in
+          let toDoID = try await goal.addToDo(
+            describedBy: .init(
+              title: " Title",
+              abstract: "Abstract. ",
+              status: .idle,
+              deadline: .distantFuture
+            )
+          )
+          try await goal.withToDo(identifiedAs: toDoID) { toDo in
+            #expect(await toDo.title == "Title")
+            #expect(await toDo.abstract == "Abstract.")
+          }
+        }
+      }
+    }
   }
 
   @Test
-  func setsTitle() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func setsTitle() async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
-    let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
-    let newTitle = "Title 🥸"
-    try await toDo.setTitle(to: newTitle)
-    #expect(await toDo.title == newTitle)
+    try await planner.withPlan(identifiedAs: planID) { plan in
+      try await plan.withGoals { goals in
+        try await goals.withElement(at: 0) { goal in
+          try await goal.withToDos { toDos in
+            try await toDos.withElement(at: 0) { toDo in
+              let newTitle = "Title 🥸"
+              try await toDo.setTitle(to: newTitle)
+              #expect(await toDo.title == newTitle)
+            }
+          }
+        }
+      }
+    }
   }
 
   @Test
-  func setsDescription() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func setsDescription() async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
-    let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
-    let newSummary = "Summary. 🏎️"
-    try await toDo.setSummary(to: newSummary)
-    #expect(await toDo.summary == newSummary)
+    try await planner.withPlan(identifiedAs: planID) { plan in
+      try await plan.withGoals { goals in
+        try await goals.withElement(at: 0) { goal in
+          try await goal.withToDos { toDos in
+            try await toDos.withElement(at: 0) { toDo in
+              let newAbstract = "Abstract. 🏎️"
+              try await toDo.setAbstract(to: newAbstract)
+              #expect(await toDo.abstract == newAbstract)
+            }
+          }
+        }
+      }
+    }
   }
 
   @Test
-  func setsStatus() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func setsStatus() async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
-    let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
-    let oldStatus = await toDo.status
-    let newStatus = Status.allCases.first(where: { status in oldStatus != status })!
-    try await toDo.setStatus(to: newStatus)
-    #expect(await toDo.status == newStatus)
+    try await planner.withPlan(identifiedAs: planID) { plan in
+      try await plan.withGoals { goals in
+        try await goals.withElement(at: 0) { goal in
+          try await goal.withToDos { toDos in
+            try await toDos.withElement(at: 0) { toDo in
+              let oldStatus = toDo.status
+              let newStatus = Status.allCases.first(where: { status in oldStatus != status })!
+              try await toDo.setStatus(to: newStatus)
+              #expect(await toDo.status == newStatus)
+            }
+          }
+        }
+      }
+    }
   }
 }

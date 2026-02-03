@@ -20,57 +20,57 @@ import Testing
 
 fileprivate struct InMemoryGoalTests {
   @Test(arguments: AnyGoalDescriptor.samples)
-  func normalizesHeadline(of descriptor: AnyGoalDescriptor) async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func normalizesHeadline(of descriptor: AnyGoalDescriptor) async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     let plan = try await planner.plan(identifiedAs: planID)
-    let goalID = try await plan.addGoal(describedBy: .init(title: " Title", summary: "Summary. "))
+    let goalID = try await plan.addGoal(describedBy: .init(title: " Title", abstract: "abstract. "))
     let goal = try await plan.goal(identifiedAs: goalID)
     #expect(await goal.title == "Title")
-    #expect(await goal.summary == "Summary.")
+    #expect(await goal.abstract == "abstract.")
   }
 
   @Test
-  func setsTitle() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func setsTitle() async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
-    let goal = await plan.goals[0]
+    let goal = plan.goals[0]
     let newTitle = "🔥"
     try await goal.setTitle(to: newTitle)
     #expect(await goal.title == newTitle)
   }
 
   @Test
-  func setsDescription() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func setsDescription() async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
-    let goal = await plan.goals[0]
-    let newSummary = "🐴"
-    try await goal.setSummary(to: newSummary)
-    #expect(await goal.summary == newSummary)
+    let goal = plan.goals[0]
+    let newAbstract = "🐴"
+    try await goal.setAbstract(to: newAbstract)
+    #expect(await goal.abstract == newAbstract)
   }
 
   @Test
-  func addsToDo() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func addsToDo() async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals))
     let plan = try await planner.plan(identifiedAs: planID)
-    let goal = await plan.goals[0]
+    let goal = plan.goals[0]
     let toDoID = try await goal.addToDo(
-      describedBy: .init(title: "🔭", summary: "🔬", status: .idle, deadline: .distantFuture)
+      describedBy: .init(title: "🔭", abstract: "🔬", status: .idle, deadline: .distantFuture)
     )
     _ = try await goal.toDo(identifiedAs: toDoID)
   }
 
   @Test
-  func removesToDo() async throws(PlannerError<NSError>) {
-    let planner = InMemoryPlanner()
+  func removesToDo() async throws {
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
-    let goal = await plan.goals[0]
-    let toDoID = await goal.toDos[0].id
+    let goal = plan.goals[0]
+    let toDoID = goal.toDos[0].id
     try await goal.removeToDo(identifiedAs: toDoID)
     try await #expect(
       throws: PlannerError<NSError>.nonexistent(type: InMemoryToDo.self, id: toDoID)

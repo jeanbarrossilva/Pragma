@@ -22,23 +22,12 @@ import CorePlanner
 public struct PlansViewModel<PlannerType> where PlannerType: Planner {
   var plans: [AnyPlanDescriptor]
 
-  private var planner: PlannerType
+  public private(set) var planner: PlannerType
 
-  public init(planner: PlannerType) async throws(PlannerError<PlannerType.ImplementationError>) {
+  public init(planner: PlannerType) async throws {
     self.planner = planner
-    self.plans = try await unsafe callWithTypedThrowsCast(
-      to: PlannerError<PlannerType.ImplementationError>.self
-    ) {
-      try await planner.run {
-        planner throws(PlannerError<PlannerType.ImplementationError>) in
-        do {
-          return try await planner.plans.asyncMap { plan in try await .init(of: plan) }
-        } catch let error as PlannerError<PlannerType.ImplementationError> {
-          throw error
-        } catch {
-          fatalError(error.localizedDescription)
-        }
-      }
+    self.plans = try await planner.withPlans { plans in
+      try await plans.asyncMap { plan in try await .init(of: plan) }
     }
   }
 

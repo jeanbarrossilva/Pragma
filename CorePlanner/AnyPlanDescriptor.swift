@@ -17,11 +17,11 @@
 
 /// Implementation-agnostic information about a ``Plan``.
 public struct AnyPlanDescriptor: Codable, Hashable, Sendable {
-  /// Main, general, non-blank summary.
+  /// Main, general, non-blank abstract.
   public let title: String
 
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
-  public let summary: String
+  public let abstract: String
 
   /// Each of the goals laid out, whose achievement was deemed required by the user in order for
   /// this plan to be successful. Their sorting in the array is the same as that of the
@@ -31,16 +31,12 @@ public struct AnyPlanDescriptor: Codable, Hashable, Sendable {
   /// Initializes a type-erased ``PlanDescriptor`` based on a ``Plan``.
   ///
   /// - Parameter plan: ``Plan`` from which the type-erased ``PlanDescriptor`` will be initialized.
-  public init<PlanType>(
-    of plan: PlanType
-  ) async throws(PlannerError<PlanType.ImplementationError>) where PlanType: Plan {
+  public init<PlanType>(of plan: borrowing PlanType) async throws where PlanType: ~Copyable & Plan {
     self = .init(
-      title: try await plan.title,
-      summary: try await plan.summary,
-      goals: try await unsafe callWithTypedThrowsCast(
-        to: PlannerError<PlanType.ImplementationError>.self
-      ) {
-        try await plan.goals.asyncMap { goal in try await .init(of: goal) }
+      title: plan.title,
+      abstract: plan.abstract,
+      goals: try await plan.withGoals { goals in
+        try await goals.asyncMap { goal in try await .init(of: goal) }
       }
     )
   }
@@ -48,14 +44,14 @@ public struct AnyPlanDescriptor: Codable, Hashable, Sendable {
   /// Initializes a type-erased ``PlanDescriptor``.
   ///
   /// - Parameters:
-  ///   - title: Main, general, non-blank summary.
-  ///   - summary: Secondary, detailed explanation related to the contents of the `title`. May be
+  ///   - title: Main, general, non-blank abstract.
+  ///   - abstract: Secondary, detailed explanation related to the contents of the `title`. May be
   ///     blank.
   ///   - goals: Each of the goals laid out, whose achievement was deemed required by the user in
   ///     order for the to be successful.
-  public init(title: String, summary: String, goals: [AnyGoalDescriptor] = []) {
+  public init(title: String, abstract: String, goals: [AnyGoalDescriptor] = []) {
     self.title = title
-    self.summary = summary
+    self.abstract = abstract
     self.goals = goals.sorted()
   }
 }
@@ -64,7 +60,7 @@ extension AnyPlanDescriptor: Comparable {
   public static func < (lhs: Self, rhs: Self) -> Bool {
     var isLhsLesser =
       lhs.title[lhs.title.startIndex] < rhs.title[rhs.title.startIndex]
-      && lhs.summary[lhs.summary.startIndex] < rhs.summary[rhs.summary.startIndex]
+      && lhs.abstract[lhs.abstract.startIndex] < rhs.abstract[rhs.abstract.startIndex]
       && lhs.goals.count < rhs.goals.count
     if let lhsFirstGoal = lhs.goals.first, let rhsFirstGoal = rhs.goals.first {
       isLhsLesser = isLhsLesser && lhsFirstGoal < rhsFirstGoal
@@ -96,11 +92,11 @@ extension AnyPlanDescriptor: CustomStringConvertible {
 
 /// Implementation-agnostic information about a ``Goal``.
 public struct AnyGoalDescriptor: Codable, Hashable, Sendable {
-  /// Main, general, non-blank summary.
+  /// Main, general, non-blank abstract.
   public let title: String
 
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
-  public let summary: String
+  public let abstract: String
 
   /// To-dos related to the achievement of the defined objective, sorted ascendingly by their
   /// deadline. Their sorting in the array is the same as that of the ``Goal/toDos`` of a ``Goal``.
@@ -109,30 +105,25 @@ public struct AnyGoalDescriptor: Codable, Hashable, Sendable {
   /// Initializes a type-erased ``GoalDescriptor`` based on a ``Goal``.
   ///
   /// - Parameter goal: ``Goal`` from which the type-erased ``GoalDescriptor`` will be initialized.
-  public init<GoalType>(of goal: GoalType) async throws(PlannerError<GoalType.ImplementationError>)
-  where GoalType: Goal {
+  public init<GoalType>(of goal: borrowing GoalType) async throws where GoalType: ~Copyable & Goal {
     self = .init(
-      title: try await goal.title,
-      summary: try await goal.summary,
-      toDos: try await unsafe callWithTypedThrowsCast(
-        to: PlannerError<GoalType.ImplementationError>.self
-      ) {
-        try await goal.toDos.asyncMap { toDo in try await .init(from: toDo) }
-      }
+      title: goal.title,
+      abstract: goal.abstract,
+      toDos: try await goal.withToDos { toDos in toDos.map { toDo in .init(of: toDo) } }
     )
   }
 
   /// Initializes a type-erased ``GoalDescriptor``.
   ///
   /// - Parameters:
-  ///   - title: Main, general, non-blank summary.
-  ///   - summary: Secondary, detailed explanation related to the contents of the `title`. May be
+  ///   - title: Main, general, non-blank abstract.
+  ///   - abstract: Secondary, detailed explanation related to the contents of the `title`. May be
   ///     blank.
   ///   - toDos: To-dos related to the achievement of the defined objective, sorted ascendingly by
   ///     their ``ReadOnlyToDo/deadline``.
-  public init(title: String, summary: String, toDos: [AnyToDoDescriptor] = []) {
+  public init(title: String, abstract: String, toDos: [AnyToDoDescriptor] = []) {
     self.title = title
-    self.summary = summary
+    self.abstract = abstract
     self.toDos = toDos.sorted()
   }
 }
@@ -141,7 +132,7 @@ extension AnyGoalDescriptor: Comparable {
   public static func < (lhs: Self, rhs: Self) -> Bool {
     var isLhsLesser =
       lhs.title[lhs.title.startIndex] < rhs.title[rhs.title.startIndex]
-      && lhs.summary[lhs.summary.startIndex] < rhs.summary[rhs.summary.startIndex]
+      && lhs.abstract[lhs.abstract.startIndex] < rhs.abstract[rhs.abstract.startIndex]
       && lhs.toDos.count < rhs.toDos.count
     if let lhsFirstToDo = lhs.toDos.first, let rhsFirstToDo = rhs.toDos.first {
       isLhsLesser = isLhsLesser && lhsFirstToDo < rhsFirstToDo
@@ -170,13 +161,13 @@ extension AnyGoalDescriptor: CustomStringConvertible {
 
 /// Implementation-agnostic information about a ``ToDo``.
 public struct AnyToDoDescriptor: Codable, Hashable, Sendable {
-  /// Main, general, non-blank summary.
+  /// Main, general, non-blank abstract.
   public let title: String
 
   /// Notes on the specifics of the achievement of this to-do, such as the prerequisites and prior
   /// preparations deemed necessary by the user. May also contain information about how it was done,
   /// detailing the process for mere posterior reading or as a basis for other plans.
-  public let summary: String
+  public let abstract: String
 
   /// Stage of completion of this to-do.
   public let status: Status
@@ -187,28 +178,26 @@ public struct AnyToDoDescriptor: Codable, Hashable, Sendable {
   /// Initializes a type-erased ``ToDoDescriptor`` based on a ``ToDo``.
   ///
   /// - Parameter toDo: ``ToDo`` from which the type-erased ``ToDoDescriptor`` will be initialized.
-  public init<ToDoType>(
-    from toDo: ToDoType
-  ) async throws(PlannerError<ToDoType.ImplementationError>) where ToDoType: ToDo {
+  public init<ToDoType>(of toDo: borrowing ToDoType) where ToDoType: ~Copyable & ToDo {
     self = .init(
-      title: try await toDo.title,
-      summary: try await toDo.summary,
-      status: try await toDo.status,
-      deadline: try await toDo.deadline
+      title: toDo.title,
+      abstract: toDo.abstract,
+      status: toDo.status,
+      deadline: toDo.deadline
     )
   }
 
   /// Initializes a type-erased ``ToDoDescriptor``.
   ///
   /// - Parameters:
-  ///   - title: Main, general, non-blank summary.
-  ///   - summary: Secondary, detailed explanation related to the contents of the `title`. May be
+  ///   - title: Main, general, non-blank abstract.
+  ///   - abstract: Secondary, detailed explanation related to the contents of the `title`. May be
   ///     blank.
   ///   - status:  Stage of completion of the to-do.
   ///   - deadline: Date at which the to-do is expected to be or have been done.
-  public init(title: String, summary: String, status: Status, deadline: Date) {
+  public init(title: String, abstract: String, status: Status, deadline: Date) {
     self.title = title
-    self.summary = summary
+    self.abstract = abstract
     self.status = status
     self.deadline = deadline
   }
@@ -218,7 +207,7 @@ extension AnyToDoDescriptor: Comparable {
   public static func < (lhs: Self, rhs: Self) -> Bool {
     lhs.deadline < rhs.deadline
       && lhs.title[lhs.title.startIndex] < rhs.title[rhs.title.startIndex]
-      && lhs.summary[lhs.summary.startIndex] < rhs.summary[rhs.summary.startIndex]
+      && lhs.abstract[lhs.abstract.startIndex] < rhs.abstract[rhs.abstract.startIndex]
   }
 }
 

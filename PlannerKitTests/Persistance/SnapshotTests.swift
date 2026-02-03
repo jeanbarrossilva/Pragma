@@ -15,22 +15,20 @@
 // not, see https://www.gnu.org/licenses.
 // ===-------------------------------------------------------------------------------------------===
 
-extension Status {
-  /// General, short and displayable description of this status.
-  var title: String {
-    switch self {
-    case .idle: "Idle"
-    case .ongoing: "Ongoing"
-    case .done: "Done"
-    }
-  }
+@testable import PlannerKit
+import Testing
 
-  /// Detailed explanation of what this status means.
-  var abstract: String {
-    switch self {
-    case .idle: "The task will be added to the goal, but no progress on it has been done yet."
-    case .ongoing: "The task is being worked on and is not yet done."
-    case .done: "The task has been worked on and is done."
-    }
+struct SnapshotTests {
+  @Test
+  func originalSnapshotAndCopiedOneAreNotIdentical() {
+    let object = NSCopyable()
+    let snapshot = Snapshot(of: object)
+    #expect(snapshot.copy() !== object)
   }
+}
+
+private class NSCopyable: NSObject {}
+
+extension NSCopyable: NSCopying {
+  func copy(with zone: NSZone? = nil) -> Any { NSCopyable() }
 }

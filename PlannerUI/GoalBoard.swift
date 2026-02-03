@@ -147,7 +147,7 @@ private struct EmptyGoalBoard: View {
   }
 }
 
-/// View which displays the headline (i.e., title and summary) of a goal, with both of its
+/// View which displays the headline (i.e., title and abstract) of a goal, with both of its
 /// components laid out vertically.
 ///
 /// Centralizing such implementation of the display of a headline here was made necessary because of
@@ -160,7 +160,7 @@ private struct Headline: View {
     VStack(alignment: .leading, spacing: 4) {
       Text(goal.title)
         .font(.system(.title, weight: .heavy))
-      Text(goal.summary)
+      Text(goal.abstract)
         .font(.system(.headline, weight: .regular))
         .foregroundStyle(.secondary)
     }

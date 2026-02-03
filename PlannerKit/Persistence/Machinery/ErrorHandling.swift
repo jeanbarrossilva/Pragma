@@ -16,17 +16,22 @@
 // ===-------------------------------------------------------------------------------------------===
 
 /// Calls the given `closure` as a closure by which an error of the specified type can be thrown.
-/// This is an unsafe operation, and will result in undefined behavior in case the `closure` throws
-/// an error which is not of the passed-in type; the responsibility of ensuring such match is
-/// brought upon the caller.
+/// This is an unsafe operation, and will interrupt the program in case the `closure` throws an
+/// error which is not of the passed-in type; the responsibility of ensuring such match is brought
+/// upon the caller.
 ///
 /// - Parameters:
 ///   - errorType: The only type of error throwable by the `closure` (unchecked).
 ///   - closure: Closure to be cast to `() async throws(ErrorType) -> Result` and called.
-@unsafe
 func callWithTypedThrowsCast<ErrorType, Result>(
   to errorType: ErrorType.Type,
-  _ closure: @escaping () async throws -> Result
-) async throws(ErrorType) -> Result where ErrorType: Error {
-  try await unsafe unsafeBitCast(closure, to: (() async throws(ErrorType) -> Result).self)()
+  _ closure: () throws -> Result
+) throws(ErrorType) -> Result where ErrorType: Error {
+  do {
+    return try closure()
+  } catch let error as ErrorType {
+    throw error
+  } catch {
+    preconditionFailure("Non-\(ErrorType.self) error thrown: \(error)")
+  }
 }

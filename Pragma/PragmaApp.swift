@@ -25,14 +25,20 @@ struct PragmaApp: App {
   var body: some Scene {
     WindowGroup {
       Group {
-        if let viewModel {
+        if let viewModel, let context = contextSnapshot?.copy() {
+          // The `View.modelContext(_:)` modifier by SwiftData should be applied to this view;
+          // however, such function is not identified by the compiler as one of the members of a
+          // PragmaView. I suppose it has something to do with its generic type, but have not gone
+          // into it yet.
           PragmaView(plansViewModel: viewModel)
-            .modelContainer(for: PersistentPlanner.modelTypes)
         }
       }
       .task {
         do {
-          viewModel = try await .init(planner: .persistent)
+          let viewModel = try await PlansViewModel(planner: .persistent)
+          self.viewModel = viewModel
+          self.contextSnapshot =
+            await viewModel.planner.context.run { context in Snapshot(of: context.backingContext) }
         } catch {
           fatalError(error.localizedDescription)
         }
@@ -42,4 +48,7 @@ struct PragmaApp: App {
 
   @State
   private var viewModel: PlansViewModel<PersistentPlanner>?
+
+  @State
+  private var contextSnapshot: Snapshot<ModelContext>?
 }
