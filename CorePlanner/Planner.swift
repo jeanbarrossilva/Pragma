@@ -34,7 +34,7 @@ public protocol Planner: Actor where PlanType.ImplementationError == Implementat
   /// The ``Plan``s *must* be sorted and, even though this is an array, each of them *must* be
   /// unique, at least with an ID distinct from that of the other ones. Such uniqueness *must* be
   /// ensured by the public initializer or factory function.
-  var plans: [PlanType] { get throws(PlannerError<ImplementationError>) }
+  var plans: [PlanType] { get async throws(PlannerError<ImplementationError>) }
 
   /// Adds a ``Plan`` as described by its descriptor. All ``Goal``s described in it, alongside the
   /// ``ToDo``s defined within these goals, will also be added.
@@ -61,13 +61,15 @@ public protocol Planner: Actor where PlanType.ImplementationError == Implementat
   /// according to the criteria of comparison of the type of ``Plan``.
   ///
   /// - Parameter id: ID of the plan to be deleted.
-  func removePlan(identifiedAs id: PlanType.ID) throws(PlannerError<ImplementationError>)
+  func removePlan(identifiedAs id: PlanType.ID) async throws(PlannerError<ImplementationError>)
 
   /// Retrieves an added ``Plan`` identified with a given ID.
   ///
   /// - Parameter id: ID of the ``Plan`` to be retrieved.
   /// - Throws: If the ``Plan`` is not found.
-  func plan(identifiedAs id: PlanType.ID) throws(PlannerError<ImplementationError>) -> PlanType
+  func plan(
+    identifiedAs id: PlanType.ID
+  ) async throws(PlannerError<ImplementationError>) -> PlanType
 
   /// Removes every added plan, goal and to-do from this ``Planner``.
   ///
