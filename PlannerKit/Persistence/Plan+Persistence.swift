@@ -27,26 +27,21 @@ extension Planner where Self == PersistentPlanner {
   ///
   /// - Parameter isInMemory: Whether plans, goals and to-dos are stored in memory, as opposed to
   ///   persisted.
-  static func persistent(isInMemory: Bool) throws -> Self {
-    try PersistentPlanner(
-      modelContainer: .init(
-        for: .init(PersistentPlanner.modelTypes),
-        configurations: .init(isStoredInMemoryOnly: isInMemory)
-      )
-    )
-  }
+  static func persistent(isInMemory: Bool) throws -> Self { try .init(isInMemory: isInMemory) }
 }
 
 /// Abstraction for accessing a container in which ``CorePlanner`` structures are inserted, with
 /// the stored data being retrievable after deinitialization of this class or the underlying
 /// implementations of ``CorePlanner/Plan``, ``CorePlanner/Goal`` and ``CorePlanner/ToDo``.
-@ModelActor
 public actor PersistentPlanner: Planner {
+  /// Context by which all standalone and batched operations are performed.
+  public let context: ConcurrentContext
+
   public var plans: [PersistedPlan] {
-    get throws(PlannerError<PersistenceError>) {
+    get async throws(PlannerError<PersistenceError>) {
       do {
-        return try modelContext.fetch(.init(predicate: Predicate<PlanModel>.true)).map { model in
-          try .init(identifiedAs: model.uuid, insertedInto: modelContext)
+        return try await context.fetch(.all, where: Predicate<PlanModel>.true).asyncMap { model in
+          try await .init(identifiedAs: model.uuid, insertedInto: context)
         }
       } catch {
         throw .implementationSpecific(
@@ -56,31 +51,36 @@ public actor PersistentPlanner: Planner {
     }
   }
 
+  /// Container on which the ``context`` is based.
+  private let container: ModelContainer
+
   /// Types of models insertable into this repository.
-  ///
-  /// ###### Implmentation notes
-  ///
-  /// ``PlanModel`` is the only type of model included in this array because SwiftData infers others
-  /// (``GoalModel``, ``ToDoModel``, …) based on the relationships of models whose types is the ones
-  /// given to the framework (Stanford University, 2025,
-  /// [*L13: SwiftData*](https://youtu.be/k9wjAdgUY0A?t=794)).
-  public static let modelTypes: [any PersistentModel.Type] = [PlanModel.self]
+  public static let modelTypes: [any PersistentModel.Type] =
+    [PlanModel.self, GoalModel.self, ToDoModel.self]
+
+  fileprivate init(isInMemory: Bool) throws {
+    self.container = try Self.makeContainer(isInMemory: isInMemory)
+    self.context = try .init(container: container)
+  }
 
   public func addPlan(
     describedBy descriptor: AnyPlanDescriptor
   ) throws(PlannerError<PersistenceError>) -> UUID {
     let model = PlanModel(describedBy: descriptor)
+    let modelSnapshot = Snapshot(of: model)
     let planUUID = model.uuid
-    if descriptor.goals.isEmpty {
-      modelContext.insert(model)
-      try modelContext._save()
-    } else {
-      try modelContext._transaction {
-        for goalDescriptor in descriptor.goals {
-          let goalModel = GoalModel(describedBy: goalDescriptor, planUUID: planUUID)
-          modelContext.insert(goalModel)
-          for toDoDescriptor in goalDescriptor.toDos {
-            modelContext.insert(ToDoModel(describedBy: toDoDescriptor, goalUUID: goalModel.uuid))
+    Task {
+      if descriptor.goals.isEmpty {
+        try await context.insert(model)
+      } else {
+        try await context.transaction { context in
+          try context.insert(modelSnapshot.copy())
+          for goalDescriptor in descriptor.goals {
+            let goalModel = GoalModel(describedBy: goalDescriptor, planUUID: planUUID)
+            try context.insert(goalModel)
+            for toDoDescriptor in goalDescriptor.toDos {
+              try context.insert(ToDoModel(describedBy: toDoDescriptor, goalUUID: goalModel.uuid))
+            }
           }
         }
       }
@@ -88,24 +88,39 @@ public actor PersistentPlanner: Planner {
     return model.uuid
   }
 
-  public func plan(identifiedAs id: UUID) throws(PlannerError<PersistenceError>) -> PersistedPlan {
-    try .init(identifiedAs: id, insertedInto: modelContext)
+  public func plan(
+    identifiedAs id: UUID
+  ) async throws(PlannerError<PersistenceError>) -> PersistedPlan {
+    try await .init(identifiedAs: id, insertedInto: context)
   }
 
   public func removePlan(identifiedAs id: UUID) throws(PlannerError<PersistenceError>) {
-    do {
-      try modelContext.delete(
-        model: PlanModel.self,
-        where: #Predicate { model in model.uuid == id }
-      )
-      try modelContext._save()
-    } catch {
-      throw .implementationSpecific(cause: .malformedPredicate(modelType: PlanModel.self))
+    Task {
+      do {
+        try await context.delete(where: #Predicate<PlanModel> { model in model.uuid == id })
+      } catch {
+        throw PlannerError<PersistenceError>.implementationSpecific(
+          cause: .malformedPredicate(modelType: PlanModel.self)
+        )
+      }
     }
   }
 
   public func clear() throws(PlannerError<PersistenceError>) {
-    modelContainer.deleteAllData()
+    do {
+      try container.erase()
+    } catch {
+      throw .implementationSpecific(cause: .failedTransaction)
+    }
+  }
+
+  /// Produces a container into which models of persisted implementations of ``CorePlanner`` are
+  /// inserted.
+  static func makeContainer(isInMemory: Bool) throws -> ModelContainer {
+    try .init(
+      for: .init(Self.modelTypes),
+      configurations: .init(isStoredInMemoryOnly: isInMemory)
+    )
   }
 }
 
@@ -114,20 +129,19 @@ public final class PersistedPlan: PersistedDomain, Plan {
   public typealias Descriptor = AnyPlanDescriptor
   public typealias BackingModel = PlanModel
 
-  public let context: ModelContext
+  public let context: ConcurrentContext
   public let id: UUID
   public let title: String
   public let summary: String
 
   public var goals: [PersistedGoal] {
-    get throws(PlannerError<PersistenceError>) {
-      let fetchDescriptor = FetchDescriptor(
-        predicate: #Predicate<GoalModel> { goalModel in goalModel.planUUID == id },
-        sortBy: [.init(\.title), .init(\.summary)]
-      )
+    get async throws(PlannerError<PersistenceError>) {
       do {
-        return try context.fetch(fetchDescriptor).map { goalModel in
-          try .init(identifiedAs: goalModel.uuid, insertedInto: context)
+        return try await context.fetch(
+          .all,
+          where: #Predicate<GoalModel> { goalModel in goalModel.planUUID == id }
+        ).asyncMap { goalModel in
+          try await .init(identifiedAs: goalModel.uuid, insertedInto: context)
         }
       } catch {
         throw .implementationSpecific(cause: .malformedPredicate(modelType: GoalModel.self))
@@ -139,11 +153,11 @@ public final class PersistedPlan: PersistedDomain, Plan {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ModelContext
-  ) throws(PlannerError<PersistenceError>) {
+    insertedInto context: ConcurrentContext
+  ) async throws(PlannerError<PersistenceError>) {
     self.id = id
     self.context = context
-    let backingModel = try Self.backingModel(identifiedAs: id, insertedInto: context)
+    let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
     var title = backingModel.title
     Self.normalize(title: &title)
     self.title = title
@@ -158,14 +172,21 @@ public final class PersistedPlan: PersistedDomain, Plan {
     let goalModel = GoalModel(describedBy: descriptor, planUUID: id)
     let goalUUID = goalModel.uuid
     if descriptor.toDos.isEmpty {
-      context.insert(goalModel)
-      try context._save()
+      do {
+        try await context.insert(goalModel)
+      } catch {
+        throw .implementationSpecific(cause: .failedTransaction)
+      }
     } else {
-      try context._transaction {
-        for toDoDescriptor in descriptor.toDos {
-          let toDoModel = ToDoModel(describedBy: toDoDescriptor, goalUUID: goalUUID)
-          context.insert(toDoModel)
+      do {
+        try await context.transaction { context in
+          for toDoDescriptor in descriptor.toDos {
+            let toDoModel = ToDoModel(describedBy: toDoDescriptor, goalUUID: goalUUID)
+            try context.insert(toDoModel)
+          }
         }
+      } catch {
+        throw .implementationSpecific(cause: .failedTransaction)
       }
     }
     return goalModel.uuid
@@ -174,17 +195,12 @@ public final class PersistedPlan: PersistedDomain, Plan {
   public func goal(
     identifiedAs id: UUID
   ) async throws(PlannerError<PersistenceError>) -> PersistedGoal {
-    try .init(identifiedAs: id, insertedInto: context)
+    try await .init(identifiedAs: id, insertedInto: context)
   }
 
   public func removeGoal(identifiedAs id: UUID) async throws(PlannerError<PersistenceError>) {
     do {
-      try context.delete(
-        model: GoalModel.self,
-        where: #Predicate { goalModel in goalModel.uuid == id },
-        includeSubclasses: false
-      )
-      try context._save()
+      try await context.delete(where: #Predicate<GoalModel> { goalModel in goalModel.uuid == id })
     } catch {
       throw .implementationSpecific(cause: .malformedPredicate(modelType: GoalModel.self))
     }
@@ -210,9 +226,20 @@ public final class PlanModel: PartialHeadlined {
   public static var titleKeyPath: KeyPath<PlanModel, String> { \.title }
   public static var summaryKeyPath: KeyPath<PlanModel, String> { \.summary }
 
-  init(describedBy descriptor: AnyPlanDescriptor) {
-    self.title = descriptor.title
-    self.summary = descriptor.summary
+  convenience init(describedBy descriptor: AnyPlanDescriptor) {
+    self.init(uuid: .init(), title: descriptor.title, summary: descriptor.summary)
+  }
+
+  required init(uuid: UUID, title: String, summary: String) {
+    self.uuid = uuid
+    self.title = title
+    self.summary = summary
+  }
+}
+
+extension PlanModel: NSCopying {
+  public func copy(with zone: NSZone? = nil) -> Any {
+    Self(uuid: uuid, title: title, summary: summary)
   }
 }
 
@@ -221,20 +248,19 @@ public final class PersistedGoal: PersistedDomain, Goal {
   public typealias Descriptor = AnyGoalDescriptor
   public typealias BackingModel = GoalModel
 
-  public let context: ModelContext
+  public let context: ConcurrentContext
   public let id: UUID
   public let title: String
   public let summary: String
 
   public var toDos: [PersistedToDo] {
-    get throws(PlannerError<PersistenceError>) {
-      let fetchDescriptor = FetchDescriptor(
-        predicate: #Predicate<ToDoModel> { toDoModel in toDoModel.goalUUID == id },
-        sortBy: [.init(\.deadline), .init(\.title), .init(\.summary)]
-      )
+    get async throws(PlannerError<PersistenceError>) {
       do {
-        return try context.fetch(fetchDescriptor).map { toDoModel in
-          try .init(identifiedAs: toDoModel.uuid, insertedInto: context)
+        return try await context.fetch(
+          .all,
+          where: #Predicate<ToDoModel> { toDoModel in toDoModel.goalUUID == id }
+        ).asyncMap { toDoModel in
+          try await .init(identifiedAs: toDoModel.uuid, insertedInto: context)
         }
       } catch {
         throw .implementationSpecific(cause: .malformedPredicate(modelType: ToDoModel.self))
@@ -246,11 +272,11 @@ public final class PersistedGoal: PersistedDomain, Goal {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ModelContext
-  ) throws(PlannerError<PersistenceError>) {
+    insertedInto context: ConcurrentContext
+  ) async throws(PlannerError<PersistenceError>) {
     self.id = id
     self.context = context
-    let backingModel = try Self.backingModel(identifiedAs: id, insertedInto: context)
+    let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
     var title = backingModel.title
     Self.normalize(title: &title)
     self.title = title
@@ -263,25 +289,25 @@ public final class PersistedGoal: PersistedDomain, Goal {
     describedBy descriptor: AnyToDoDescriptor
   ) async throws(PlannerError<PersistenceError>) -> UUID {
     let toDoModel = ToDoModel(describedBy: descriptor, goalUUID: id)
-    context.insert(toDoModel)
-    try context._save()
+    do {
+      try await context.insert(toDoModel)
+    } catch {
+      throw .implementationSpecific(cause: .failedTransaction)
+    }
     return toDoModel.uuid
   }
 
   public func toDo(
     identifiedAs id: UUID
   ) async throws(PlannerError<PersistenceError>) -> PersistedToDo {
-    try .init(identifiedAs: id, insertedInto: context)
+    try await .init(identifiedAs: id, insertedInto: context)
   }
 
   public func removeToDo(identifiedAs id: UUID) async throws(PlannerError<PersistenceError>) {
     do {
-      try context.delete(
-        model: ToDoModel.self,
-        where: #Predicate { toDoModel in toDoModel.uuid == id },
-        includeSubclasses: false
+      try await context.delete(
+        where: #Predicate<ToDoModel> { toDoModel in toDoModel.uuid == id }
       )
-      try context._save()
     } catch {
       throw .implementationSpecific(cause: .malformedPredicate(modelType: ToDoModel.self))
     }
@@ -299,7 +325,7 @@ extension PersistedGoal: Hashable {
 /// Model of a goal persisted into a container by its ``PersistedPlan``.
 @Model
 public final class GoalModel: PartialHeadlined {
-  private(set) public var uuid = UUID()
+  private(set) public var uuid: UUID
 
   private(set) fileprivate var planUUID: UUID
   private(set) fileprivate var title: String
@@ -308,10 +334,26 @@ public final class GoalModel: PartialHeadlined {
   public static var titleKeyPath: KeyPath<GoalModel, String> { \.title }
   public static var summaryKeyPath: KeyPath<GoalModel, String> { \.summary }
 
-  fileprivate init(describedBy descriptor: AnyGoalDescriptor, planUUID: UUID) {
+  fileprivate convenience init(describedBy descriptor: AnyGoalDescriptor, planUUID: UUID) {
+    self.init(
+      uuid: .init(),
+      planUUID: planUUID,
+      title: descriptor.title,
+      summary: descriptor.summary
+    )
+  }
+
+  required init(uuid: UUID, planUUID: UUID, title: String, summary: String) {
+    self.uuid = uuid
     self.planUUID = planUUID
-    self.title = descriptor.title
-    self.summary = descriptor.summary
+    self.title = title
+    self.summary = summary
+  }
+}
+
+extension GoalModel: NSCopying {
+  public func copy(with zone: NSZone? = nil) -> Any {
+    Self(uuid: uuid, planUUID: planUUID, title: title, summary: summary)
   }
 }
 
@@ -320,7 +362,7 @@ public final class PersistedToDo: PersistedDomain, ToDo {
   public typealias Descriptor = AnyToDoDescriptor
   public typealias BackingModel = ToDoModel
 
-  public let context: ModelContext
+  public let context: ConcurrentContext
   public let id: UUID
   public let title: String
   public let summary: String
@@ -331,11 +373,11 @@ public final class PersistedToDo: PersistedDomain, ToDo {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ModelContext
-  ) throws(PlannerError<PersistenceError>) {
+    insertedInto context: ConcurrentContext
+  ) async throws(PlannerError<PersistenceError>) {
     self.id = id
     self.context = context
-    let backingModel = try Self.backingModel(identifiedAs: id, insertedInto: context)
+    let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
     var title = backingModel.title
     Self.normalize(title: &title)
     self.title = title
@@ -347,11 +389,19 @@ public final class PersistedToDo: PersistedDomain, ToDo {
   }
 
   public func setStatus(to newStatus: Status) async throws(PlannerError<PersistenceError>) {
-    try backingModel.setValue(forKey: \.status, to: newStatus)
+    do {
+      try await backingModel.setValue(forKey: \.status, to: newStatus)
+    } catch {
+      throw .implementationSpecific(cause: .failedTransaction)
+    }
   }
 
   public func setDeadline(to newDeadline: Date) async throws(PlannerError<PersistenceError>) {
-    try backingModel.setValue(forKey: \.deadline, to: newDeadline)
+    do {
+      try await backingModel.setValue(forKey: \.deadline, to: newDeadline)
+    } catch {
+      throw .implementationSpecific(cause: .failedTransaction)
+    }
   }
 }
 
@@ -368,7 +418,7 @@ extension PersistedToDo: Hashable {
 /// Model of a to-do persisted into a container by its ``PersistedGoal``.
 @Model
 public final class ToDoModel: PartialHeadlined {
-  private(set) public var uuid = UUID()
+  private(set) public var uuid: UUID
 
   private(set) fileprivate var goalUUID: UUID
   private(set) fileprivate var title: String
@@ -379,12 +429,44 @@ public final class ToDoModel: PartialHeadlined {
   public static var titleKeyPath: KeyPath<ToDoModel, String> { \.title }
   public static var summaryKeyPath: KeyPath<ToDoModel, String> { \.summary }
 
-  fileprivate init(describedBy descriptor: AnyToDoDescriptor, goalUUID: UUID) {
+  fileprivate convenience init(describedBy descriptor: AnyToDoDescriptor, goalUUID: UUID) {
+    self.init(
+      uuid: .init(),
+      goalUUID: goalUUID,
+      title: descriptor.title,
+      summary: descriptor.summary,
+      status: descriptor.status,
+      deadline: descriptor.deadline
+    )
+  }
+
+  required init(
+    uuid: UUID,
+    goalUUID: UUID,
+    title: String,
+    summary: String,
+    status: Status,
+    deadline: Date
+  ) {
+    self.uuid = uuid
     self.goalUUID = goalUUID
-    self.title = descriptor.title
-    self.summary = descriptor.summary
-    self.status = descriptor.status
-    self.deadline = descriptor.deadline
+    self.title = title
+    self.summary = summary
+    self.status = status
+    self.deadline = deadline
+  }
+}
+
+extension ToDoModel: NSCopying {
+  public func copy(with zone: NSZone? = nil) -> Any {
+    Self(
+      uuid: uuid,
+      goalUUID: goalUUID,
+      title: title,
+      summary: summary,
+      status: status,
+      deadline: deadline
+    )
   }
 }
 
@@ -395,13 +477,13 @@ public final class ToDoModel: PartialHeadlined {
 /// (upon both initialization and changes through the setters) and domain-driven behavior, e.g.,
 /// adding to-dos to goals and goals to plans, without exposing details about the underlying
 /// persistence layer.
-public protocol PersistedDomain: Headlineable
+public protocol PersistedDomain: Headlineable, SendableMetatype
 where ID == UUID, ImplementationError == PersistenceError {
   /// The persisted model on which this structure is based.
-  associatedtype BackingModel: PartialHeadlined & PersistentModel
+  associatedtype BackingModel: PartialHeadlined, PersistentModel, NSCopying
 
   /// Context of the model backing this implementation.
-  var context: ModelContext { get }
+  var context: ConcurrentContext { get }
 
   /// Makes an instance of this type from the ID of the model persisted into the container, backing
   /// accesses to each of its properties, adding normalization to the headline of such model and
@@ -412,22 +494,33 @@ where ID == UUID, ImplementationError == PersistenceError {
   ///   - context: Context into which the model is inserted.
   init(
     identifiedAs id: UUID,
-    insertedInto context: ModelContext
-  ) throws(PlannerError<PersistenceError>)
+    insertedInto context: ConcurrentContext
+  ) async throws
 }
 
 extension PersistedDomain {
-  /// Object persisted into the container and on which the headline of this implementation is based.
+  /// Copy of the object persisted into the container and on which the headline of this
+  /// implementation is based.
   ///
   /// - SeeAlso: ``backingModel(identifiedAs:insertedInto:)``
   fileprivate var backingModel: BackingModel {
-    get throws(PlannerError<PersistenceError>) {
-      try Self.backingModel(identifiedAs: id, insertedInto: context)
+    get async throws(PlannerError<PersistenceError>) {
+      try await Self.backingModel(identifiedAs: id, insertedInto: context)
     }
   }
 
-  /// Retrieves the object persisted into the container and on which the headline of this
+  /// Retrieves a copy of the object persisted into the container and on which the headline of this
   /// implementation is based.
+  ///
+  /// ###### Implementation notes
+  ///
+  /// The backing model is retrieved from the ``context`` by copy through a snapshot. This is far
+  /// from ideal, given that copying is not synchronized and may be made outdated due to changes by
+  /// another caller.
+  ///
+  /// In a greater, more complex program, this could be an issue, and this function would (maybe)
+  /// have to be declared with a sendable closure to which the backing model is provided; in our
+  /// situation, however, this detail will probably do no harm.
   ///
   /// - Parameters:
   ///   - uuid: The ID of the backing model.
@@ -435,17 +528,24 @@ extension PersistedDomain {
   /// - SeeAlso: ``backingModel``
   fileprivate static func backingModel(
     identifiedAs id: UUID,
-    insertedInto context: ModelContext
-  ) throws(PlannerError<PersistenceError>) -> BackingModel {
-    let fetchDescriptor = FetchDescriptor(
-      predicate: #Predicate<BackingModel> { backingModel in backingModel.uuid == id }
-    )
-    guard let backingModels = try? context.fetch(fetchDescriptor) else {
-      throw .implementationSpecific(cause: .malformedPredicate(modelType: BackingModel.self))
+    insertedInto context: ConcurrentContext
+  ) async throws(PlannerError<PersistenceError>) -> BackingModel {
+    do {
+      let snapshot = try await context.run { context in
+        guard
+          let backingModel = try context.fetch(
+            .one,
+            where: #Predicate<BackingModel> { backingModel in backingModel.uuid == id }
+          )
+        else {
+          throw PlannerError<SwiftDataError>.nonexistent(type: Self.self, id: id)
+        }
+        return Snapshot(of: backingModel)
+      }
+      return snapshot.copy()
+    } catch {
+      throw .implementationSpecific(cause: .failedTransaction)
     }
-    guard let backingModel = backingModels.first
-    else { throw .nonexistent(type: Self.self, id: id) }
-    return backingModel
   }
 }
 
@@ -453,13 +553,21 @@ extension PersistedDomain where Self: Headlineable {
   public func setTitle(to newTitle: String) async throws(PlannerError<PersistenceError>) {
     var newTitle = newTitle
     Self.normalize(title: &newTitle)
-    try backingModel.setValue(forKey: BackingModel.titleKeyPath, to: newTitle)
+    do {
+      try await backingModel.setValue(forKey: BackingModel.titleKeyPath, to: newTitle)
+    } catch {
+      throw .implementationSpecific(cause: .failedTransaction)
+    }
   }
 
   public func setSummary(to newSummary: String) async throws(PlannerError<PersistenceError>) {
     var newSummary = newSummary
     Self.normalize(summary: &newSummary)
-    try backingModel.setValue(forKey: BackingModel.summaryKeyPath, to: newSummary)
+    do {
+      try await backingModel.setValue(forKey: BackingModel.summaryKeyPath, to: newSummary)
+    } catch {
+      throw .implementationSpecific(cause: .failedTransaction)
+    }
   }
 }
 
@@ -510,17 +618,4 @@ public protocol PartialHeadlined {
 
   /// Key path of the description.
   static var summaryKeyPath: KeyPath<Self, String> { get }
-}
-
-extension ModelContext {
-  fileprivate func _transaction(action: () -> Void) throws(PlannerError<PersistenceError>) {
-    do { try transaction(block: action) } catch {
-      throw .implementationSpecific(cause: .failedTransaction)
-    }
-  }
-
-  fileprivate func _save() throws(PlannerError<PersistenceError>) {
-    guard hasChanges else { return }
-    do { try save() } catch { throw .implementationSpecific(cause: .failedTransaction) }
-  }
 }
