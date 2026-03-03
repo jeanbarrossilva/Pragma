@@ -21,7 +21,5 @@ extension Actor {
   /// - Parameter action: Operation to be performed.
   public func run<Result>(
     _ action: @Sendable (isolated Self) async throws -> Result
-  ) async rethrows -> Result where Result: Sendable {
-    try await action(self)
-  }
+  ) async rethrows -> Result where Result: Sendable { try await action(self) }
 }

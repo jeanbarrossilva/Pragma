@@ -20,7 +20,7 @@ import Testing
 
 struct InMemoryToDoTests {
   @Test
-  func headlineIsNormalized() async throws(PlannerError<NSError>) {
+  func headlineIsNormalized() async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .samples[0])
     let plan = try await planner.plan(identifiedAs: planID)
@@ -39,7 +39,7 @@ struct InMemoryToDoTests {
   }
 
   @Test
-  func setsTitle() async throws(PlannerError<NSError>) {
+  func setsTitle() async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
@@ -49,7 +49,7 @@ struct InMemoryToDoTests {
   }
 
   @Test
-  func setsDescription() async throws(PlannerError<NSError>) {
+  func setsDescription() async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
@@ -59,7 +59,7 @@ struct InMemoryToDoTests {
   }
 
   @Test
-  func setsStatus() async throws(PlannerError<NSError>) {
+  func setsStatus() async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]

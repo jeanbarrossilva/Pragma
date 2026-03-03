@@ -26,14 +26,10 @@ struct PragmaApp: App {
     WindowGroup {
       Group {
         if let viewModel {
-          PragmaView(plansViewModel: viewModel)
-            .modelContainer(for: PersistentPlanner.modelTypes)
+          PragmaView(plansViewModel: viewModel).modelContainer(for: PersistentPlanner.modelTypes)
         }
-      }
-      .task {
-        do {
-          viewModel = try await .init(planner: .persistent)
-        } catch {
+      }.task {
+        do { viewModel = try await .init(planner: .persistent) } catch {
           fatalError(error.localizedDescription)
         }
       }

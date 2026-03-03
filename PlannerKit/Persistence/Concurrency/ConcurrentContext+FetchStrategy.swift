@@ -75,9 +75,7 @@ public extension ConcurrentContext {
     public func fetch(
       through backingContext: ModelContext,
       withDescriptor fetchDescriptor: FetchDescriptor<Model>
-    ) throws -> Int {
-      try backingContext.fetchCount(fetchDescriptor)
-    }
+    ) throws -> Int { try backingContext.fetchCount(fetchDescriptor) }
   }
 }
 
@@ -95,9 +93,7 @@ public extension ConcurrentContext {
     public func fetch(
       through backingContext: ModelContext,
       withDescriptor fetchDescriptor: FetchDescriptor<Model>
-    ) throws -> Model? {
-      try backingContext.fetch(fetchDescriptor, batchSize: 1).first
-    }
+    ) throws -> Model? { try backingContext.fetch(fetchDescriptor, batchSize: 1).first }
   }
 }
 
@@ -115,8 +111,6 @@ public extension ConcurrentContext {
     public func fetch(
       through backingContext: ModelContext,
       withDescriptor fetchDescriptor: FetchDescriptor<Model>
-    ) throws -> [Model] {
-      try backingContext.fetch(fetchDescriptor)
-    }
+    ) throws -> [Model] { try backingContext.fetch(fetchDescriptor) }
   }
 }

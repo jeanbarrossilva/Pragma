@@ -534,7 +534,6 @@ extension AnyPlanDescriptor {
         title: "Help LGBTQIAPN+ community",
         summary: "Volunteer in some non-profitable organization."
       )
-    ]
-    .sorted()
+    ].sorted()
   }
 }

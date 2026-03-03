@@ -18,14 +18,11 @@
 import SwiftUI
 
 #Preview("Addition") {
-  ToDoEditor(isAppearing: .constant(true), onSubmit: { _ in })
-    .frame(width: 512)
-    .padding()
+  ToDoEditor(isAppearing: .constant(true), onSubmit: { _ in }).frame(width: 512).padding()
 }
 
 #Preview("Editing") {
-  ToDoEditor(toDo: .samples[0], isAppearing: .constant(true), onSubmit: { _ in })
-    .frame(width: 512)
+  ToDoEditor(toDo: .samples[0], isAppearing: .constant(true), onSubmit: { _ in }).frame(width: 512)
     .padding()
 }
 
@@ -40,20 +37,15 @@ struct ToDoEditor: View {
         VStack(alignment: .leading) {
           TextField("Title", text: $title)
           TextField("Description", text: $summary)
-          StatusSection(status: $status)
-            .padding(.top)
-          DeadlineSection(deadline: $deadline)
-            .padding(.top)
+          StatusSection(status: $status).padding(.top)
+          DeadlineSection(deadline: $deadline).padding(.top)
         }
         HStack {
           Spacer()
           Button(role: .confirm) {
             isAppearing = false
-            onSubmit(
-              .init(title: title, summary: summary, status: status, deadline: deadline)
-            )
-          }
-          .buttonStyle(.borderedProminent)
+            onSubmit(.init(title: title, summary: summary, status: status, deadline: deadline))
+          }.buttonStyle(.borderedProminent)
         }
       }
     } title: {
@@ -63,12 +55,12 @@ struct ToDoEditor: View {
         case .dark: .white
         @unknown default: .primary
         }
-      Text(mode.title)
-        .font(.system(.title2, weight: .bold))
-        .foregroundStyle(color)
+      Text(mode.title).font(.system(.title2, weight: .bold)).foregroundStyle(color)
     } summary: {
-      Text("A task is the minimal step toward the achievement of a goal.")
-        .fixedSize(horizontal: false, vertical: true)
+      Text("A task is the minimal step toward the achievement of a goal.").fixedSize(
+        horizontal: false,
+        vertical: true
+      )
     }
   }
 
@@ -155,29 +147,23 @@ private struct StatusSection: View {
         ForEach(Status.allCases, id: \.self) { status in
           Label(status.title, systemImage: status.systemImage)
         }
-      }
-      .labelsHidden()
-      .pickerStyle(.inline)
-      .frame(maxWidth: .infinity, alignment: .leading)
+      }.labelsHidden().pickerStyle(.inline).frame(maxWidth: .infinity, alignment: .leading)
     } title: {
       Text(
-        AttributedString("Status")
-          .settingAttributes(.init().font(.system(.body, weight: .medium)))
+        AttributedString("Status").settingAttributes(.init().font(.system(.body, weight: .medium)))
           + .init(": \(status.title.decapitalized)")
       )
     } summary: {
-      Text(status.summary)
-        .fixedSize(horizontal: false, vertical: true)
+      Text(status.summary).fixedSize(horizontal: false, vertical: true)
       if let statusIndex = Status.allCases.firstIndex(of: status),
         statusIndex > Status.allCases.startIndex
       {
         Text(
           .init("The status can always be changed to another prior to ")
-            + .init(status.title.decapitalized)
-            .settingAttributes(.init().font(.system(.body, weight: .bold)))
-            + .init(" later.")
-        )
-        .foregroundStyle(.tertiary)
+            + .init(status.title.decapitalized).settingAttributes(
+              .init().font(.system(.body, weight: .bold))
+            ) + .init(" later.")
+        ).foregroundStyle(.tertiary)
       }
     }
   }
@@ -207,11 +193,9 @@ extension Status {
 private struct DeadlineSection: View {
   var body: some View {
     Section {
-      DatePicker("Deadline", selection: $deadline)
-        .labelsHidden()
+      DatePicker("Deadline", selection: $deadline).labelsHidden()
     } title: {
-      Text("Deadline")
-        .fontWeight(.medium)
+      Text("Deadline").fontWeight(.medium)
     } summary: {
       Text("Date at which this task is expected to be or have been done.")
     }
@@ -233,8 +217,7 @@ where Title: View, Summary: View, Content: View {
     VStack(alignment: .leading, spacing: 16) {
       VStack(alignment: .leading, spacing: 4) {
         title()
-        summary()
-          .fixedSize(horizontal: false, vertical: true)
+        summary().fixedSize(horizontal: false, vertical: true)
       }
       content()
     }

@@ -20,9 +20,7 @@ extension AnyPlanDescriptor {
   ///
   /// - Parameter filter: The filter with which the matching sample will be obtained.
   public static func sample<Filter>(_ filter: Filter) -> Filter.Result
-  where Filter: SamplePlanFilter {
-    filter._apply(to: Self.samples)
-  }
+  where Filter: SamplePlanFilter { filter._apply(to: Self.samples) }
 }
 
 /// ``SampleFilter`` of plans.

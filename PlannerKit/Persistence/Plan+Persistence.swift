@@ -38,15 +38,9 @@ public actor PersistentPlanner: Planner {
   public let context: ConcurrentContext
 
   public var plans: [PersistedPlan] {
-    get async throws(PlannerError<PersistenceError>) {
-      do {
-        return try await context.fetch(.all, where: Predicate<PlanModel>.true).asyncMap { model in
-          try await .init(identifiedAs: model.uuid, insertedInto: context)
-        }
-      } catch {
-        throw .implementationSpecific(
-          cause: .malformedPredicate(modelType: PlanModel.self)
-        )
+    get async throws {
+      try await context.fetch(.all, where: Predicate<PlanModel>.true).asyncMap { model in
+        try await .init(identifiedAs: model.uuid, insertedInto: context)
       }
     }
   }
@@ -55,17 +49,16 @@ public actor PersistentPlanner: Planner {
   private let container: ModelContainer
 
   /// Types of models insertable into this repository.
-  public static let modelTypes: [any PersistentModel.Type] =
-    [PlanModel.self, GoalModel.self, ToDoModel.self]
+  public static let modelTypes: [any PersistentModel.Type] = [
+    PlanModel.self, GoalModel.self, ToDoModel.self
+  ]
 
   fileprivate init(isInMemory: Bool) throws {
     self.container = try Self.makeContainer(isInMemory: isInMemory)
     self.context = try .init(container: container)
   }
 
-  public func addPlan(
-    describedBy descriptor: AnyPlanDescriptor
-  ) throws(PlannerError<PersistenceError>) -> UUID {
+  public func addPlan(describedBy descriptor: AnyPlanDescriptor) throws -> UUID {
     let model = PlanModel(describedBy: descriptor)
     let modelSnapshot = Snapshot(of: model)
     let planUUID = model.uuid
@@ -88,39 +81,20 @@ public actor PersistentPlanner: Planner {
     return model.uuid
   }
 
-  public func plan(
-    identifiedAs id: UUID
-  ) async throws(PlannerError<PersistenceError>) -> PersistedPlan {
+  public func plan(identifiedAs id: UUID) async throws -> PersistedPlan {
     try await .init(identifiedAs: id, insertedInto: context)
   }
 
-  public func removePlan(identifiedAs id: UUID) throws(PlannerError<PersistenceError>) {
-    Task {
-      do {
-        try await context.delete(where: #Predicate<PlanModel> { model in model.uuid == id })
-      } catch {
-        throw PlannerError<PersistenceError>.implementationSpecific(
-          cause: .malformedPredicate(modelType: PlanModel.self)
-        )
-      }
-    }
+  public func removePlan(identifiedAs id: UUID) throws {
+    Task { try await context.delete(where: #Predicate<PlanModel> { model in model.uuid == id }) }
   }
 
-  public func clear() throws(PlannerError<PersistenceError>) {
-    do {
-      try container.erase()
-    } catch {
-      throw .implementationSpecific(cause: .failedTransaction)
-    }
-  }
+  public func clear() throws { try container.erase() }
 
   /// Produces a container into which models of persisted implementations of ``CorePlanner`` are
   /// inserted.
   static func makeContainer(isInMemory: Bool) throws -> ModelContainer {
-    try .init(
-      for: .init(Self.modelTypes),
-      configurations: .init(isStoredInMemoryOnly: isInMemory)
-    )
+    try .init(for: .init(Self.modelTypes), configurations: .init(isStoredInMemoryOnly: isInMemory))
   }
 }
 
@@ -135,26 +109,18 @@ public final class PersistedPlan: PersistedDomain, Plan {
   public let summary: String
 
   public var goals: [PersistedGoal] {
-    get async throws(PlannerError<PersistenceError>) {
-      do {
-        return try await context.fetch(
-          .all,
-          where: #Predicate<GoalModel> { goalModel in goalModel.planUUID == id }
-        ).asyncMap { goalModel in
-          try await .init(identifiedAs: goalModel.uuid, insertedInto: context)
-        }
-      } catch {
-        throw .implementationSpecific(cause: .malformedPredicate(modelType: GoalModel.self))
+    get async throws {
+      try await context.fetch(
+        .all,
+        where: #Predicate<GoalModel> { goalModel in goalModel.planUUID == id }
+      ).asyncMap { goalModel in try await .init(identifiedAs: goalModel.uuid, insertedInto: context)
       }
     }
   }
 
   public static let description = "plan"
 
-  public init(
-    identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
-  ) async throws(PlannerError<PersistenceError>) {
+  public init(identifiedAs id: UUID, insertedInto context: ConcurrentContext) async throws {
     self.id = id
     self.context = context
     let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
@@ -166,44 +132,28 @@ public final class PersistedPlan: PersistedDomain, Plan {
     self.summary = summary
   }
 
-  public func addGoal(
-    describedBy descriptor: AnyGoalDescriptor
-  ) async throws(PlannerError<PersistenceError>) -> UUID {
+  public func addGoal(describedBy descriptor: AnyGoalDescriptor) async throws -> UUID {
     let goalModel = GoalModel(describedBy: descriptor, planUUID: id)
     let goalUUID = goalModel.uuid
     if descriptor.toDos.isEmpty {
-      do {
-        try await context.insert(goalModel)
-      } catch {
-        throw .implementationSpecific(cause: .failedTransaction)
-      }
+      try await context.insert(goalModel)
     } else {
-      do {
-        try await context.transaction { context in
-          for toDoDescriptor in descriptor.toDos {
-            let toDoModel = ToDoModel(describedBy: toDoDescriptor, goalUUID: goalUUID)
-            try context.insert(toDoModel)
-          }
+      try await context.transaction { context in
+        for toDoDescriptor in descriptor.toDos {
+          let toDoModel = ToDoModel(describedBy: toDoDescriptor, goalUUID: goalUUID)
+          try context.insert(toDoModel)
         }
-      } catch {
-        throw .implementationSpecific(cause: .failedTransaction)
       }
     }
     return goalModel.uuid
   }
 
-  public func goal(
-    identifiedAs id: UUID
-  ) async throws(PlannerError<PersistenceError>) -> PersistedGoal {
+  public func goal(identifiedAs id: UUID) async throws -> PersistedGoal {
     try await .init(identifiedAs: id, insertedInto: context)
   }
 
-  public func removeGoal(identifiedAs id: UUID) async throws(PlannerError<PersistenceError>) {
-    do {
-      try await context.delete(where: #Predicate<GoalModel> { goalModel in goalModel.uuid == id })
-    } catch {
-      throw .implementationSpecific(cause: .malformedPredicate(modelType: GoalModel.self))
-    }
+  public func removeGoal(identifiedAs id: UUID) async throws {
+    try await context.delete(where: #Predicate<GoalModel> { goalModel in goalModel.uuid == id })
   }
 }
 
@@ -254,26 +204,18 @@ public final class PersistedGoal: PersistedDomain, Goal {
   public let summary: String
 
   public var toDos: [PersistedToDo] {
-    get async throws(PlannerError<PersistenceError>) {
-      do {
-        return try await context.fetch(
-          .all,
-          where: #Predicate<ToDoModel> { toDoModel in toDoModel.goalUUID == id }
-        ).asyncMap { toDoModel in
-          try await .init(identifiedAs: toDoModel.uuid, insertedInto: context)
-        }
-      } catch {
-        throw .implementationSpecific(cause: .malformedPredicate(modelType: ToDoModel.self))
+    get async throws {
+      try await context.fetch(
+        .all,
+        where: #Predicate<ToDoModel> { toDoModel in toDoModel.goalUUID == id }
+      ).asyncMap { toDoModel in try await .init(identifiedAs: toDoModel.uuid, insertedInto: context)
       }
     }
   }
 
   public static let description = "goal"
 
-  public init(
-    identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
-  ) async throws(PlannerError<PersistenceError>) {
+  public init(identifiedAs id: UUID, insertedInto context: ConcurrentContext) async throws {
     self.id = id
     self.context = context
     let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
@@ -285,32 +227,18 @@ public final class PersistedGoal: PersistedDomain, Goal {
     self.summary = summary
   }
 
-  public func addToDo(
-    describedBy descriptor: AnyToDoDescriptor
-  ) async throws(PlannerError<PersistenceError>) -> UUID {
+  public func addToDo(describedBy descriptor: AnyToDoDescriptor) async throws -> UUID {
     let toDoModel = ToDoModel(describedBy: descriptor, goalUUID: id)
-    do {
-      try await context.insert(toDoModel)
-    } catch {
-      throw .implementationSpecific(cause: .failedTransaction)
-    }
+    try await context.insert(toDoModel)
     return toDoModel.uuid
   }
 
-  public func toDo(
-    identifiedAs id: UUID
-  ) async throws(PlannerError<PersistenceError>) -> PersistedToDo {
+  public func toDo(identifiedAs id: UUID) async throws -> PersistedToDo {
     try await .init(identifiedAs: id, insertedInto: context)
   }
 
-  public func removeToDo(identifiedAs id: UUID) async throws(PlannerError<PersistenceError>) {
-    do {
-      try await context.delete(
-        where: #Predicate<ToDoModel> { toDoModel in toDoModel.uuid == id }
-      )
-    } catch {
-      throw .implementationSpecific(cause: .malformedPredicate(modelType: ToDoModel.self))
-    }
+  public func removeToDo(identifiedAs id: UUID) async throws {
+    try await context.delete(where: #Predicate<ToDoModel> { toDoModel in toDoModel.uuid == id })
   }
 }
 
@@ -371,10 +299,7 @@ public final class PersistedToDo: PersistedDomain, ToDo {
 
   public static let description = "to-do"
 
-  public init(
-    identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
-  ) async throws(PlannerError<PersistenceError>) {
+  public init(identifiedAs id: UUID, insertedInto context: ConcurrentContext) async throws {
     self.id = id
     self.context = context
     let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
@@ -388,20 +313,12 @@ public final class PersistedToDo: PersistedDomain, ToDo {
     self.deadline = backingModel.deadline
   }
 
-  public func setStatus(to newStatus: Status) async throws(PlannerError<PersistenceError>) {
-    do {
-      try await backingModel.setValue(forKey: \.status, to: newStatus)
-    } catch {
-      throw .implementationSpecific(cause: .failedTransaction)
-    }
+  public func setStatus(to newStatus: Status) async throws {
+    try await backingModel.setValue(forKey: \.status, to: newStatus)
   }
 
-  public func setDeadline(to newDeadline: Date) async throws(PlannerError<PersistenceError>) {
-    do {
-      try await backingModel.setValue(forKey: \.deadline, to: newDeadline)
-    } catch {
-      throw .implementationSpecific(cause: .failedTransaction)
-    }
+  public func setDeadline(to newDeadline: Date) async throws {
+    try await backingModel.setValue(forKey: \.deadline, to: newDeadline)
   }
 }
 
@@ -477,8 +394,7 @@ extension ToDoModel: NSCopying {
 /// (upon both initialization and changes through the setters) and domain-driven behavior, e.g.,
 /// adding to-dos to goals and goals to plans, without exposing details about the underlying
 /// persistence layer.
-public protocol PersistedDomain: Headlineable, SendableMetatype
-where ID == UUID, ImplementationError == PersistenceError {
+public protocol PersistedDomain: Headlineable, SendableMetatype where ID == UUID {
   /// The persisted model on which this structure is based.
   associatedtype BackingModel: PartialHeadlined, PersistentModel, NSCopying
 
@@ -492,10 +408,7 @@ where ID == UUID, ImplementationError == PersistenceError {
   /// - Parameters:
   ///   - id: The stable identity of the entity associated with this instance.
   ///   - context: Context into which the model is inserted.
-  init(
-    identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
-  ) async throws
+  init(identifiedAs id: UUID, insertedInto context: ConcurrentContext) async throws
 }
 
 extension PersistedDomain {
@@ -504,9 +417,7 @@ extension PersistedDomain {
   ///
   /// - SeeAlso: ``backingModel(identifiedAs:insertedInto:)``
   fileprivate var backingModel: BackingModel {
-    get async throws(PlannerError<PersistenceError>) {
-      try await Self.backingModel(identifiedAs: id, insertedInto: context)
-    }
+    get async throws { try await Self.backingModel(identifiedAs: id, insertedInto: context) }
   }
 
   /// Retrieves a copy of the object persisted into the container and on which the headline of this
@@ -529,75 +440,31 @@ extension PersistedDomain {
   fileprivate static func backingModel(
     identifiedAs id: UUID,
     insertedInto context: ConcurrentContext
-  ) async throws(PlannerError<PersistenceError>) -> BackingModel {
-    do {
-      let snapshot = try await context.run { context in
-        guard
-          let backingModel = try context.fetch(
-            .one,
-            where: #Predicate<BackingModel> { backingModel in backingModel.uuid == id }
-          )
-        else {
-          throw PlannerError<SwiftDataError>.nonexistent(type: Self.self, id: id)
-        }
-        return Snapshot(of: backingModel)
-      }
-      return snapshot.copy()
-    } catch {
-      throw .implementationSpecific(cause: .failedTransaction)
+  ) async throws -> BackingModel {
+    let snapshot = try await context.run { context in
+      guard
+        let backingModel = try context.fetch(
+          .one,
+          where: #Predicate<BackingModel> { backingModel in backingModel.uuid == id }
+        )
+      else { throw PlannerError.nonexistent(type: Self.self, id: id) }
+      return Snapshot(of: backingModel)
     }
+    return snapshot.copy()
   }
 }
 
 extension PersistedDomain where Self: Headlineable {
-  public func setTitle(to newTitle: String) async throws(PlannerError<PersistenceError>) {
+  public func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
     Self.normalize(title: &newTitle)
-    do {
-      try await backingModel.setValue(forKey: BackingModel.titleKeyPath, to: newTitle)
-    } catch {
-      throw .implementationSpecific(cause: .failedTransaction)
-    }
+    try await backingModel.setValue(forKey: BackingModel.titleKeyPath, to: newTitle)
   }
 
-  public func setSummary(to newSummary: String) async throws(PlannerError<PersistenceError>) {
+  public func setSummary(to newSummary: String) async throws {
     var newSummary = newSummary
     Self.normalize(summary: &newSummary)
-    do {
-      try await backingModel.setValue(forKey: BackingModel.summaryKeyPath, to: newSummary)
-    } catch {
-      throw .implementationSpecific(cause: .failedTransaction)
-    }
-  }
-}
-
-/// Failure happened upon reading the value of a property of a model or a saving changes
-/// (insertions, updates or deletions) to a persistence container.
-public enum PersistenceError: Error {
-  /// A single or batch insertion of, update to or deletion of models from the container has failed.
-  /// The documentation of neither
-  /// [SwiftData](https://developer.apple.com/documentation/swiftdata/modelcontext/save()) nor
-  /// [Core Data](https://developer.apple.com/documentation/coredata/nsmanagedobjectcontext/save())
-  /// specify when, exactly, this error occurs; the empirical (and unverified) guess of the author
-  /// of Pragma is that it may be thrown due to a migration failure or in case the device runs out
-  /// of storage.
-  case failedTransaction
-
-  /// A predicate for retrieving or deleting one or more models from the container contains
-  /// expressions which cannot be converted into an SQL query by SwiftData.
-  case malformedPredicate(modelType: any PersistentModel.Type)
-}
-
-extension PersistenceError: Equatable {
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    switch (lhs, rhs) {
-    case (.failedTransaction, .failedTransaction):
-      true
-    case (.malformedPredicate(let lhsType), .malformedPredicate(let rhsType)):
-      lhsType == rhsType
-    default:
-      false
-    }
+    try await backingModel.setValue(forKey: BackingModel.summaryKeyPath, to: newSummary)
   }
 }
 

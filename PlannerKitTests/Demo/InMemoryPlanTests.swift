@@ -76,7 +76,7 @@ struct InMemoryPlanTests {
     let plan = try await planner.plan(identifiedAs: planID)
     let goalID = await plan.goals[0].id
     try await plan.removeGoal(identifiedAs: goalID)
-    await #expect(throws: PlannerError<NSError>.nonexistent(type: InMemoryGoal.self, id: goalID)) {
+    await #expect(throws: PlannerError.nonexistent(type: InMemoryGoal.self, id: goalID)) {
       try await plan.goal(identifiedAs: goalID)
     }
   }

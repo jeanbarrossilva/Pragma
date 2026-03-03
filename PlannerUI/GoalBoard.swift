@@ -25,8 +25,7 @@ internal import Collections
     goal: .sample(.withoutToDos),
     onDidRequestToDoAddition: { _ in },
     onDidRequestStatusChange: { _, _ in }
-  )
-  .padding()
+  ).padding()
 }
 
 #Preview("With to-dos", traits: .sizeThatFitsLayout) {
@@ -34,8 +33,7 @@ internal import Collections
     goal: .sample(.withToDos),
     onDidRequestToDoAddition: { _ in },
     onDidRequestStatusChange: { _, _ in }
-  )
-  .padding()
+  ).padding()
 }
 
 /// Board view for the headline of a goal and its to-dos based on their status. Such layout is
@@ -50,8 +48,7 @@ public struct GoalBoard: View {
         PopulatedGoalBoard(toDos: goal.toDos, onDidRequestStatusChange: onToDoStatusChangeRequest)
           .padding(12)
       } label: {
-        Headline(goal: goal)
-          .padding(.bottom, 12)
+        Headline(goal: goal).padding(.bottom, 12)
       }
     }
   }
@@ -102,11 +99,10 @@ private struct EmptyGoalBoard: View {
           isAddingGoal = true
         } label: {
           Image(systemName: "plus")
-        }
-        .popover(isPresented: $isAddingGoal, arrowEdge: .bottom) {
-          ToDoEditor(isAppearing: $isAddingGoal, onSubmit: onDidRequestToDoAddition)
-            .frame(width: 256)
-            .padding()
+        }.popover(isPresented: $isAddingGoal, arrowEdge: .bottom) {
+          ToDoEditor(isAppearing: $isAddingGoal, onSubmit: onDidRequestToDoAddition).frame(
+            width: 256
+          ).padding()
         }
       } icon: {
         Image(systemName: "lightbulb.max.fill").imageScale(.large)
@@ -158,11 +154,8 @@ private struct EmptyGoalBoard: View {
 private struct Headline: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 4) {
-      Text(goal.title)
-        .font(.system(.title, weight: .heavy))
-      Text(goal.summary)
-        .font(.system(.headline, weight: .regular))
-        .foregroundStyle(.secondary)
+      Text(goal.title).font(.system(.title, weight: .heavy))
+      Text(goal.summary).font(.system(.headline, weight: .regular)).foregroundStyle(.secondary)
     }
   }
 
@@ -240,34 +233,29 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == AnyToDoDescript
         withDropDestinationIndication(for: target) {
           switch target {
           case .label(_):
-            StatusLabel(status: status)
-              .frame(maxWidth: .infinity, alignment: .topLeading)
+            StatusLabel(status: status).frame(maxWidth: .infinity, alignment: .topLeading)
               .onGeometryChange(for: CGRect.self) { geometry in
                 geometry.frame(in: .global)
               } action: { frame in
                 labelFrame = frame
               }
           case .toDoCard(let toDo, _, _):
-            ToDoCard(toDo: toDo)
-              .draggable(toDo)
-              .onGeometryChange(for: CGRect?.self) { geometry in
-                geometry.frame(in: .global)
-              } action: { toDoCardFrame in
-                if let frame, let toDoCardFrame, frame.intersects(toDoCardFrame) {
-                  toDoCardFraming[toDo] = toDoCardFrame
-                } else {
-                  toDoCardFraming.removeValue(forKey: toDo)
-                }
+            ToDoCard(toDo: toDo).draggable(toDo).onGeometryChange(for: CGRect?.self) { geometry in
+              geometry.frame(in: .global)
+            } action: { toDoCardFrame in
+              if let frame, let toDoCardFrame, frame.intersects(toDoCardFrame) {
+                toDoCardFraming[toDo] = toDoCardFrame
+              } else {
+                toDoCardFraming.removeValue(forKey: toDo)
               }
+            }
           }
         }
       }
-    }
-    .dropDestination(for: AnyToDoDescriptor.self) { droppedToDos, _ in
+    }.dropDestination(for: AnyToDoDescriptor.self) { droppedToDos, _ in
       onDidRequestStatusChange(droppedToDos)
       return true
-    }
-    .onDropSessionUpdated { session in
+    }.onDropSessionUpdated { session in
       switch session.phase {
       case .entering, .active:
         guard let frame else { return }
@@ -278,8 +266,7 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == AnyToDoDescript
       case .exiting, .ended(_), .dataTransferCompleted: toDoCardDragLocation = nil
       @unknown default: ()
       }
-    }
-    .onGeometryChange(for: CGRect.self) { geometry in
+    }.onGeometryChange(for: CGRect.self) { geometry in
       geometry.frame(in: .global)
     } action: { frame in
       self.frame = frame
@@ -408,21 +395,13 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == AnyToDoDescript
     ///   ``previous`` target) are not being displayed.
     @MainActor
     private func reference(in parent: StatusColumn) -> Self? {
-      guard let dragLocation = parent.toDoCardDragLocation,
-        let parentFrame = parent.frame,
-        parentFrame.contains(dragLocation),
-        let frame = frame(in: parent)
+      guard let dragLocation = parent.toDoCardDragLocation, let parentFrame = parent.frame,
+        parentFrame.contains(dragLocation), let frame = frame(in: parent)
       else { return nil }
       return
-        if dragLocation.y < frame.midY,
-        let previous,
-        let previousFrame = previous.frame(in: parent),
-        dragLocation.y > previousFrame.midY
-      {
-        previous
-      } else if dragLocation.y < frame.maxY, dragLocation.y > frame.midY {
-        self
-      } else {
+        if dragLocation.y < frame.midY, let previous,
+        let previousFrame = previous.frame(in: parent), dragLocation.y > previousFrame.midY
+      { previous } else if dragLocation.y < frame.maxY, dragLocation.y > frame.midY { self } else {
         nil
       }
     }
@@ -525,16 +504,13 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == AnyToDoDescript
     @ViewBuilder content: () -> some View
   ) -> some View {
     if let indicatorOffset = target.indicatorOffset(in: self) {
-      content()
-        .overlay(alignment: .top) {
-          LinearGradient(
-            colors: [.clear, .init(nsColor: .controlAccentColor), .clear],
-            startPoint: .leading,
-            endPoint: .trailing
-          )
-          .frame(height: Self.toDoCardDropDestinationIndicatorHeight)
-          .offset(y: indicatorOffset)
-        }
+      content().overlay(alignment: .top) {
+        LinearGradient(
+          colors: [.clear, .init(nsColor: .controlAccentColor), .clear],
+          startPoint: .leading,
+          endPoint: .trailing
+        ).frame(height: Self.toDoCardDropDestinationIndicatorHeight).offset(y: indicatorOffset)
+      }
     } else {
       content()
     }
@@ -547,18 +523,12 @@ where ToDos: RandomAccessCollection & Sendable, ToDos.Element == AnyToDoDescript
 private struct StatusLabel: View {
   var body: some View {
     Label {
-      Text(status.title)
-        .font(.system(.headline, weight: .medium))
-        .textCase(.uppercase)
+      Text(status.title).font(.system(.headline, weight: .medium)).textCase(.uppercase)
     } icon: {
-      Image(systemName: "circle.fill")
-        .offset(y: -1)
-        .foregroundStyle(status.color)
-        .shadow(
-          color: status == .idle ? .clear : status.color.opacity(0.8),
-          radius: status == .idle ? 0 : 1.5
-        )
-        .imageScale(.small)
+      Image(systemName: "circle.fill").offset(y: -1).foregroundStyle(status.color).shadow(
+        color: status == .idle ? .clear : status.color.opacity(0.8),
+        radius: status == .idle ? 0 : 1.5
+      ).imageScale(.small)
     }
   }
 
@@ -596,15 +566,13 @@ private struct ToDoCard: View {
     GroupBox {
       HStack {
         VStack(alignment: .leading, spacing: 4) {
-          Text(toDo.title)
-            .font(.default)
-            .lineLimit(4)
-          Text("Due \(toDo.deadline.formatted(.relative(presentation: .numeric)))")
-            .foregroundStyle(.secondary)
+          Text(toDo.title).font(.default).lineLimit(4)
+          Text("Due \(toDo.deadline.formatted(.relative(presentation: .numeric)))").foregroundStyle(
+            .secondary
+          )
         }
         Spacer()
-      }
-      .padding(4)
+      }.padding(4)
     }
   }
 

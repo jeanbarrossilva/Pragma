@@ -29,26 +29,25 @@ public actor InMemoryPlanner: Planner {
 
   private(set) public var plans = [InMemoryPlan]()
 
-  public func addPlan(
-    describedBy descriptor: AnyPlanDescriptor
-  ) async throws(PlannerError<NSError>) -> UUID {
+  public func addPlan(describedBy descriptor: AnyPlanDescriptor) async throws -> UUID {
     let plan = InMemoryPlan(describedBy: descriptor)
     plans.append(plan)
     return plan.id
   }
 
-  public func plan(identifiedAs id: UUID) throws(PlannerError<NSError>) -> InMemoryPlan {
-    guard let plan = plans.first(where: { plan in plan.id == id })
-    else { throw .nonexistent(type: InMemoryPlan.self, id: id) }
+  public func plan(identifiedAs id: UUID) throws -> InMemoryPlan {
+    guard let plan = plans.first(where: { plan in plan.id == id }) else {
+      throw PlannerError.nonexistent(type: InMemoryPlan.self, id: id)
+    }
     return plan
   }
 
-  public func removePlan(identifiedAs id: UUID) throws(PlannerError<NSError>) {
+  public func removePlan(identifiedAs id: UUID) throws {
     guard let index = plans.firstIndex(where: { plan in plan.id == id }) else { return }
     plans.remove(at: index)
   }
 
-  public func clear() throws(PlannerError<NSError>) { plans.removeAll() }
+  public func clear() throws { plans.removeAll() }
 }
 
 /// Plan whose modifications, including those on its goals and to-dos, are performed in-memory,
@@ -79,33 +78,32 @@ public actor InMemoryPlan: Plan {
     self.goals = descriptor.goals.map { goalDescriptor in .init(describedBy: goalDescriptor) }
   }
 
-  public func setTitle(to newTitle: String) async throws(PlannerError<NSError>) {
+  public func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
     Self.normalize(title: &newTitle)
     title = newTitle
   }
 
-  public func setSummary(to newSummary: String) async throws(PlannerError<NSError>) {
+  public func setSummary(to newSummary: String) async throws {
     var newSummary = newSummary
     Self.normalize(summary: &newSummary)
     summary = newSummary
   }
 
-  public func addGoal(
-    describedBy descriptor: AnyGoalDescriptor
-  ) async throws(PlannerError<NSError>) -> UUID {
+  public func addGoal(describedBy descriptor: AnyGoalDescriptor) async throws -> UUID {
     let goal = InMemoryGoal(describedBy: descriptor)
     goals.append(goal)
     return goal.id
   }
 
-  public func goal(identifiedAs id: UUID) async throws(PlannerError<NSError>) -> InMemoryGoal {
-    guard let goal = goals.first(where: { goal in goal.id == id })
-    else { throw .nonexistent(type: InMemoryGoal.self, id: id) }
+  public func goal(identifiedAs id: UUID) async throws -> InMemoryGoal {
+    guard let goal = goals.first(where: { goal in goal.id == id }) else {
+      throw PlannerError.nonexistent(type: InMemoryGoal.self, id: id)
+    }
     return goal
   }
 
-  public func removeGoal(identifiedAs id: UUID) async throws(PlannerError<NSError>) {
+  public func removeGoal(identifiedAs id: UUID) async throws {
     guard let index = goals.firstIndex(where: { goal in goal.id == id }) else { return }
     goals.remove(at: index)
   }
@@ -139,33 +137,32 @@ public actor InMemoryGoal: Goal {
     self.toDos = descriptor.toDos.map { toDoDescriptor in .init(describedBy: toDoDescriptor) }
   }
 
-  public func setTitle(to newTitle: String) async throws(PlannerError<NSError>) {
+  public func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
     Self.normalize(title: &newTitle)
     title = newTitle
   }
 
-  public func setSummary(to newSummary: String) async throws(PlannerError<NSError>) {
+  public func setSummary(to newSummary: String) async throws {
     var newSummary = newSummary
     Self.normalize(summary: &newSummary)
     summary = newSummary
   }
 
-  public func addToDo(
-    describedBy descriptor: AnyToDoDescriptor
-  ) async throws(PlannerError<NSError>) -> UUID {
+  public func addToDo(describedBy descriptor: AnyToDoDescriptor) async throws -> UUID {
     let toDo = InMemoryToDo(describedBy: descriptor)
     toDos.append(toDo)
     return toDo.id
   }
 
-  public func toDo(identifiedAs id: UUID) async throws(PlannerError<NSError>) -> InMemoryToDo {
-    guard let toDo = toDos.first(where: { toDo in toDo.id == id })
-    else { throw .nonexistent(type: InMemoryToDo.self, id: id) }
+  public func toDo(identifiedAs id: UUID) async throws -> InMemoryToDo {
+    guard let toDo = toDos.first(where: { toDo in toDo.id == id }) else {
+      throw PlannerError.nonexistent(type: InMemoryToDo.self, id: id)
+    }
     return toDo
   }
 
-  public func removeToDo(identifiedAs id: UUID) async throws(PlannerError<NSError>) {
+  public func removeToDo(identifiedAs id: UUID) async throws {
     guard let index = toDos.firstIndex(where: { toDo in toDo.id == id }) else { return }
     toDos.remove(at: index)
   }
@@ -200,23 +197,18 @@ public actor InMemoryToDo: ToDo {
     self.deadline = descriptor.deadline
   }
 
-  public func setTitle(to newTitle: String) async throws(PlannerError<NSError>) {
+  public func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
     Self.normalize(title: &newTitle)
     title = newTitle
   }
 
-  public func setSummary(to newSummary: String) async throws(PlannerError<NSError>) {
+  public func setSummary(to newSummary: String) async throws {
     var newSummary = newSummary
     Self.normalize(summary: &newSummary)
     summary = newSummary
   }
 
-  public func setStatus(to newStatus: Status) async throws(PlannerError<NSError>) {
-    status = newStatus
-  }
-
-  public func setDeadline(to newDeadline: Date) async throws(PlannerError<NSError>) {
-    deadline = newDeadline
-  }
+  public func setStatus(to newStatus: Status) async throws { status = newStatus }
+  public func setDeadline(to newDeadline: Date) async throws { deadline = newDeadline }
 }

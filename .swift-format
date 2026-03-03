@@ -6,6 +6,7 @@
   "reflowMultilineStringLiterals": {
     "always": {}
   },
+  "respectsExistingLineBreaks": false,
   "rules": {
     "AvoidRetroactiveConformances": false
   },
