@@ -40,7 +40,8 @@ import SwiftUI
 public struct Plans: View {
   public var body: some View {
     if plans.isEmpty {
-      EmptyPlanList(onDidRequestPlanAddition: onDidRequestPlanAddition).padding()
+      EmptyPlanList(onDidRequestPlanAddition: onDidRequestPlanAddition)
+        .padding()
     } else {
       PopulatedPlanList(
         plans: plans,
@@ -123,11 +124,15 @@ private struct PopulatedPlanList: View {
             HStack {
               Text(plan.title).lineLimit(2).multilineTextAlignment(.leading)
               Spacer()
-            }.padding(4)
-          }.buttonStyle(
+            }
+            .padding(4)
+          }
+          .buttonStyle(
             plan != selectedPlan ? AnyPrimitiveButtonStyle(.plain) : .init(.borderedProminent)
           )
-        }.navigationTitle("Plans").navigationSplitViewColumnWidth(
+        }
+        .navigationTitle("Plans")
+        .navigationSplitViewColumnWidth(
           min: geometry.size.width * 0.16,
           ideal: geometry.size.width * 0.16,
           max: geometry.size.width * 0.32
@@ -142,17 +147,18 @@ private struct PopulatedPlanList: View {
               // for plans to be structurally equal. This is a temporary workaround for the
               // refactoring of ReadOnlyPlan (now PlanDescriptor).
               id: \.1
-            ) { (index, goal) in
+            ) {
+              (index, goal) in
               GoalBoard(
                 goal: goal,
                 onDidRequestToDoAddition: { toDo in onDidRequestToDoAddition(selectedPlan, toDo) },
                 onDidRequestStatusChange: { toDos, newStatus in
                   onDidRequestToDoTransfer(goal, toDos, newStatus)
                 }
-              ).padding(.horizontal, 32).padding(
-                .top,
-                index == selectedPlan.goals.startIndex ? 32 : 0
-              ).padding(
+              )
+              .padding(.horizontal, 32)
+              .padding(.top, index == selectedPlan.goals.startIndex ? 32 : 0)
+              .padding(
                 .bottom,
                 index == selectedPlan.goals.index(before: selectedPlan.goals.endIndex) ? 32 : 0
               )
@@ -167,7 +173,8 @@ private struct PopulatedPlanList: View {
   private let onDidRequestToDoAddition: (AnyPlanDescriptor, AnyToDoDescriptor) -> Void
   private let onDidRequestToDoTransfer:
     (
-      _ destinationGoal: AnyGoalDescriptor, _ transferredToDos: [AnyToDoDescriptor],
+      _ destinationGoal: AnyGoalDescriptor,
+      _ transferredToDos: [AnyToDoDescriptor],
       _ newStatus: Status
     ) -> Void
 
@@ -179,7 +186,8 @@ private struct PopulatedPlanList: View {
     onDidRequestToDoAddition: @escaping (AnyPlanDescriptor, AnyToDoDescriptor) -> Void,
     onDidRequestToDoTransfer:
       @escaping (
-        _ destinationGoal: AnyGoalDescriptor, _ transferredToDos: [AnyToDoDescriptor],
+        _ destinationGoal: AnyGoalDescriptor,
+        _ transferredToDos: [AnyToDoDescriptor],
         _ newStatus: Status
       ) -> Void
   ) {
