@@ -22,9 +22,7 @@ extension AnyGoalDescriptor {
   ///
   /// - Parameter filter: The filter with which the matching sample will be obtained.
   public static func sample<Filter>(_ filter: Filter) -> Filter.Result
-  where Filter: SampleGoalFilter {
-    filter._apply(to: Self.samples)
-  }
+  where Filter: SampleGoalFilter { filter._apply(to: Self.samples) }
 }
 
 /// Filter of ``withoutToDos``.

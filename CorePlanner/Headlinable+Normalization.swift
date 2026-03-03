@@ -105,9 +105,7 @@ extension Headlined {
   ///
   /// - Parameters:
   ///   - summary: Summary suggested for a ``Headlined``.
-  public static func normalize(summary: inout String) {
-    summary.trim(.whitespacesAndNewlines)
-  }
+  public static func normalize(summary: inout String) { summary.trim(.whitespacesAndNewlines) }
 }
 
 extension String {

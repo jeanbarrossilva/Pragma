@@ -20,18 +20,18 @@ import Testing
 
 struct InMemoryPlannerTests {
   @Test(arguments: AnyPlanDescriptor.samples)
-  func addsPlan(basedOn descriptor: AnyPlanDescriptor) async throws(PlannerError<NSError>) {
+  func addsPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: descriptor)
     _ = try await planner.plan(identifiedAs: planID)
   }
 
   @Test(arguments: AnyPlanDescriptor.samples)
-  func removesPlan(basedOn descriptor: AnyPlanDescriptor) async throws(PlannerError<NSError>) {
+  func removesPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: descriptor)
     try await planner.removePlan(identifiedAs: planID)
-    await #expect(throws: PlannerError<NSError>.nonexistent(type: InMemoryPlan.self, id: planID)) {
+    await #expect(throws: PlannerError.nonexistent(type: InMemoryPlan.self, id: planID)) {
       try await planner.plan(identifiedAs: planID)
     }
   }
@@ -44,9 +44,7 @@ struct InMemoryPlannerTests {
     }
     try await planner.clear()
     for planID in planIDs {
-      await #expect(
-        throws: PlannerError<NSError>.nonexistent(type: InMemoryPlan.self, id: planID)
-      ) {
+      await #expect(throws: PlannerError.nonexistent(type: InMemoryPlan.self, id: planID)) {
         try await planner.plan(identifiedAs: planID)
       }
     }

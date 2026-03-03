@@ -20,7 +20,7 @@ import Testing
 
 fileprivate struct InMemoryGoalTests {
   @Test(arguments: AnyGoalDescriptor.samples)
-  func normalizesHeadline(of descriptor: AnyGoalDescriptor) async throws(PlannerError<NSError>) {
+  func normalizesHeadline(of descriptor: AnyGoalDescriptor) async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     let plan = try await planner.plan(identifiedAs: planID)
@@ -31,7 +31,7 @@ fileprivate struct InMemoryGoalTests {
   }
 
   @Test
-  func setsTitle() async throws(PlannerError<NSError>) {
+  func setsTitle() async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
@@ -42,7 +42,7 @@ fileprivate struct InMemoryGoalTests {
   }
 
   @Test
-  func setsDescription() async throws(PlannerError<NSError>) {
+  func setsDescription() async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
@@ -53,7 +53,7 @@ fileprivate struct InMemoryGoalTests {
   }
 
   @Test
-  func addsToDo() async throws(PlannerError<NSError>) {
+  func addsToDo() async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals))
     let plan = try await planner.plan(identifiedAs: planID)
@@ -65,16 +65,14 @@ fileprivate struct InMemoryGoalTests {
   }
 
   @Test
-  func removesToDo() async throws(PlannerError<NSError>) {
+  func removesToDo() async throws {
     let planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
     let plan = try await planner.plan(identifiedAs: planID)
     let goal = await plan.goals[0]
     let toDoID = await goal.toDos[0].id
     try await goal.removeToDo(identifiedAs: toDoID)
-    try await #expect(
-      throws: PlannerError<NSError>.nonexistent(type: InMemoryToDo.self, id: toDoID)
-    ) {
+    try await #expect(throws: PlannerError.nonexistent(type: InMemoryToDo.self, id: toDoID)) {
       try await goal.toDo(identifiedAs: toDoID)
     }
   }

@@ -32,14 +32,10 @@ public extension Sequence {
   /// - returns: The transformed values as an array. The order of
   ///   the transformed values will match the original sequence.
   /// - throws: Rethrows any error thrown by the passed closure.
-  func asyncMap<T>(
-    _ transform: (Element) async throws -> T
-  ) async rethrows -> [T] {
+  func asyncMap<T>(_ transform: (Element) async throws -> T) async rethrows -> [T] {
     var values = [T]()
 
-    for element in self {
-      try await values.append(transform(element))
-    }
+    for element in self { try await values.append(transform(element)) }
 
     return values
   }

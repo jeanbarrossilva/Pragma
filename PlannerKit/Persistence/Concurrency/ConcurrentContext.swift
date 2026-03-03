@@ -93,9 +93,7 @@ public actor ConcurrentContext: @unchecked Sendable {
             continuation.resume()
           }
         }
-      } catch {
-        continuation.resume(throwing: error)
-      }
+      } catch { continuation.resume(throwing: error) }
     }
     try save()
   }

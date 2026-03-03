@@ -31,17 +31,11 @@ public struct AnyPlanDescriptor: Codable, Hashable, Sendable {
   /// Initializes a type-erased ``PlanDescriptor`` based on a ``Plan``.
   ///
   /// - Parameter plan: ``Plan`` from which the type-erased ``PlanDescriptor`` will be initialized.
-  public init<PlanType>(
-    of plan: PlanType
-  ) async throws(PlannerError<PlanType.ImplementationError>) where PlanType: Plan {
+  public init<PlanType>(of plan: PlanType) async throws where PlanType: Plan {
     self = .init(
       title: try await plan.title,
       summary: try await plan.summary,
-      goals: try await unsafe callWithTypedThrowsCast(
-        to: PlannerError<PlanType.ImplementationError>.self
-      ) {
-        try await plan.goals.asyncMap { goal in try await .init(of: goal) }
-      }
+      goals: try await plan.goals.asyncMap { goal in try await .init(of: goal) }
     )
   }
 
@@ -87,8 +81,7 @@ extension AnyPlanDescriptor: CustomStringConvertible {
     let goalIndentation = String(repeating: "\t", count: goalIndentationLevel)
     description +=
       "\n"
-      + goals
-      .map { goal in goalIndentation + "└ \(goal.description(withToDosIndentedBy: 2))" }
+      + goals.map { goal in goalIndentation + "└ \(goal.description(withToDosIndentedBy: 2))" }
       .joined(separator: "\n")
     return description
   }
@@ -109,16 +102,11 @@ public struct AnyGoalDescriptor: Codable, Hashable, Sendable {
   /// Initializes a type-erased ``GoalDescriptor`` based on a ``Goal``.
   ///
   /// - Parameter goal: ``Goal`` from which the type-erased ``GoalDescriptor`` will be initialized.
-  public init<GoalType>(of goal: GoalType) async throws(PlannerError<GoalType.ImplementationError>)
-  where GoalType: Goal {
+  public init<GoalType>(of goal: GoalType) async throws where GoalType: Goal {
     self = .init(
       title: try await goal.title,
       summary: try await goal.summary,
-      toDos: try await unsafe callWithTypedThrowsCast(
-        to: PlannerError<GoalType.ImplementationError>.self
-      ) {
-        try await goal.toDos.asyncMap { toDo in try await .init(from: toDo) }
-      }
+      toDos: try await goal.toDos.asyncMap { toDo in try await .init(from: toDo) }
     )
   }
 
@@ -187,9 +175,7 @@ public struct AnyToDoDescriptor: Codable, Hashable, Sendable {
   /// Initializes a type-erased ``ToDoDescriptor`` based on a ``ToDo``.
   ///
   /// - Parameter toDo: ``ToDo`` from which the type-erased ``ToDoDescriptor`` will be initialized.
-  public init<ToDoType>(
-    from toDo: ToDoType
-  ) async throws(PlannerError<ToDoType.ImplementationError>) where ToDoType: ToDo {
+  public init<ToDoType>(from toDo: ToDoType) async throws where ToDoType: ToDo {
     self = .init(
       title: try await toDo.title,
       summary: try await toDo.summary,
@@ -216,16 +202,13 @@ public struct AnyToDoDescriptor: Codable, Hashable, Sendable {
 
 extension AnyToDoDescriptor: Comparable {
   public static func < (lhs: Self, rhs: Self) -> Bool {
-    lhs.deadline < rhs.deadline
-      && lhs.title[lhs.title.startIndex] < rhs.title[rhs.title.startIndex]
+    lhs.deadline < rhs.deadline && lhs.title[lhs.title.startIndex] < rhs.title[rhs.title.startIndex]
       && lhs.summary[lhs.summary.startIndex] < rhs.summary[rhs.summary.startIndex]
   }
 }
 
 extension AnyToDoDescriptor: CustomStringConvertible {
-  public var description: String {
-    "\(status.icon) \(title)"
-  }
+  public var description: String { "\(status.icon) \(title)" }
 }
 
 extension Status {

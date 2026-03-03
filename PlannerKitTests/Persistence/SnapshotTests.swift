@@ -29,6 +29,4 @@ struct SnapshotTests {
 
 private class NSCopyable: NSObject {}
 
-extension NSCopyable: NSCopying {
-  func copy(with zone: NSZone? = nil) -> Any { NSCopyable() }
-}
+extension NSCopyable: NSCopying { func copy(with zone: NSZone? = nil) -> Any { NSCopyable() } }
