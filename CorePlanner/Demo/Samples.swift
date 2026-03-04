@@ -1,19 +1,21 @@
-// ===-------------------------------------------------------------------------------------------===
+// ===-----------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
 // This file is part of the Pragma open-source project.
 //
-// This program is free software: you can redistribute it and/or modify it under the terms of the
-// GNU General Public License as published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-// even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-// General Public License for more details.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+// details.
 //
-// You should have received a copy of the GNU General Public License along with this program. If
-// not, see https://www.gnu.org/licenses.
-// ===-------------------------------------------------------------------------------------------===
+// You should have received a copy of the GNU General Public License along with
+// this program. If not, see https://www.gnu.org/licenses.
+// ===-----------------------------------------------------------------------===
 
 extension AnyToDoDescriptor {
   /// Sample descriptors of to-dos for demonstration purposes.
@@ -24,7 +26,9 @@ extension AnyToDoDescriptor {
 
 extension AnyGoalDescriptor {
   /// Sample descriptors of goals for demonstration purposes.
-  public static var samples: [Self] { AnyPlanDescriptor.samples.flatMap(\.goals) }
+  public static var samples: [Self] {
+    AnyPlanDescriptor.samples.flatMap(\.goals)
+  }
 }
 
 extension AnyPlanDescriptor {
@@ -53,7 +57,9 @@ extension AnyPlanDescriptor {
               ),
               .init(
                 title: "Start strength training",
-                summary: "Begin a basic strength training routine three times per week.",
+                summary:
+                  "Begin a basic strength training routine three times per "
+                  + "week.",
                 status: .idle,
                 deadline: .init(timeIntervalSinceNow: 60 * 60 * 24 * 30)
               ),
@@ -125,7 +131,8 @@ extension AnyPlanDescriptor {
               ),
               .init(
                 title: "Limit social media",
-                summary: "Reduce social media usage to less than thirty minutes per day.",
+                summary: "Reduce social media usage to less than thirty "
+                  + "minutes per day.",
                 status: .ongoing,
                 deadline: .init(timeIntervalSinceNow: 60 * 60 * 24 * 10)
               ),
@@ -192,7 +199,8 @@ extension AnyPlanDescriptor {
               ),
               .init(
                 title: "Study Swift concurrency",
-                summary: "Understand async/await, actors, and structured concurrency.",
+                summary:
+                  "Understand async/await, actors, and structured concurrency.",
                 status: .ongoing,
                 deadline: .init(timeIntervalSinceNow: 60 * 60 * 24 * 45)
               ),
@@ -216,7 +224,8 @@ extension AnyPlanDescriptor {
               ),
               .init(
                 title: "Build sample project",
-                summary: "Create a small application applying new concurrency concepts.",
+                summary: "Create a small application applying new concurrency "
+                  + "concepts.",
                 status: .idle,
                 deadline: .init(timeIntervalSinceNow: 60 * 60 * 24 * 60)
               ),
@@ -316,12 +325,13 @@ extension AnyPlanDescriptor {
       ),
       .init(
         title: "Artistic endeavours",
-        summary:
-          "Make singing and dancing a part of the weekly schedule, taking lessons with professional teachers and vocal coaches.",
+        summary: "Make singing and dancing a part of the weekly schedule, "
+          + "taking lessons with professional teachers and vocal coaches.",
         goals: [
           .init(
             title: "Find a ballet school",
-            summary: "Catalog and decide on the school in which I will learn dancing."
+            summary:
+              "Catalog and decide on the school in which I will learn dancing."
           ),
           .init(
             title: "Hire a vocal coach",
@@ -534,6 +544,7 @@ extension AnyPlanDescriptor {
         title: "Help LGBTQIAPN+ community",
         summary: "Volunteer in some non-profitable organization."
       )
-    ].sorted()
+    ]
+    .sorted()
   }
 }

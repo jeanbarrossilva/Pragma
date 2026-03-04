@@ -1,19 +1,21 @@
-// ===-------------------------------------------------------------------------------------------===
+// ===-----------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
 // This file is part of the Pragma open-source project.
 //
-// This program is free software: you can redistribute it and/or modify it under the terms of the
-// GNU General Public License as published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-// even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-// General Public License for more details.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+// details.
 //
-// You should have received a copy of the GNU General Public License along with this program. If
-// not, see https://www.gnu.org/licenses.
-// ===-------------------------------------------------------------------------------------------===
+// You should have received a copy of the GNU General Public License along with
+// this program. If not, see https://www.gnu.org/licenses.
+// ===-----------------------------------------------------------------------===
 
 import PlannerKit
 import PlannerUI
@@ -53,14 +55,19 @@ public struct Plans: View {
 
   private let plans: [AnyPlanDescriptor]
   private let onDidRequestPlanAddition: () -> Void
-  private let onDidRequestToDoAddition: (_ goalID: AnyHashable, _ toDo: AnyToDoDescriptor) -> Void
+  private let onDidRequestToDoAddition:
+    (_ goalID: AnyHashable, _ toDo: AnyToDoDescriptor) -> Void
   private let onDidRequestToDoTransfer:
-    (_ goalID: AnyHashable, _ toDoIDs: [AnyHashable], _ newStatus: Status) -> Void
+    (_ goalID: AnyHashable, _ toDoIDs: [AnyHashable], _ newStatus: Status) ->
+      Void
 
-  public init<PlannerType>(viewModel: PlansViewModel<PlannerType>) where PlannerType: Planner {
+  public init<PlannerType>(viewModel: PlansViewModel<PlannerType>)
+  where PlannerType: Planner {
     self.plans = viewModel.plans
     self.onDidRequestPlanAddition = {}
-    self.onDidRequestToDoAddition = { goalID, toDo in viewModel.add(toDo: toDo, to: goalID) }
+    self.onDidRequestToDoAddition = { goalID, toDo in
+      viewModel.add(toDo: toDo, to: goalID)
+    }
     self.onDidRequestToDoTransfer = { goalID, toDoIDs, newStatus in
       viewModel.transfer(toDos: toDoIDs, withStatus: newStatus, to: goalID)
     }
@@ -69,9 +76,12 @@ public struct Plans: View {
   init(
     plans: [AnyPlanDescriptor],
     onDidRequestPlanAddition: @escaping () -> Void,
-    onDidRequestToDoAddition: @escaping (_ goalID: AnyHashable, _ toDo: AnyToDoDescriptor) -> Void,
+    onDidRequestToDoAddition:
+      @escaping (_ goalID: AnyHashable, _ toDo: AnyToDoDescriptor) -> Void,
     onDidRequestToDoTransfer:
-      @escaping (_ goalID: AnyHashable, _ toDoIDs: [AnyHashable], _ newStatus: Status) -> Void
+      @escaping (
+        _ goalID: AnyHashable, _ toDoIDs: [AnyHashable], _ newStatus: Status
+      ) -> Void
   ) {
     self.plans = plans
     self.onDidRequestPlanAddition = onDidRequestPlanAddition
@@ -113,9 +123,10 @@ private struct PopulatedPlanList: View {
         List(
           plans,
 
-          // TODO: This should be the ID of the plan instead of the plan itself, as it is legal for
-          // plans to be structurally equal. This is a temporary workaround for the refactoring of
-          // ReadOnlyPlan (now PlanDescriptor).
+          // TODO: This should be the ID of the plan instead of the plan itself,
+          // as it is legal for plans to be structurally equal. This is a
+          // temporary workaround for the refactoring of ReadOnlyPlan (now
+          // PlanDescriptor).
           id: \.self
         ) { plan in
           Button {
@@ -128,7 +139,8 @@ private struct PopulatedPlanList: View {
             .padding(4)
           }
           .buttonStyle(
-            plan != selectedPlan ? AnyPrimitiveButtonStyle(.plain) : .init(.borderedProminent)
+            plan != selectedPlan
+              ? AnyPrimitiveButtonStyle(.plain) : .init(.borderedProminent)
           )
         }
         .navigationTitle("Plans")
@@ -143,15 +155,17 @@ private struct PopulatedPlanList: View {
             ForEach(
               Array(zip(selectedPlan.goals.indices, selectedPlan.goals)),
 
-              // TODO: This should be the ID of the plan instead of the plan itself, as it is legal
-              // for plans to be structurally equal. This is a temporary workaround for the
-              // refactoring of ReadOnlyPlan (now PlanDescriptor).
+              // TODO: This should be the ID of the plan instead of the plan
+              // itself, as it is legal for plans to be structurally equal. This
+              // is a temporary workaround for the refactoring of ReadOnlyPlan
+              // (now PlanDescriptor).
               id: \.1
-            ) {
-              (index, goal) in
+            ) { (index, goal) in
               GoalBoard(
                 goal: goal,
-                onDidRequestToDoAddition: { toDo in onDidRequestToDoAddition(selectedPlan, toDo) },
+                onDidRequestToDoAddition: { toDo in
+                  onDidRequestToDoAddition(selectedPlan, toDo)
+                },
                 onDidRequestStatusChange: { toDos, newStatus in
                   onDidRequestToDoTransfer(goal, toDos, newStatus)
                 }
@@ -160,7 +174,10 @@ private struct PopulatedPlanList: View {
               .padding(.top, index == selectedPlan.goals.startIndex ? 32 : 0)
               .padding(
                 .bottom,
-                index == selectedPlan.goals.index(before: selectedPlan.goals.endIndex) ? 32 : 0
+                index
+                  == selectedPlan.goals.index(
+                    before: selectedPlan.goals.endIndex
+                  ) ? 32 : 0
               )
             }
           }
@@ -170,12 +187,12 @@ private struct PopulatedPlanList: View {
   }
 
   private let plans: [AnyPlanDescriptor]
-  private let onDidRequestToDoAddition: (AnyPlanDescriptor, AnyToDoDescriptor) -> Void
+  private let onDidRequestToDoAddition:
+    (AnyPlanDescriptor, AnyToDoDescriptor) -> Void
   private let onDidRequestToDoTransfer:
     (
       _ destinationGoal: AnyGoalDescriptor,
-      _ transferredToDos: [AnyToDoDescriptor],
-      _ newStatus: Status
+      _ transferredToDos: [AnyToDoDescriptor], _ newStatus: Status
     ) -> Void
 
   @State
@@ -183,12 +200,12 @@ private struct PopulatedPlanList: View {
 
   init(
     plans: [AnyPlanDescriptor],
-    onDidRequestToDoAddition: @escaping (AnyPlanDescriptor, AnyToDoDescriptor) -> Void,
+    onDidRequestToDoAddition:
+      @escaping (AnyPlanDescriptor, AnyToDoDescriptor) -> Void,
     onDidRequestToDoTransfer:
       @escaping (
         _ destinationGoal: AnyGoalDescriptor,
-        _ transferredToDos: [AnyToDoDescriptor],
-        _ newStatus: Status
+        _ transferredToDos: [AnyToDoDescriptor], _ newStatus: Status
       ) -> Void
   ) {
     self.plans = plans
@@ -204,6 +221,8 @@ private struct AnyPrimitiveButtonStyle: PrimitiveButtonStyle {
   init(_ base: some PrimitiveButtonStyle) { self.base = base }
 
   func makeBody(configuration: Configuration) -> AnyView {
-    AnyView((base as! any PrimitiveButtonStyle).makeBody(configuration: configuration))
+    AnyView(
+      (base as! any PrimitiveButtonStyle).makeBody(configuration: configuration)
+    )
   }
 }

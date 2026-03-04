@@ -1,19 +1,21 @@
-// ===-------------------------------------------------------------------------------------------===
+// ===-----------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
 // This file is part of the Pragma open-source project.
 //
-// This program is free software: you can redistribute it and/or modify it under the terms of the
-// GNU General Public License as published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-// even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-// General Public License for more details.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+// details.
 //
-// You should have received a copy of the GNU General Public License along with this program. If
-// not, see https://www.gnu.org/licenses.
-// ===-------------------------------------------------------------------------------------------===
+// You should have received a copy of the GNU General Public License along with
+// this program. If not, see https://www.gnu.org/licenses.
+// ===-----------------------------------------------------------------------===
 
 @testable import PlannerKit
 import Testing
@@ -24,7 +26,9 @@ fileprivate struct InMemoryGoalTests {
     var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     var plan = try await planner.plan(identifiedAs: planID)
-    let goalID = try await plan.addGoal(describedBy: .init(title: " Title", summary: "Summary. "))
+    let goalID = try await plan.addGoal(
+      describedBy: .init(title: " Title", summary: "Summary. ")
+    )
     let goal = try await plan.goal(identifiedAs: goalID)
     #expect(await goal.title == "Title")
     #expect(await goal.summary == "Summary.")
@@ -33,7 +37,9 @@ fileprivate struct InMemoryGoalTests {
   @Test
   func setsTitle() async throws {
     var planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
+    let planID = try await planner.addPlan(
+      describedBy: .sample(.withGoals(.withToDos))
+    )
     let plan = try await planner.plan(identifiedAs: planID)
     var goal = plan.goals[0]
     let newTitle = "🔥"
@@ -44,7 +50,9 @@ fileprivate struct InMemoryGoalTests {
   @Test
   func setsDescription() async throws {
     var planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
+    let planID = try await planner.addPlan(
+      describedBy: .sample(.withGoals(.withToDos))
+    )
     let plan = try await planner.plan(identifiedAs: planID)
     var goal = plan.goals[0]
     let newSummary = "🐴"
@@ -59,7 +67,12 @@ fileprivate struct InMemoryGoalTests {
     let plan = try await planner.plan(identifiedAs: planID)
     var goal = plan.goals[0]
     let toDoID = try await goal.addToDo(
-      describedBy: .init(title: "🔭", summary: "🔬", status: .idle, deadline: .distantFuture)
+      describedBy: .init(
+        title: "🔭",
+        summary: "🔬",
+        status: .idle,
+        deadline: .distantFuture
+      )
     )
     _ = try await goal.toDo(identifiedAs: toDoID)
   }
@@ -67,13 +80,15 @@ fileprivate struct InMemoryGoalTests {
   @Test
   func removesToDo() async throws {
     var planner = InMemoryPlanner()
-    let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
+    let planID = try await planner.addPlan(
+      describedBy: .sample(.withGoals(.withToDos))
+    )
     let plan = try await planner.plan(identifiedAs: planID)
     var goal = plan.goals[0]
     let toDoID = goal.toDos[0].id
     try await goal.removeToDo(identifiedAs: toDoID)
-    try await #expect(throws: PlannerError.nonexistent(type: InMemoryToDo.self, id: toDoID)) {
-      try await goal.toDo(identifiedAs: toDoID)
-    }
+    try await #expect(
+      throws: PlannerError.nonexistent(type: InMemoryToDo.self, id: toDoID)
+    ) { try await goal.toDo(identifiedAs: toDoID) }
   }
 }

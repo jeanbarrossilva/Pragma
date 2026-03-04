@@ -16,10 +16,12 @@
 // ===-------------------------------------------------------------------------------------------===
 
 extension Array {
-  /// Initializes an ``Array`` with ``count`` elements which result from the given closure.
+  /// Initializes an ``Array`` with ``count`` elements which result from the
+  /// given closure.
   ///
   /// - Parameters:
-  ///   - count: Amount of elements in the ``Array`` (and of times the ``initializer`` is called).
+  ///   - count: Amount of elements in the ``Array`` (and of times the
+  ///     `initializer` is called).
   ///   - initializer: Produces the element to be inserted at the given index.
   init(count: Int, _ initializer: (_ index: Int) throws -> Element) rethrows {
     self =
@@ -29,20 +31,28 @@ extension Array {
         unsafeUninitializedCapacity: count,
         initializingWith: { buffer, initializedCount in
           for index in 0..<count {
-            unsafe buffer.baseAddress?.advanced(by: index).initialize(to: try initializer(index))
+            unsafe buffer.baseAddress?.advanced(by: index)
+              .initialize(to: try initializer(index))
           }
           initializedCount = count
         }
       )
   }
 
-  /// Initializes an ``Array`` with ``count`` elements which result from the given closure.
+  /// Initializes an ``Array`` with ``count`` elements which result from the
+  /// given closure.
   ///
   /// - Parameters:
-  ///   - count: Amount of elements in the ``Array`` (and of times the `initializer` is called).
+  ///   - count: Amount of elements in the ``Array`` (and of times the
+  ///     `initializer` is called).
   ///   - initializer: Produces the element to be inserted at the given index.
-  init(count: Int, _ initializer: (_ index: Int) async throws -> Element) async rethrows {
-    self = count <= 0 ? .init() : unsafe .init(unsafeUninitializedCapacity: count) { _, _ in }
+  init(
+    count: Int,
+    _ initializer: (_ index: Int) async throws -> Element
+  ) async rethrows {
+    self =
+      count <= 0
+      ? .init() : unsafe .init(unsafeUninitializedCapacity: count) { _, _ in }
     for index in 0..<count { self[index] = try await initializer(index) }
   }
 }

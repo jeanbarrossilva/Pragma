@@ -1,19 +1,21 @@
-// ===-------------------------------------------------------------------------------------------===
+// ===-----------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
 // This file is part of the Pragma open-source project.
 //
-// This program is free software: you can redistribute it and/or modify it under the terms of the
-// GNU General Public License as published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-// even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-// General Public License for more details.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+// details.
 //
-// You should have received a copy of the GNU General Public License along with this program. If
-// not, see https://www.gnu.org/licenses.
-// ===-------------------------------------------------------------------------------------------===
+// You should have received a copy of the GNU General Public License along with
+// this program. If not, see https://www.gnu.org/licenses.
+// ===-----------------------------------------------------------------------===
 
 @testable import PlannerKit
 import SwiftData
@@ -24,12 +26,17 @@ struct ConcurrentContextTests {
   struct TransactionTests {
     @Test
     func doesNotSaveWhileInsertingInTransaction() async throws {
-      try await ConcurrentContext(container: PersistentPlanner.makeContainer(isInMemory: true))
-        .transaction { context in
-          try context.insert(PlanModel(uuid: .init(), title: "", summary: ""))
-          let fetchedModel = try context.fetch(.one, where: Predicate<PlanModel>.true)
-          #expect(fetchedModel == nil)
-        }
+      try await ConcurrentContext(
+        container: PersistentPlanner.makeContainer(isInMemory: true)
+      )
+      .transaction { context in
+        try context.insert(PlanModel(uuid: .init(), title: "", summary: ""))
+        let fetchedModel = try context.fetch(
+          .one,
+          where: Predicate<PlanModel>.true
+        )
+        #expect(fetchedModel == nil)
+      }
     }
 
     @Test
@@ -43,7 +50,10 @@ struct ConcurrentContextTests {
       try await context.transaction { context in
         let copiedInsertedModel = insertedModelSnapshot.copy()
         try context.delete(copiedInsertedModel)
-        let fetchedModel = try context.fetch(.one, where: Predicate<PlanModel>.true)
+        let fetchedModel = try context.fetch(
+          .one,
+          where: Predicate<PlanModel>.true
+        )
         #expect(fetchedModel?.uuid == copiedInsertedModel.uuid)
       }
     }
@@ -55,10 +65,15 @@ struct ConcurrentContextTests {
       )
       let insertedModelUUID = UUID()
       try await context.transaction { context in
-        try context.insert(PlanModel(uuid: insertedModelUUID, title: "", summary: ""))
+        try context.insert(
+          PlanModel(uuid: insertedModelUUID, title: "", summary: "")
+        )
       }
       try await context.run { context in
-        let fetchedModel = try context.fetch(.one, where: Predicate<PlanModel>.true)
+        let fetchedModel = try context.fetch(
+          .one,
+          where: Predicate<PlanModel>.true
+        )
         #expect(fetchedModel?.uuid == insertedModelUUID)
       }
     }
@@ -69,14 +84,21 @@ struct ConcurrentContextTests {
         container: PersistentPlanner.makeContainer(isInMemory: true)
       )
       let insertedModelUUID = UUID()
-      try await context.insert(PlanModel(uuid: insertedModelUUID, title: "", summary: ""))
+      try await context.insert(
+        PlanModel(uuid: insertedModelUUID, title: "", summary: "")
+      )
       try await context.transaction { context in
         try context.delete(
-          where: #Predicate<PlanModel> { model in model.uuid == insertedModelUUID }
+          where: #Predicate<PlanModel> { model in
+            model.uuid == insertedModelUUID
+          }
         )
       }
       try await context.run { context in
-        let fetchedModel = try context.fetch(.one, where: Predicate<PlanModel>.true)
+        let fetchedModel = try context.fetch(
+          .one,
+          where: Predicate<PlanModel>.true
+        )
         #expect(fetchedModel == nil)
       }
     }
@@ -86,33 +108,50 @@ struct ConcurrentContextTests {
   struct FetchingTests {
     @Test
     func fetchingOneNonexistentModelReturnsNil() async throws {
-      try await ConcurrentContext(container: PersistentPlanner.makeContainer(isInMemory: true)).run
-      { context in
-        let fetchedModel = try context.fetch(.one, where: Predicate<PlanModel>.true)
+      try await ConcurrentContext(
+        container: PersistentPlanner.makeContainer(isInMemory: true)
+      )
+      .run { context in
+        let fetchedModel = try context.fetch(
+          .one,
+          where: Predicate<PlanModel>.true
+        )
         #expect(fetchedModel == nil)
       }
     }
 
     @Test
     func fetchesOneExistingModel() async throws {
-      try await ConcurrentContext(container: PersistentPlanner.makeContainer(isInMemory: true)).run
-      { context in
+      try await ConcurrentContext(
+        container: PersistentPlanner.makeContainer(isInMemory: true)
+      )
+      .run { context in
         let insertedModel = PlanModel(uuid: .init(), title: "", summary: "")
         try context.insert(insertedModel)
-        let fetchedModel = try context.fetch(.one, where: Predicate<PlanModel>.true)
+        let fetchedModel = try context.fetch(
+          .one,
+          where: Predicate<PlanModel>.true
+        )
         #expect(fetchedModel == insertedModel)
       }
     }
 
     @Test
     func fetchesAllModels() async throws {
-      try await ConcurrentContext(container: PersistentPlanner.makeContainer(isInMemory: true)).run
-      { context in
+      try await ConcurrentContext(
+        container: PersistentPlanner.makeContainer(isInMemory: true)
+      )
+      .run { context in
         let insertedModels = [PlanModel](count: 128) { _ in
           .init(uuid: .init(), title: "", summary: "")
         }
-        for insertedModel in insertedModels { try context.insert(insertedModel) }
-        let fetchedModels = try context.fetch(.all, where: Predicate<PlanModel>.true)
+        for insertedModel in insertedModels {
+          try context.insert(insertedModel)
+        }
+        let fetchedModels = try context.fetch(
+          .all,
+          where: Predicate<PlanModel>.true
+        )
         #expect(fetchedModels == insertedModels)
       }
     }
@@ -120,8 +159,10 @@ struct ConcurrentContextTests {
 
   @Test
   func inserts() async throws {
-    try await ConcurrentContext(container: PersistentPlanner.makeContainer(isInMemory: true)).run {
-      context in
+    try await ConcurrentContext(
+      container: PersistentPlanner.makeContainer(isInMemory: true)
+    )
+    .run { context in
       let model = PlanModel(uuid: .init(), title: "", summary: "")
       try context.insert(model)
       let models = try context.fetch(.all, where: Predicate<PlanModel>.true)
@@ -131,8 +172,10 @@ struct ConcurrentContextTests {
 
   @Test
   func deletes() async throws {
-    try await ConcurrentContext(container: PersistentPlanner.makeContainer(isInMemory: true)).run {
-      context in
+    try await ConcurrentContext(
+      container: PersistentPlanner.makeContainer(isInMemory: true)
+    )
+    .run { context in
       let model = PlanModel(uuid: .init(), title: "", summary: "")
       try context.insert(model)
       try context.delete(model)
@@ -151,7 +194,12 @@ struct ConcurrentContextTests {
     }
     let goalSnapshots = planSnapshots.map { planSnapshot in
       Snapshot(
-        of: GoalModel(uuid: .init(), planUUID: planSnapshot.copy().uuid, title: "", summary: "")
+        of: GoalModel(
+          uuid: .init(),
+          planUUID: planSnapshot.copy().uuid,
+          title: "",
+          summary: ""
+        )
       )
     }
     let toDoSnapshots = goalSnapshots.map { goalSnapshot in
@@ -166,9 +214,15 @@ struct ConcurrentContextTests {
         )
       )
     }
-    for planSnapshot in planSnapshots { try await context.insert(planSnapshot.copy()) }
-    for goalSnapshot in goalSnapshots { try await context.insert(goalSnapshot.copy()) }
-    for toDoSnapshot in toDoSnapshots { try await context.insert(toDoSnapshot.copy()) }
+    for planSnapshot in planSnapshots {
+      try await context.insert(planSnapshot.copy())
+    }
+    for goalSnapshot in goalSnapshots {
+      try await context.insert(goalSnapshot.copy())
+    }
+    for toDoSnapshot in toDoSnapshots {
+      try await context.insert(toDoSnapshot.copy())
+    }
     try await context.deleteAll(ofType: PlanModel.self)
     try await context.deleteAll(ofType: GoalModel.self)
     try await context.deleteAll(ofType: ToDoModel.self)

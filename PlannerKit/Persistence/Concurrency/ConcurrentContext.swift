@@ -1,63 +1,66 @@
-// ===-------------------------------------------------------------------------------------------===
+// ===-----------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
 // This file is part of the Pragma open-source project.
 //
-// This program is free software: you can redistribute it and/or modify it under the terms of the
-// GNU General Public License as published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-// even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-// General Public License for more details.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+// details.
 //
-// You should have received a copy of the GNU General Public License along with this program. If
-// not, see https://www.gnu.org/licenses.
-// ===-------------------------------------------------------------------------------------------===
+// You should have received a copy of the GNU General Public License along with
+// this program. If not, see https://www.gnu.org/licenses.
+// ===-----------------------------------------------------------------------===
 
 import SwiftData
 
-/// A concurrent context is a wrapper around a SwiftData model context. Allows for performing
-/// operations on the SwiftData context asynchronously.
+/// A concurrent context is a wrapper around a SwiftData model context. Allows
+/// for performing operations on the SwiftData context asynchronously.
 ///
 /// SwiftData exposes an API for making the
 /// [stack](https://developer.apple.com/documentation/coredata/setting-up-a-core-data-stack)
-/// by which the container is referenced asynchronous — the `ModelActor` macro. However, the
-/// isolation of the resulting actor is that of the main actor, i.e., requests for operations are
-/// performed on the UI thread (the operations themselves *are not*), and its underlying machinery
-/// is largely undocumented by Apple.
+/// by which the container is referenced asynchronous — the `ModelActor` macro.
+/// However, the isolation of the resulting actor is that of the main actor,
+/// i.e., requests for operations are performed on the UI thread (the operations
+/// themselves *are not*), and its underlying machinery is largely undocumented by Apple.
 ///
 /// For more details on the quirks of `ModelActor`, see
-/// ["ModelActor Is Just Weird"](https://www.massicotte.org/model-actor) by Matt Massicotte. Because
-/// of these unexplained behaviors, a concurrent context is the recommended way to use SwiftData
-/// asynchronously in Pragma.
+/// ["ModelActor Is Just Weird"](https://www.massicotte.org/model-actor) by Matt
+/// Massicotte. Because of these unexplained behaviors, a concurrent context is
+/// the recommended way to use SwiftData asynchronously in Pragma.
 ///
 /// ## On the conformance to Sendable
 ///
-/// A concurrent context is backed by a SwiftData context internally. SwiftData contexts are not
-/// sendable, given that they contain properties storing models that have been inserted,
-/// deleted, and other data modifiable by one of these contexts' methods. On top of that, these
-/// contexts are not actors: access to their properties is not thread-safe.
+/// A concurrent context is backed by a SwiftData context internally. SwiftData
+/// contexts are not sendable, given that they contain properties storing models
+/// that have been inserted, deleted, and other data modifiable by one of these
+/// contexts' methods. On top of that, these contexts are not actors: access to
+/// their properties is not thread-safe.
 ///
 /// A concurrent context *may* be sendable because it is an actor,
 /// [with each access being isolated](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Isolation)
-/// (including those to its backing SwiftData context). However, a concurrent context will be
-/// sendable *only if* accesses to its ``backingContext`` do not mutate the state of the concurrent
-/// context.
+/// (including those to its backing SwiftData context). However, a concurrent
+/// context will be sendable *only if* accesses to its ``backingContext`` do not
+/// mutate the state of the concurrent context.
 public actor ConcurrentContext: @unchecked Sendable {
   /// SwiftData context backing each operation and batch of operations.
   public let backingContext: ModelContext
 
-  /// Whether the pending changes (if any) to the ``backingContext`` should be saved. This should be
-  /// checked by operations which may not have had any effect (i.e., non-insertion ones); for those
-  /// that are guaranteed to mutate the ``backingContext``, ``isInTransaction`` should be checked
-  /// instead.
+  /// Whether the pending changes (if any) to the ``backingContext`` should be
+  /// saved. This should be checked by operations which may not have had any
+  /// effect (i.e., non-insertion ones); for those that are guaranteed to mutate
+  /// the ``backingContext``, ``isInTransaction`` should be checked instead.
   private var shouldSave: Bool { !isInTransaction && backingContext.hasChanges }
 
-  /// Whether a transaction is being performed by this context. This being `true` indicates to
-  /// insertions and deletions that they should not save immediately; rather, they will be saved by
-  /// the underlying transaction of the ``backingContext``. Batched operations are executed by a
-  /// task on the ``queue`` of this concurrent context.
+  /// Whether a transaction is being performed by this context. This being
+  /// `true` indicates to insertions and deletions that they should not save
+  /// immediately; rather, they will be saved by the underlying transaction of
+  /// the ``backingContext``.
   ///
   /// - SeeAlso:
   ///   - ``transaction(_:)``
@@ -66,22 +69,25 @@ public actor ConcurrentContext: @unchecked Sendable {
 
   /// Initializes a concurrent context backed by a SwiftData one.
   ///
-  /// - Parameter container: Container into which changes performed in memory by the concurrent
-  ///   context will be persisted.
+  /// - Parameter container: Container into which changes performed in memory by
+  ///   the concurrent context will be persisted.
   init(container: ModelContainer) throws(SwiftDataError) {
     self.backingContext = .init(container)
     backingContext.autosaveEnabled = false
   }
 
-  /// Performs a series of operations on an isolated instance of this context, guaranteeing that
-  /// they either finish successfully as an entire batch; or fail completely in case one of them
-  /// fails, leaving the context as it was prior to the call to this method.
+  /// Performs a series of operations on an isolated instance of this context,
+  /// guaranteeing that they either finish successfully as an entire batch; or
+  /// fail completely in case one of them fails, leaving the context as it was
+  /// prior to the call to this method.
   ///
-  /// - Parameter action: Operations to be performed as one transaction on the isolated context.
-  /// - Throws: The error thrown by one of the operations in case some failed; or if beginning or
-  ///   ending the transaction failed.
+  /// - Parameter action: Operations to be performed as one transaction on the
+  ///   isolated context.
+  /// - Throws: The error thrown by one of the operations in case some failed;
+  ///   or if beginning or ending the transaction failed.
   func transaction(
-    _ action: @escaping @Sendable (isolated ConcurrentContext) async throws -> Void
+    _ action:
+      @escaping @Sendable (isolated ConcurrentContext) async throws -> Void
   ) async throws {
     try await withCheckedThrowingContinuation { continuation in
       do {
@@ -101,20 +107,24 @@ public actor ConcurrentContext: @unchecked Sendable {
   /// Persists a model into the container.
   ///
   /// - Parameter model: Model to be inserted.
-  /// - Throws: In case the backing SwiftData context fails to save. The reasons of failure are
-  ///   mostly unknown, as they are not covered by the SwiftData documentation.
+  /// - Throws: In case the backing SwiftData context fails to save. The reasons
+  ///   of failure are mostly unknown, as they are not covered by the SwiftData
+  ///   documentation.
   func insert(_ model: some PersistentModel) throws {
     backingContext.insert(model)
     guard !isInTransaction else { return }
     try backingContext.save()
   }
 
-  /// Obtains models inserted into the container by previous calls to ``insert(_:)``, with these
-  /// models ordered according to the specified properties of theirs.
+  /// Obtains models inserted into the container by previous calls to
+  /// ``insert(_:)``, with these models ordered according to the specified
+  /// properties of theirs.
   ///
   /// - Parameters:
-  ///   - predicate: Condition to be satisfied by the models returned by this function.
-  ///   - sorting: Key paths to the properties of each model by which they will be ordered.
+  ///   - predicate: Condition to be satisfied by the models returned by this
+  ///     function.
+  ///   - sorting: Key paths to the properties of each model by which they will
+  ///     be ordered.
   /// - Throws: If the `predicate` is malformed.
   func fetch<Model, Sorter>(
     where predicate: Predicate<Model>,
@@ -125,19 +135,22 @@ public actor ConcurrentContext: @unchecked Sendable {
       sortBy: sorting.map({ keyPath in .init(keyPath) })
     )
     fetchDescriptor.includePendingChanges = false
-    return try AllFetchStrategy().fetch(through: backingContext, withDescriptor: fetchDescriptor)
+    return try AllFetchStrategy()
+      .fetch(through: backingContext, withDescriptor: fetchDescriptor)
   }
 
-  /// Obtains models inserted into the container by previous calls to ``insert(_:)`` in order of
-  /// insertion.
+  /// Obtains models inserted into the container by previous calls to
+  /// ``insert(_:)`` in order of insertion.
   ///
   /// - Parameters:
-  ///   - strategy: Determines both the amount of models which match the `predicate` that should be
-  ///     returned and the type of return of this function. For example: in case the intent is to
-  ///     fetch a single model, ``AnyFetchStrategy/one`` would be passed into this parameter, and an
-  ///     instance of a model (rather than a single-element collection containing it) would be
-  ///     returned.
-  ///   - predicate: Condition to be satisfied by the models returned by this function.
+  ///   - strategy: Determines both the amount of models which match the
+  ///     `predicate` that should be returned and the type of return of this
+  ///     function. For example: in case the intent is to fetch a single model,
+  ///     ``AnyFetchStrategy/one`` would be passed into this parameter, and an
+  ///     instance of a model (rather than a single-element collection
+  ///     containing it) would be returned.
+  ///   - predicate: Condition to be satisfied by the models returned by this
+  ///     function.
   /// - Throws: If the `predicate` is malformed.
   func fetch<Strategy>(
     _ strategy: AnyFetchStrategy<Strategy, Strategy.Model>,
@@ -145,7 +158,10 @@ public actor ConcurrentContext: @unchecked Sendable {
   ) throws -> Strategy.Result where Strategy: FetchStrategy {
     var fetchDescriptor = FetchDescriptor(predicate: predicate)
     fetchDescriptor.includePendingChanges = false
-    return try strategy.fetch(through: backingContext, withDescriptor: fetchDescriptor)
+    return try strategy.fetch(
+      through: backingContext,
+      withDescriptor: fetchDescriptor
+    )
   }
 
   /// Undoes the insertion of a given model into the container.
@@ -164,28 +180,37 @@ public actor ConcurrentContext: @unchecked Sendable {
     try save()
   }
 
-  /// Undoes the insertion of models into the container which match a given predicate.
+  /// Undoes the insertion of models into the container which match a given
+  /// predicate.
   ///
-  /// - Parameter predicate: Condition to be satisfied by the models to be deleted.
-  /// - Throws: If the backing SwiftData context fails to delete the models or the deletion fails to
-  ///   be saved.
-  func delete<Model>(where predicate: Predicate<Model>) throws where Model: PersistentModel {
-    try backingContext.delete(model: Model.self, where: predicate, includeSubclasses: false)
+  /// - Parameter predicate: Condition to be satisfied by the models to be
+  ///   deleted.
+  /// - Throws: If the backing SwiftData context fails to delete the models or
+  ///   the deletion fails to be saved.
+  func delete<Model>(where predicate: Predicate<Model>) throws
+  where Model: PersistentModel {
+    try backingContext.delete(
+      model: Model.self,
+      where: predicate,
+      includeSubclasses: false
+    )
     try save()
   }
 
-  /// Performs pending operations if there are any; otherwise, calling this method is a no-op.
+  /// Performs pending operations if there are any; otherwise, calling this
+  /// method is a no-op.
   ///
-  /// > Note: Standalone insertions and deletions are saved in-place; or, when in a transaction,
-  ///   after the transaction is finished. Calling this method for saving either of those operations
-  ///   is not necessary.
+  /// > Note: Standalone insertions and deletions are saved in-place; or, when
+  ///   in a transaction, after the transaction is finished. Calling this method
+  ///   for saving either of those operations is not necessary.
   ///
   /// - SeeAlso:
   ///   - ``insert(_:)``
   ///   - ``delete(_:)``
   ///   - ``transaction(_:)``
-  /// - Throws: In case the backing SwiftData context fails to save. The reasons of failure are
-  ///   mostly unknown, as they are not covered by the SwiftData documentation.
+  /// - Throws: In case the backing SwiftData context fails to save. The reasons
+  ///   of failure are mostly unknown, as they are not covered by the SwiftData
+  ///   documentation.
   private func save() throws {
     guard shouldSave else { return }
     try backingContext.save()

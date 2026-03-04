@@ -1,11 +1,18 @@
 {
+  "lineBreakAroundMultilineExpressionChainComponents": true,
   "lineBreakBeforeEachArgument": true,
   "lineBreakBetweenDeclarationAttributes": true,
+  "lineLength": 80,
   "multiElementCollectionTrailingCommas": false,
+  "orderedImports": {
+    "includeConditionalImports": true,
+    "shouldGroupImports": true
+  },
   "prioritizeKeepingFunctionOutputTogether": true,
   "reflowMultilineStringLiterals": {
     "always": {}
   },
+  "respectsExistingLineBreaks": false,
   "rules": {
     "AvoidRetroactiveConformances": false
   },
