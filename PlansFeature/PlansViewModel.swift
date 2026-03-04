@@ -26,9 +26,7 @@ public struct PlansViewModel<PlannerType> where PlannerType: Planner {
 
   public init(planner: PlannerType) async throws {
     self.planner = planner
-    self.plans = try await planner.run { planner in
-      try await planner.plans.asyncMap { plan in try await .init(of: plan) }
-    }
+    self.plans = try await planner.plans.asyncMap { plan in try await .init(of: plan) }
   }
 
   func add(toDo: AnyToDoDescriptor, to goalID: AnyHashable) {}

@@ -26,10 +26,10 @@ public protocol Headlineable: Headlined {
   /// - Parameter newTitle: Title by which the current one will be replaced.
   mutating func setTitle(to newTitle: String) async throws
 
-  /// Changes the ``Headlined/abstract``.
+  /// Changes the ``Headlined/summary``.
   ///
-  /// - Parameter newAbstract: Abstract by which the current one will be replaced.
-  mutating func setAbstract(to newAbstract: String) async throws
+  /// - Parameter newSummary: Summary by which the current one will be replaced.
+  mutating func setSummary(to newSummary: String) async throws
 }
 
 /// Structs or classes conforming to this protocol are presentable by a general, short summary;
@@ -41,7 +41,7 @@ public protocol Headlined: Comparable, Hashable, Identifiable, SendableMetatype 
   var title: String { get }
 
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
-  var abstract: String { get }
+  var summary: String { get }
 }
 
 extension Headlined where Self: Comparable {
@@ -53,7 +53,7 @@ extension Headlined where Self: Comparable {
   /// - Parameter other: Right-hand-side of the comparison.
   public func isLesser(than other: Self) -> Bool {
     title[title.startIndex] < other.title[other.title.startIndex]
-    && abstract[abstract.startIndex] < other.abstract[other.abstract.startIndex]
+      && summary[summary.startIndex] < other.summary[other.summary.startIndex]
   }
 
   public static func < (lhs: Self, rhs: Self) -> Bool { lhs.isLesser(than: rhs) }
@@ -77,16 +77,14 @@ public func normalize(title: inout String) {
   title.trim(.whitespacesAndNewlines)
 }
 
-/// Trims an ``abstract``.
+/// Trims a ``summary``.
 ///
-/// This function *must* be called upon updates of the abstract, and the backing property *must* be
+/// This function *must* be called upon updates of the summary, and the backing property *must* be
 /// set to the resulting value.
 ///
 /// - Parameters:
-///   - abstract: Abstract suggested for a headline.
-public func normalize(abstract: inout String) {
-  abstract.trim(.whitespacesAndNewlines)
-}
+///   - summary: Summary suggested for a headline.
+public func normalize(summary: inout String) { summary.trim(.whitespacesAndNewlines) }
 
 extension String {
   /// Whether this ``String`` is empty or contains only whitespace or newlines.

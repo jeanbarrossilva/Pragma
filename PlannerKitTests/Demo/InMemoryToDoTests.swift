@@ -21,10 +21,10 @@ import Testing
 struct InMemoryToDoTests {
   @Test
   func headlineIsNormalized() async throws {
-    let planner = InMemoryPlanner()
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .samples[0])
     let plan = try await planner.plan(identifiedAs: planID)
-    let goal = await plan.goals[0]
+    var goal = plan.goals[0]
     let toDoID = try await goal.addToDo(
       describedBy: .init(
         title: " Title",
@@ -40,9 +40,9 @@ struct InMemoryToDoTests {
 
   @Test
   func setsTitle() async throws {
-    let planner = InMemoryPlanner()
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
-    let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
+    var toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
     let newTitle = "Title 🥸"
     try await toDo.setTitle(to: newTitle)
     #expect(await toDo.title == newTitle)
@@ -50,9 +50,9 @@ struct InMemoryToDoTests {
 
   @Test
   func setsDescription() async throws {
-    let planner = InMemoryPlanner()
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
-    let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
+    var toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
     let newSummary = "Summary. 🏎️"
     try await toDo.setSummary(to: newSummary)
     #expect(await toDo.summary == newSummary)
@@ -60,10 +60,10 @@ struct InMemoryToDoTests {
 
   @Test
   func setsStatus() async throws {
-    let planner = InMemoryPlanner()
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals(.withToDos)))
-    let toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
-    let oldStatus = await toDo.status
+    var toDo = try await planner.plan(identifiedAs: planID).goals[0].toDos[0]
+    let oldStatus = toDo.status
     let newStatus = Status.allCases.first(where: { status in oldStatus != status })!
     try await toDo.setStatus(to: newStatus)
     #expect(await toDo.status == newStatus)

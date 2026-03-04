@@ -33,14 +33,16 @@ extension Planner where Self == PersistentPlanner {
 /// Abstraction for accessing a container in which ``CorePlanner`` structures are inserted, with
 /// the stored data being retrievable after deinitialization of this class or the underlying
 /// implementations of ``CorePlanner/Plan``, ``CorePlanner/Goal`` and ``CorePlanner/ToDo``.
-public actor PersistentPlanner: Planner {
+public struct PersistentPlanner: Planner {
   /// Context by which all standalone and batched operations are performed.
   public let context: ConcurrentContext
 
   public var plans: [PersistedPlan] {
     get async throws {
-      try await context.fetch(.all, where: Predicate<PlanModel>.true).asyncMap { model in
-        try await .init(identifiedAs: model.uuid, insertedInto: context)
+      try await context.run { context in
+        try await context.fetch(.all, where: Predicate<PlanModel>.true).asyncMap { model in
+          try await .init(identifiedAs: model.uuid, insertedInto: context)
+        }
       }
     }
   }
@@ -58,16 +60,17 @@ public actor PersistentPlanner: Planner {
     self.context = try .init(container: container)
   }
 
-  public func addPlan(describedBy descriptor: AnyPlanDescriptor) throws -> UUID {
-    let model = PlanModel(describedBy: descriptor)
-    let modelSnapshot = Snapshot(of: model)
-    let planUUID = model.uuid
-    Task {
+  public func addPlan(describedBy descriptor: AnyPlanDescriptor) async throws -> UUID {
+    try await context.run { context in
+      let model = PlanModel(describedBy: descriptor)
+      let planUUID = model.uuid
       if descriptor.goals.isEmpty {
-        try await context.insert(model)
+        try context.insert(model)
       } else {
+        let modelSnapshot = Snapshot(of: model)
         try await context.transaction { context in
-          try context.insert(modelSnapshot.copy())
+          let copiedModel = modelSnapshot.copy()
+          try context.insert(copiedModel)
           for goalDescriptor in descriptor.goals {
             let goalModel = GoalModel(describedBy: goalDescriptor, planUUID: planUUID)
             try context.insert(goalModel)
@@ -77,16 +80,16 @@ public actor PersistentPlanner: Planner {
           }
         }
       }
+      return model.uuid
     }
-    return model.uuid
   }
 
   public func plan(identifiedAs id: UUID) async throws -> PersistedPlan {
     try await .init(identifiedAs: id, insertedInto: context)
   }
 
-  public func removePlan(identifiedAs id: UUID) throws {
-    Task { try await context.delete(where: #Predicate<PlanModel> { model in model.uuid == id }) }
+  public func removePlan(identifiedAs id: UUID) async throws {
+    try await context.delete(where: #Predicate<PlanModel> { model in model.uuid == id })
   }
 
   public func clear() throws { try container.erase() }
@@ -110,10 +113,13 @@ public final class PersistedPlan: PersistedDomain, Plan {
 
   public var goals: [PersistedGoal] {
     get async throws {
-      try await context.fetch(
-        .all,
-        where: #Predicate<GoalModel> { goalModel in goalModel.planUUID == id }
-      ).asyncMap { goalModel in try await .init(identifiedAs: goalModel.uuid, insertedInto: context)
+      try await context.run { context in
+        try await context.fetch(
+          .all,
+          where: #Predicate<GoalModel> { goalModel in goalModel.planUUID == id }
+        ).asyncMap { goalModel in
+          try await .init(identifiedAs: goalModel.uuid, insertedInto: context)
+        }
       }
     }
   }
@@ -125,27 +131,29 @@ public final class PersistedPlan: PersistedDomain, Plan {
     self.context = context
     let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
     var title = backingModel.title
-    Self.normalize(title: &title)
+    normalize(title: &title)
     self.title = title
     var summary = backingModel.summary
-    Self.normalize(summary: &summary)
+    normalize(summary: &summary)
     self.summary = summary
   }
 
   public func addGoal(describedBy descriptor: AnyGoalDescriptor) async throws -> UUID {
-    let goalModel = GoalModel(describedBy: descriptor, planUUID: id)
-    let goalUUID = goalModel.uuid
-    if descriptor.toDos.isEmpty {
-      try await context.insert(goalModel)
-    } else {
-      try await context.transaction { context in
-        for toDoDescriptor in descriptor.toDos {
-          let toDoModel = ToDoModel(describedBy: toDoDescriptor, goalUUID: goalUUID)
-          try context.insert(toDoModel)
+    try await context.run { context in
+      let goalModel = GoalModel(describedBy: descriptor, planUUID: id)
+      let goalUUID = goalModel.uuid
+      if descriptor.toDos.isEmpty {
+        try context.insert(goalModel)
+      } else {
+        try await context.transaction { context in
+          for toDoDescriptor in descriptor.toDos {
+            let toDoModel = ToDoModel(describedBy: toDoDescriptor, goalUUID: goalUUID)
+            try context.insert(toDoModel)
+          }
         }
       }
+      return goalUUID
     }
-    return goalModel.uuid
   }
 
   public func goal(identifiedAs id: UUID) async throws -> PersistedGoal {
@@ -205,10 +213,13 @@ public final class PersistedGoal: PersistedDomain, Goal {
 
   public var toDos: [PersistedToDo] {
     get async throws {
-      try await context.fetch(
-        .all,
-        where: #Predicate<ToDoModel> { toDoModel in toDoModel.goalUUID == id }
-      ).asyncMap { toDoModel in try await .init(identifiedAs: toDoModel.uuid, insertedInto: context)
+      try await context.run { context in
+        try await context.fetch(
+          .all,
+          where: #Predicate<ToDoModel> { toDoModel in toDoModel.goalUUID == id }
+        ).asyncMap { toDoModel in
+          try await .init(identifiedAs: toDoModel.uuid, insertedInto: context)
+        }
       }
     }
   }
@@ -220,17 +231,19 @@ public final class PersistedGoal: PersistedDomain, Goal {
     self.context = context
     let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
     var title = backingModel.title
-    Self.normalize(title: &title)
+    normalize(title: &title)
     self.title = title
     var summary = backingModel.summary
-    Self.normalize(summary: &summary)
+    normalize(summary: &summary)
     self.summary = summary
   }
 
   public func addToDo(describedBy descriptor: AnyToDoDescriptor) async throws -> UUID {
-    let toDoModel = ToDoModel(describedBy: descriptor, goalUUID: id)
-    try await context.insert(toDoModel)
-    return toDoModel.uuid
+    try await context.run { context in
+      let toDoModel = ToDoModel(describedBy: descriptor, goalUUID: id)
+      try context.insert(toDoModel)
+      return toDoModel.uuid
+    }
   }
 
   public func toDo(identifiedAs id: UUID) async throws -> PersistedToDo {
@@ -304,10 +317,10 @@ public final class PersistedToDo: PersistedDomain, ToDo {
     self.context = context
     let backingModel = try await Self.backingModel(identifiedAs: id, insertedInto: context)
     var title = backingModel.title
-    Self.normalize(title: &title)
+    normalize(title: &title)
     self.title = title
     var summary = backingModel.summary
-    Self.normalize(summary: &summary)
+    normalize(summary: &summary)
     self.summary = summary
     self.status = backingModel.status
     self.deadline = backingModel.deadline
@@ -394,7 +407,7 @@ extension ToDoModel: NSCopying {
 /// (upon both initialization and changes through the setters) and domain-driven behavior, e.g.,
 /// adding to-dos to goals and goals to plans, without exposing details about the underlying
 /// persistence layer.
-public protocol PersistedDomain: Headlineable, SendableMetatype where ID == UUID {
+public protocol PersistedDomain: Headlineable where ID == UUID {
   /// The persisted model on which this structure is based.
   associatedtype BackingModel: PartialHeadlined, PersistentModel, NSCopying
 
@@ -457,13 +470,13 @@ extension PersistedDomain {
 extension PersistedDomain where Self: Headlineable {
   public func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
-    Self.normalize(title: &newTitle)
+    normalize(title: &newTitle)
     try await backingModel.setValue(forKey: BackingModel.titleKeyPath, to: newTitle)
   }
 
   public func setSummary(to newSummary: String) async throws {
     var newSummary = newSummary
-    Self.normalize(summary: &newSummary)
+    normalize(summary: &newSummary)
     try await backingModel.setValue(forKey: BackingModel.summaryKeyPath, to: newSummary)
   }
 }

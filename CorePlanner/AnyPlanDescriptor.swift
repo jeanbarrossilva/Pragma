@@ -33,8 +33,8 @@ public struct AnyPlanDescriptor: Codable, Hashable, Sendable {
   /// - Parameter plan: ``Plan`` from which the type-erased ``PlanDescriptor`` will be initialized.
   public init<PlanType>(of plan: PlanType) async throws where PlanType: Plan {
     self = .init(
-      title: try await plan.title,
-      summary: try await plan.summary,
+      title: plan.title,
+      summary: plan.summary,
       goals: try await plan.goals.asyncMap { goal in try await .init(of: goal) }
     )
   }
@@ -104,8 +104,8 @@ public struct AnyGoalDescriptor: Codable, Hashable, Sendable {
   /// - Parameter goal: ``Goal`` from which the type-erased ``GoalDescriptor`` will be initialized.
   public init<GoalType>(of goal: GoalType) async throws where GoalType: Goal {
     self = .init(
-      title: try await goal.title,
-      summary: try await goal.summary,
+      title: goal.title,
+      summary: goal.summary,
       toDos: try await goal.toDos.asyncMap { toDo in try await .init(from: toDo) }
     )
   }
@@ -177,10 +177,10 @@ public struct AnyToDoDescriptor: Codable, Hashable, Sendable {
   /// - Parameter toDo: ``ToDo`` from which the type-erased ``ToDoDescriptor`` will be initialized.
   public init<ToDoType>(from toDo: ToDoType) async throws where ToDoType: ToDo {
     self = .init(
-      title: try await toDo.title,
-      summary: try await toDo.summary,
-      status: try await toDo.status,
-      deadline: try await toDo.deadline
+      title: toDo.title,
+      summary: toDo.summary,
+      status: toDo.status,
+      deadline: toDo.deadline
     )
   }
 
