@@ -21,13 +21,22 @@
 /// afterwards. The mechanism for adding and whether the plans or changes to them are maintained
 /// after deinitialization of an instance of this type or of its plans is a detail of the
 /// implementation.
-public protocol Planner: ~Copyable
+public protocol Planner
 where PlanType.ID == PlanType.GoalType.ID, PlanType.GoalType.ID == PlanType.GoalType.ToDoType.ID {
   /// Type of the descriptor of an instance of a ``PlanType``.
   associatedtype PlanDescriptor: Sendable
 
   /// Type of ``Plan``s by which this ``Planner`` is composed.
   associatedtype PlanType: Plan
+
+  /// Stream of ``Plan``s in this ``Planner``.
+  ///
+  /// ###### Implementation notes
+  ///
+  /// The ``Plan``s *must* be sorted and, even though this is an array, each of them *must* be
+  /// unique, at least with an ID distinct from that of the other ones. Such uniqueness *must* be
+  /// ensured by the public initializer or factory function.
+  var plans: [PlanType] { get async throws }
 
   /// Adds a ``Plan`` as described by its descriptor. All ``Goal``s described in it, alongside the
   /// ``ToDo``s defined within these goals, will also be added.
@@ -52,7 +61,7 @@ where PlanType.ID == PlanType.GoalType.ID, PlanType.GoalType.ID == PlanType.Goal
   /// according to the criteria of comparison of the type of ``Plan``.
   ///
   /// - Parameter id: ID of the plan to be deleted.
-  func removePlan(identifiedAs id: PlanType.ID) async throws
+  mutating func removePlan(identifiedAs id: PlanType.ID) async throws
 
   /// Retrieves an added ``Plan`` identified with a given ID.
   ///
@@ -63,7 +72,7 @@ where PlanType.ID == PlanType.GoalType.ID, PlanType.GoalType.ID == PlanType.Goal
   /// Removes every added plan, goal and to-do from this ``Planner``.
   ///
   /// > Warning: This is a destructive action and cannot be undone.
-  func clear() throws
+  mutating func clear() async throws
 }
 
 /// Plans are groups of ``Goal``s which may be related by category (e.g., an academic plan, focused
@@ -83,21 +92,31 @@ where GoalType.ID == ID, GoalType.ToDoType.ID == ID {
   /// Identifier which distinguishes this ``Plan`` from others in the same ``Planner``.
   var id: ID { get }
 
-  /// Main, general, non-blank abstract.
+  /// Main, general, non-blank description.
   var title: String { get }
 
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
-  var abstract: String { get }
+  var summary: String { get }
+
+  /// Each of the ``Goal``s laid out, whose achievement was deemed required by the user in order for
+  /// this ``Plan`` to be successful.
+  ///
+  /// ###### Implementation notes
+  ///
+  /// The ``Goal``s *must* be sorted and, even though this is an array, each of them *must* be
+  /// unique, at least with an ID distinct from that of the other ones. Such uniqueness *must* be
+  /// ensured by the public initializer or factory function.
+  var goals: [GoalType] { get async throws }
 
   /// Changes the ``title``.
   ///
   /// - Parameter newTitle: Title by which the current one will be replaced.
   mutating func setTitle(to newTitle: String) async throws
 
-  /// Changes the ``abstract``.
+  /// Changes the ``summary``.
   ///
-  /// - Parameter newAbstract: Abstract by which the current one will be replaced.
-  mutating func setAbstract(to newAbstract: String) async throws
+  /// - Parameter newSummary: Summary by which the current one will be replaced.
+  mutating func setSummary(to newSummary: String) async throws
 
   /// Adds a ``Goal`` as described by its descriptor. All ``ToDo``s described in it will also be
   /// added.
@@ -128,7 +147,7 @@ where GoalType.ID == ID, GoalType.ToDoType.ID == ID {
   /// according to the criteria of comparison of the type of ``Goal``.
   ///
   /// - Parameter id: ID of the ``Goal`` to be removed.
-  func removeGoal(identifiedAs id: GoalType.ID) async throws
+  mutating func removeGoal(identifiedAs id: GoalType.ID) async throws
 }
 
 /// Characteristics of a desired outcome, consisting of an obligatory, non-empty ``title`` and an
@@ -148,21 +167,31 @@ public protocol Goal: Sendable, SendableMetatype where ID == ToDoType.ID {
   /// Identifier which distinguishes this ``Goal`` from others in the same ``Plan``.
   var id: ID { get }
 
-  /// Main, general, non-blank abstract.
+  /// Main, general, non-blank description.
   var title: String { get }
 
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
-  var abstract: String { get }
+  var summary: String { get }
+
+  /// ``ToDo``s related to the achievement of the defined objective, sorted ascendingly by their
+  /// ``ToDo/deadline``.
+  ///
+  /// ###### Implementation notes
+  ///
+  /// The ``ToDo``s *must* be sorted and, even though this is an array, each of them *must* be
+  /// unique, at least with an ID distinct from that of the other ones. Such uniqueness *must* be
+  /// ensured by the public initializer or factory function.
+  var toDos: [ToDoType] { get async throws }
 
   /// Changes the ``title``.
   ///
   /// - Parameter newTitle: Title by which the current one will be replaced.
   mutating func setTitle(to newTitle: String) async throws
 
-  /// Changes the ``abstract``.
+  /// Changes the ``summary``.
   ///
-  /// - Parameter newAbstract: Abstract by which the current one will be replaced.
-  mutating func setAbstract(to newAbstract: String) async throws
+  /// - Parameter newSummary: Summary by which the current one will be replaced.
+  mutating func setSummary(to newSummary: String) async throws
 
   /// Adds a ``ToDo`` as described by its descriptor.
   ///
@@ -191,7 +220,7 @@ public protocol Goal: Sendable, SendableMetatype where ID == ToDoType.ID {
   /// according to the criteria of comparison of the type of ``ToDo``.
   ///
   /// - Parameter id: ID of the ``ToDo`` to be removed.
-  func removeToDo(identifiedAs id: ToDoType.ID) async throws
+  mutating func removeToDo(identifiedAs id: ToDoType.ID) async throws
 }
 
 /// Referred to as "tasks" to the user, to-dos are the minimal steps toward the achievement of a
@@ -204,11 +233,11 @@ public protocol ToDo: Sendable, SendableMetatype {
   /// Identifier which distinguishes this ``ToDo`` from others in the same ``Goal``.
   var id: ID { get }
 
-  /// Main, general, non-blank abstract.
+  /// Main, general, non-blank description.
   var title: String { get }
 
   /// Secondary, detailed explanation related to the contents of the ``title``. May be blank.
-  var abstract: String { get }
+  var summary: String { get }
 
   /// Stage of completion of this ``ToDo``.
   var status: Status { get }
@@ -221,10 +250,10 @@ public protocol ToDo: Sendable, SendableMetatype {
   /// - Parameter newTitle: Title by which the current one will be replaced.
   mutating func setTitle(to newTitle: String) async throws
 
-  /// Changes the ``abstract``.
+  /// Changes the ``summary``.
   ///
-  /// - Parameter newAbstract: Abstract by which the current one will be replaced.
-  mutating func setAbstract(to newAbstract: String) async throws
+  /// - Parameter newSummary: Summary by which the current one will be replaced.
+  mutating func setSummary(to newSummary: String) async throws
 
   /// Changes the ``status``.
   ///

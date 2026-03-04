@@ -21,14 +21,14 @@ import Testing
 struct InMemoryPlannerTests {
   @Test(arguments: AnyPlanDescriptor.samples)
   func addsPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
-    let planner = InMemoryPlanner()
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: descriptor)
     _ = try await planner.plan(identifiedAs: planID)
   }
 
   @Test(arguments: AnyPlanDescriptor.samples)
   func removesPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
-    let planner = InMemoryPlanner()
+    var planner = InMemoryPlanner()
     let planID = try await planner.addPlan(describedBy: descriptor)
     try await planner.removePlan(identifiedAs: planID)
     await #expect(throws: PlannerError.nonexistent(type: InMemoryPlan.self, id: planID)) {
@@ -38,7 +38,7 @@ struct InMemoryPlannerTests {
 
   @Test
   func clears() async throws {
-    let planner = InMemoryPlanner()
+    var planner = InMemoryPlanner()
     let planIDs = try await AnyPlanDescriptor.samples.asyncMap { planDescriptor in
       try await planner.addPlan(describedBy: planDescriptor)
     }

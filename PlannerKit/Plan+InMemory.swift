@@ -24,36 +24,36 @@ extension Planner where Self == InMemoryPlanner {
 /// supported: all data added to it will be removed upon its deinitialization, and will not be
 /// recoverable afterward; every newly initialized instance of this planner is in an untouched
 /// state.
-public actor InMemoryPlanner: Planner {
+public struct InMemoryPlanner: Planner {
   public typealias ImplementationError = NSError
 
   private(set) public var plans = [InMemoryPlan]()
 
-  public func addPlan(describedBy descriptor: AnyPlanDescriptor) async throws -> UUID {
+  public mutating func addPlan(describedBy descriptor: AnyPlanDescriptor) async throws -> UUID {
     let plan = InMemoryPlan(describedBy: descriptor)
     plans.append(plan)
     return plan.id
   }
 
-  public func plan(identifiedAs id: UUID) throws -> InMemoryPlan {
+  public func plan(identifiedAs id: UUID) async throws -> InMemoryPlan {
     guard let plan = plans.first(where: { plan in plan.id == id }) else {
       throw PlannerError.nonexistent(type: InMemoryPlan.self, id: id)
     }
     return plan
   }
 
-  public func removePlan(identifiedAs id: UUID) throws {
+  public mutating func removePlan(identifiedAs id: UUID) async throws {
     guard let index = plans.firstIndex(where: { plan in plan.id == id }) else { return }
     plans.remove(at: index)
   }
 
-  public func clear() throws { plans.removeAll() }
+  public mutating func clear() async throws { plans.removeAll() }
 }
 
 /// Plan whose modifications, including those on its goals and to-dos, are performed in-memory,
 /// maintained only for as long as the program is being executed, with changes on these structs
 /// being discarded upon their deinitialization.
-public actor InMemoryPlan: Plan {
+public struct InMemoryPlan: Plan {
   public typealias Descriptor = AnyPlanDescriptor
   public typealias ImplementationError = NSError
 
@@ -70,27 +70,27 @@ public actor InMemoryPlan: Plan {
   ///   of properties of this ``Plan``.
   fileprivate init(describedBy descriptor: AnyPlanDescriptor) {
     var title = descriptor.title
-    Self.normalize(title: &title)
+    normalize(title: &title)
     self.title = title
     var summary = descriptor.summary
-    Self.normalize(summary: &summary)
+    normalize(summary: &summary)
     self.summary = summary
     self.goals = descriptor.goals.map { goalDescriptor in .init(describedBy: goalDescriptor) }
   }
 
-  public func setTitle(to newTitle: String) async throws {
+  public mutating func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
-    Self.normalize(title: &newTitle)
+    normalize(title: &newTitle)
     title = newTitle
   }
 
-  public func setSummary(to newSummary: String) async throws {
+  public mutating func setSummary(to newSummary: String) async throws {
     var newSummary = newSummary
-    Self.normalize(summary: &newSummary)
+    normalize(summary: &newSummary)
     summary = newSummary
   }
 
-  public func addGoal(describedBy descriptor: AnyGoalDescriptor) async throws -> UUID {
+  public mutating func addGoal(describedBy descriptor: AnyGoalDescriptor) async throws -> UUID {
     let goal = InMemoryGoal(describedBy: descriptor)
     goals.append(goal)
     return goal.id
@@ -103,7 +103,7 @@ public actor InMemoryPlan: Plan {
     return goal
   }
 
-  public func removeGoal(identifiedAs id: UUID) async throws {
+  public mutating func removeGoal(identifiedAs id: UUID) async throws {
     guard let index = goals.firstIndex(where: { goal in goal.id == id }) else { return }
     goals.remove(at: index)
   }
@@ -112,7 +112,7 @@ public actor InMemoryPlan: Plan {
 /// Goal whose modifications and those on its to-dos are performed in-memory, maintained only for as
 /// long as the program is being executed, with changes on these structs being discarded upon their
 /// deinitialization.
-public actor InMemoryGoal: Goal {
+public struct InMemoryGoal: Goal {
   public typealias Descriptor = AnyGoalDescriptor
   public typealias ImplementationError = NSError
 
@@ -129,27 +129,27 @@ public actor InMemoryGoal: Goal {
   ///   of properties of this ``Goal``.
   fileprivate init(describedBy descriptor: AnyGoalDescriptor) {
     var title = descriptor.title
-    Self.normalize(title: &title)
+    normalize(title: &title)
     self.title = title
     var summary = descriptor.summary
-    Self.normalize(summary: &summary)
+    normalize(summary: &summary)
     self.summary = summary
     self.toDos = descriptor.toDos.map { toDoDescriptor in .init(describedBy: toDoDescriptor) }
   }
 
-  public func setTitle(to newTitle: String) async throws {
+  public mutating func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
-    Self.normalize(title: &newTitle)
+    normalize(title: &newTitle)
     title = newTitle
   }
 
-  public func setSummary(to newSummary: String) async throws {
+  public mutating func setSummary(to newSummary: String) async throws {
     var newSummary = newSummary
-    Self.normalize(summary: &newSummary)
+    normalize(summary: &newSummary)
     summary = newSummary
   }
 
-  public func addToDo(describedBy descriptor: AnyToDoDescriptor) async throws -> UUID {
+  public mutating func addToDo(describedBy descriptor: AnyToDoDescriptor) async throws -> UUID {
     let toDo = InMemoryToDo(describedBy: descriptor)
     toDos.append(toDo)
     return toDo.id
@@ -162,7 +162,7 @@ public actor InMemoryGoal: Goal {
     return toDo
   }
 
-  public func removeToDo(identifiedAs id: UUID) async throws {
+  public mutating func removeToDo(identifiedAs id: UUID) async throws {
     guard let index = toDos.firstIndex(where: { toDo in toDo.id == id }) else { return }
     toDos.remove(at: index)
   }
@@ -170,7 +170,7 @@ public actor InMemoryGoal: Goal {
 
 /// To-do of a ``DemoGoal`` whose modifications are performed in-memory, maintained for as long as
 /// the program is being executed and discarted upon the deinitialization of this struct.
-public actor InMemoryToDo: ToDo {
+public struct InMemoryToDo: ToDo {
   public typealias Descriptor = AnyToDoDescriptor
   public typealias ImplementationError = NSError
 
@@ -188,27 +188,27 @@ public actor InMemoryToDo: ToDo {
   ///   of properties of this ``ToDo``.
   fileprivate init(describedBy descriptor: AnyToDoDescriptor) {
     var title = descriptor.title
-    Self.normalize(title: &title)
+    normalize(title: &title)
     self.title = title
     var summary = descriptor.summary
-    Self.normalize(summary: &summary)
+    normalize(summary: &summary)
     self.summary = summary
     self.status = descriptor.status
     self.deadline = descriptor.deadline
   }
 
-  public func setTitle(to newTitle: String) async throws {
+  public mutating func setTitle(to newTitle: String) async throws {
     var newTitle = newTitle
-    Self.normalize(title: &newTitle)
+    normalize(title: &newTitle)
     title = newTitle
   }
 
-  public func setSummary(to newSummary: String) async throws {
+  public mutating func setSummary(to newSummary: String) async throws {
     var newSummary = newSummary
-    Self.normalize(summary: &newSummary)
+    normalize(summary: &newSummary)
     summary = newSummary
   }
 
-  public func setStatus(to newStatus: Status) async throws { status = newStatus }
-  public func setDeadline(to newDeadline: Date) async throws { deadline = newDeadline }
+  public mutating func setStatus(to newStatus: Status) async throws { status = newStatus }
+  public mutating func setDeadline(to newDeadline: Date) async throws { deadline = newDeadline }
 }
