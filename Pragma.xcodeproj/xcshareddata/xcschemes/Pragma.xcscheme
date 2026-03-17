@@ -46,6 +46,17 @@
                ReferencedContainer = "container:Pragma.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "499F42E62F68B9DA00AC5722"
+               BuildableName = "PragmaTests.xctest"
+               BlueprintName = "PragmaTests"
+               ReferencedContainer = "container:Pragma.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

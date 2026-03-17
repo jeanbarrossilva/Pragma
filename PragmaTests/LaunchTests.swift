@@ -17,29 +17,34 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-import OnboardingFeature
-import PlannerKit
-import PlansFeature
-import SwiftUI
+import Foundation
+@testable import Pragma
+import Testing
 
-private let isFirstLaunch =
-  Launch.current(from: .standard, updating: true).count == 1
+struct LaunchTests: ~Copyable {
+  private let userDefaults = UserDefaults()
 
-struct PragmaView<PlannerType>: View where PlannerType: Planner {
-  var body: some View {
-    if isOnboarding {
-      OnboardingCarousel(onNext: { isOnboarding = false })
-    } else {
-      Plans(viewModel: plansViewModel)
+  init() {
+    for key in Launch.Key.allCases {
+      userDefaults.removeObject(forKey: key.rawValue)
     }
   }
 
-  private let plansViewModel: PlansViewModel<PlannerType>
+  @Test(arguments: [false, true])
+  func launchCountIsOneByDefault(updating willUpdate: Bool) {
+    let launch = Launch.current(from: userDefaults, updating: willUpdate)
+    #expect(launch.count == 1)
+  }
 
-  @State
-  private var isOnboarding = isFirstLaunch
+  @Test
+  func launchCountIsNotIncrementedInUserDefaultsWhenNotUpdating() {
+    let _ = Launch.current(from: userDefaults, updating: false)
+    #expect(userDefaults.integer(forKey: Launch.Key.count.rawValue) == 0)
+  }
 
-  init(plansViewModel: PlansViewModel<PlannerType>) {
-    self.plansViewModel = plansViewModel
+  @Test
+  func launchCountIsIncrementedInUserDefaultsWhenUpdating() {
+    let _ = Launch.current(from: userDefaults, updating: true)
+    #expect(userDefaults.integer(forKey: Launch.Key.count.rawValue) == 1)
   }
 }
