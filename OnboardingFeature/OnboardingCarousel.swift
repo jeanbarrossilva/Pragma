@@ -33,9 +33,7 @@ public struct OnboardingCarousel: View {
           }
         }
       }
-      Button {
-
-      } label: {
+      Button(action: onNext) {
         Label {
           Text("Next")
         } icon: {
