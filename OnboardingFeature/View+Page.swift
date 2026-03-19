@@ -17,29 +17,10 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-import OnboardingFeature
-import PlannerKit
-import PlansFeature
 import SwiftUI
 
-private let isFirstLaunch =
-  Launch.current(from: .standard, updating: true).count == 1
-
-struct PragmaView<PlannerType>: View where PlannerType: Planner {
-  var body: some View {
-    if isOnboarding {
-      OnboardingCarousel(onNext: { isOnboarding = false })
-    } else {
-      Plans(viewModel: plansViewModel)
-    }
-  }
-
-  private let plansViewModel: PlansViewModel<PlannerType>
-
-  @State
-  private var isOnboarding = isFirstLaunch
-
-  init(plansViewModel: PlansViewModel<PlannerType>) {
-    self.plansViewModel = plansViewModel
+extension View {
+  func pagePadding(_ edges: Edge.Set = .all) -> some View {
+    padding(edges).padding(edges)
   }
 }

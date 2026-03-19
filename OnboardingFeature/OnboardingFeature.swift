@@ -1,7 +1,7 @@
 // ===-----------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
-// This file is part of the Pragma open-source project.
+// This file is part of the OnboardingFeature open-source project.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -16,30 +16,3 @@
 // You should have received a copy of the GNU General Public License along with
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
-
-import OnboardingFeature
-import PlannerKit
-import PlansFeature
-import SwiftUI
-
-private let isFirstLaunch =
-  Launch.current(from: .standard, updating: true).count == 1
-
-struct PragmaView<PlannerType>: View where PlannerType: Planner {
-  var body: some View {
-    if isOnboarding {
-      OnboardingCarousel(onNext: { isOnboarding = false })
-    } else {
-      Plans(viewModel: plansViewModel)
-    }
-  }
-
-  private let plansViewModel: PlansViewModel<PlannerType>
-
-  @State
-  private var isOnboarding = isFirstLaunch
-
-  init(plansViewModel: PlansViewModel<PlannerType>) {
-    self.plansViewModel = plansViewModel
-  }
-}

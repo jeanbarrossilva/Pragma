@@ -17,29 +17,22 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-import OnboardingFeature
-import PlannerKit
-import PlansFeature
 import SwiftUI
 
-private let isFirstLaunch =
-  Launch.current(from: .standard, updating: true).count == 1
+#Preview { IntroPage() }
 
-struct PragmaView<PlannerType>: View where PlannerType: Planner {
+struct IntroPage: Hashable, View {
   var body: some View {
-    if isOnboarding {
-      OnboardingCarousel(onNext: { isOnboarding = false })
-    } else {
-      Plans(viewModel: plansViewModel)
+    HStack {
+      VStack(alignment: .leading) {
+        Spacer()
+        Text("Pragma")
+          .font(.system(.largeTitle, design: .monospaced, weight: .black))
+        Text("Tasks, reimagined.").fontDesign(.monospaced)
+          .foregroundStyle(.secondary).padding(.top, -8)
+      }
+      .pagePadding()
+      Spacer()
     }
-  }
-
-  private let plansViewModel: PlansViewModel<PlannerType>
-
-  @State
-  private var isOnboarding = isFirstLaunch
-
-  init(plansViewModel: PlansViewModel<PlannerType>) {
-    self.plansViewModel = plansViewModel
   }
 }
