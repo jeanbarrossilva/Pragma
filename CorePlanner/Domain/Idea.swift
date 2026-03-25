@@ -17,27 +17,17 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-import Combine
-import PlannerKit
+/// Part of the process of achieving an objective defined by the user,
+/// regardless of its granularity.
+///
+/// This is the protocol common to each entity of ``CorePlanner``: ``Plan``,
+/// ``Goal`` and ``ToDo``.
+public protocol Idea: Identifiable, Sendable, SendableMetatype
+where ID: Sendable {
+  /// Main, general, non-blank description.
+  var title: String { get }
 
-@MainActor
-public struct PlansViewModel {
-  var plans: [AnyPlanDescriptor]
-
-  private var repository: PersistentPlanRepository
-
-  public init(repository: PersistentPlanRepository) async throws {
-    self.repository = repository
-    self.plans = try await repository.plans.asyncMap { plan in
-      try await .init(of: plan)
-    }
-  }
-
-  func add(toDo: AnyToDoDescriptor, to goalID: AnyHashable) {}
-
-  func transfer(
-    toDos toDoIDs: [AnyHashable],
-    withStatus status: Status,
-    to goalID: AnyHashable
-  ) {}
+  /// Secondary, detailed explanation related to the contents of the ``title``.
+  /// May be blank.
+  var summary: String { get }
 }

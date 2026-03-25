@@ -1,4 +1,4 @@
-// ===-----------------------------------------------------------------------===
+//// ===-----------------------------------------------------------------------===
 // Copyright © 2026 Jean Silva
 //
 // This file is part of the Pragma open-source project.
@@ -17,27 +17,5 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-import Combine
-import PlannerKit
-
-@MainActor
-public struct PlansViewModel {
-  var plans: [AnyPlanDescriptor]
-
-  private var repository: PersistentPlanRepository
-
-  public init(repository: PersistentPlanRepository) async throws {
-    self.repository = repository
-    self.plans = try await repository.plans.asyncMap { plan in
-      try await .init(of: plan)
-    }
-  }
-
-  func add(toDo: AnyToDoDescriptor, to goalID: AnyHashable) {}
-
-  func transfer(
-    toDos toDoIDs: [AnyHashable],
-    withStatus status: Status,
-    to goalID: AnyHashable
-  ) {}
-}
+/// Abstract container for adding, updating and removing ``Goal``s.
+public protocol GoalRepository {}

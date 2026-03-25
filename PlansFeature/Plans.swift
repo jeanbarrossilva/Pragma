@@ -61,8 +61,7 @@ public struct Plans: View {
     (_ goalID: AnyHashable, _ toDoIDs: [AnyHashable], _ newStatus: Status) ->
       Void
 
-  public init<PlannerType>(viewModel: PlansViewModel<PlannerType>)
-  where PlannerType: PlanRepository {
+  public init(viewModel: PlansViewModel) {
     self.plans = viewModel.plans
     self.onDidRequestPlanAddition = {}
     self.onDidRequestToDoAddition = { goalID, toDo in

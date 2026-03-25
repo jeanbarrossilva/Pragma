@@ -25,7 +25,7 @@ import SwiftUI
 private let isFirstLaunch =
   Launch.current(from: .standard, updating: true).count == 1
 
-struct PragmaView<PlannerType>: View where PlannerType: PlanRepository {
+struct PragmaView: View {
   var body: some View {
     if isOnboarding {
       OnboardingCarousel(onNext: { isOnboarding = false })
@@ -34,12 +34,10 @@ struct PragmaView<PlannerType>: View where PlannerType: PlanRepository {
     }
   }
 
-  private let plansViewModel: PlansViewModel<PlannerType>
+  private let plansViewModel: PlansViewModel
 
   @State
   private var isOnboarding = isFirstLaunch
 
-  init(plansViewModel: PlansViewModel<PlannerType>) {
-    self.plansViewModel = plansViewModel
-  }
+  init(plansViewModel: PlansViewModel) { self.plansViewModel = plansViewModel }
 }

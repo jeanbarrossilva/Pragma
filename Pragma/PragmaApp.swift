@@ -33,13 +33,13 @@ struct PragmaApp: App {
         }
       }
       .task {
-        do { viewModel = try await .init(planner: .persistent) } catch {
-          fatalError(error.localizedDescription)
-        }
+        do {
+          viewModel = try await .init(repository: .init(inMemory: false))
+        } catch { fatalError(error.localizedDescription) }
       }
     }
   }
 
   @State
-  private var viewModel: PlansViewModel<PersistentPlanRepository>?
+  private var viewModel: PlansViewModel?
 }

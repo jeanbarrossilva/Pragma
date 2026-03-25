@@ -21,27 +21,12 @@
 /// academic plan, focused on studies of subjects of a given course and overall
 /// enhancement of received grades) or time (e.g., a plan with resolutions for
 /// the upcoming year).
-public protocol Plan: Sendable, SendableMetatype
-where GoalType.ID == ID, GoalType.ToDoType.ID == ID {
+public protocol Plan: Idea where GoalType.ID == ID, GoalType.ToDoType.ID == ID {
   /// Type of the descriptor of an instance of a ``GoalType``.
   associatedtype GoalDescriptor: Sendable
 
   /// Type of ``Goal``s by which this ``Plan`` is composed.
   associatedtype GoalType: Goal
-
-  /// Type of the ``id``.
-  associatedtype ID: Hashable & Sendable
-
-  /// Identifier which distinguishes this ``Plan`` from others in the same
-  /// ``PlanRepository``.
-  var id: ID { get }
-
-  /// Main, general, non-blank description.
-  var title: String { get }
-
-  /// Secondary, detailed explanation related to the contents of the ``title``.
-  /// May be blank.
-  var summary: String { get }
 
   /// Each of the ``Goal``s laid out, whose achievement was deemed required by
   /// the user in order for this ``Plan`` to be successful.

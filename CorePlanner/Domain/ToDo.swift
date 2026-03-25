@@ -21,21 +21,7 @@
 /// achievement of a ``Goal``. They are sequential, meaning that each is part of
 /// a set of other to-dos which are designed to be done in order; such order is
 /// ascending, determined by their ``deadline``.
-public protocol ToDo: Sendable, SendableMetatype {
-  /// Type of the ``id``.
-  associatedtype ID: Hashable & Sendable
-
-  /// Identifier which distinguishes this ``ToDo`` from others in the same
-  /// ``Goal``.
-  var id: ID { get }
-
-  /// Main, general, non-blank description.
-  var title: String { get }
-
-  /// Secondary, detailed explanation related to the contents of the ``title``.
-  /// May be blank.
-  var summary: String { get }
-
+public protocol ToDo: Idea {
   /// Stage of completion of this ``ToDo``.
   var status: Status { get }
 

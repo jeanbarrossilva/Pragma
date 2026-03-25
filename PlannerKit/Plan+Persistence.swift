@@ -19,29 +19,22 @@
 
 import SwiftData
 
-extension PlanRepository where Self == PersistentPlanRepository {
-  /// Alias for the initialization of a ``PersistentPlanRepository``.
-  public static var persistent: PersistentPlanRepository {
-    get throws { try persistent(isInMemory: false) }
-  }
-
-  /// Produces an instance of a ``PersistentPlanRepository``.
-  ///
-  /// - Parameter isInMemory: Whether plans, goals and to-dos are stored in
-  ///   memory, as opposed to persisted.
-  static func persistent(isInMemory: Bool) throws -> Self {
-    try .init(isInMemory: isInMemory)
-  }
-}
-
 /// Abstraction for accessing a container in which ``CorePlanner`` structures
 /// are inserted, with the stored data being retrievable after deinitialization
 /// of this class or the underlying implementations of ``CorePlanner/Plan``,
 /// ``CorePlanner/Goal`` and ``CorePlanner/ToDo``.
-public struct PersistentPlanRepository: PlanRepository {
+public class PersistentPlanRepository {
   /// Context by which all standalone and batched operations are performed.
   public let context: ConcurrentContext
 
+  /// Plans in this repository.
+  ///
+  /// ###### Implementation notes
+  ///
+  /// The plans *must* be sorted and, even though this is an array, each of them
+  /// *must* be unique, at least with an ID distinct from that of the other
+  /// ones. Such uniqueness *must* be ensured by the public initializer or
+  /// factory function.
   public var plans: [PersistedPlan] {
     get async throws {
       try await context.run { context in
@@ -61,11 +54,29 @@ public struct PersistentPlanRepository: PlanRepository {
     PlanModel.self, GoalModel.self, ToDoModel.self
   ]
 
-  fileprivate init(isInMemory: Bool) throws {
+  /// Initializes a persistent repository of plans.
+  ///
+  /// - Parameter isInMemory: Whether plans, goals and to-dos are stored in
+  ///   memory rather than in a database.
+  public init(inMemory isInMemory: Bool) throws {
     self.container = try Self.makeContainer(isInMemory: isInMemory)
     self.context = try .init(container: container)
   }
 
+  /// Adds a plan as described by its descriptor. All goals described in it,
+  /// alongside the to-dos defined within these goals, will also be added.
+  ///
+  /// ###### Implementation notes
+  ///
+  /// The array returned by ``plans`` *must* have been modified after a call to
+  /// this function, with the plan included in it. By the time this function
+  /// returns, such array *must* be sorted according to the criteria of
+  /// comparison of the type of plan.
+  ///
+  /// - Parameter descriptor: Descriptor based on which the plan will be
+  ///   added.
+  /// - Returns: The ID of the added plan.
+  /// - SeeAlso: ``addGoal(describedBy:)``
   public func addPlan(
     describedBy descriptor: AnyPlanDescriptor
   ) async throws -> UUID {
@@ -96,17 +107,33 @@ public struct PersistentPlanRepository: PlanRepository {
       return model.uuid
     }
   }
-
+  /// Retrieves an added plan identified with a given ID.
+  ///
+  /// - Parameter id: ID of the plan to be retrieved.
+  /// - Throws: If the plan is not found.
   public func plan(identifiedAs id: UUID) async throws -> PersistedPlan {
     try await .init(identifiedAs: id, insertedInto: context)
   }
 
+  /// Removes an added plan from this repository.
+  ///
+  /// ###### Implementation notes
+  ///
+  /// The array returned by ``plans`` *must* have been modified after a call to
+  /// this function, with the plan removed from it. By the time this function
+  /// returns, such array *must* be sorted according to the criteria of
+  /// comparison of the type of plan.
+  ///
+  /// - Parameter id: ID of the plan to be deleted.
   public func removePlan(identifiedAs id: UUID) async throws {
     try await context.delete(
       where: #Predicate<PlanModel> { model in model.uuid == id }
     )
   }
 
+  /// Removes every added plan, goal and to-do from this repository.
+  ///
+  /// > Warning: This is a destructive action and cannot be undone.
   public func clear() throws { try container.erase() }
 
   /// Produces a container into which models of persisted implementations of
@@ -119,7 +146,7 @@ public struct PersistentPlanRepository: PlanRepository {
   }
 }
 
-/// Plan persisted into a container by a ``PersistentPlanner``.
+/// Plan persisted into a container by a ``PersistentPlanRepository``.
 public final class PersistedPlan: PersistedDomain, Plan {
   public typealias Descriptor = AnyPlanDescriptor
   public typealias BackingModel = PlanModel
@@ -205,7 +232,8 @@ extension PersistedPlan: Hashable {
   }
 }
 
-/// Model of a plan persisted into a container by a ``PersistentPlanner``.
+/// Model of a plan persisted into a container by a
+/// ``PersistentPlanRepository``.
 @Model
 public final class PlanModel: PartialHeadlined {
   private(set) public var uuid = UUID()

@@ -22,26 +22,12 @@
 /// the user). It intends to make specific an otherwise broad objective, e.g.,
 /// "Work at Apple", by dividing it into various intentional, trackable,
 /// time-constrained steps.
-public protocol Goal: Sendable, SendableMetatype where ID == ToDoType.ID {
+public protocol Goal: Idea {
   /// Type of the descriptor of an instance of a ``ToDoType``.
   associatedtype ToDoDescriptor: Sendable
 
   /// Type of ``ToDo``s by which this ``Goal`` is composed.
   associatedtype ToDoType: ToDo
-
-  /// Type of the ``id``.
-  associatedtype ID: Hashable & Sendable
-
-  /// Identifier which distinguishes this ``Goal`` from others in the same
-  /// ``Plan``.
-  var id: ID { get }
-
-  /// Main, general, non-blank description.
-  var title: String { get }
-
-  /// Secondary, detailed explanation related to the contents of the ``title``.
-  /// May be blank.
-  var summary: String { get }
 
   /// ``ToDo``s related to the achievement of the defined objective, sorted
   /// ascendingly by their ``ToDo/deadline``.
