@@ -165,7 +165,7 @@
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 491005902F10575200896DDF /* Resources */;
 			membershipExceptions = (
-				CollectionConcurrencyKit.swift,
+				Core/CollectionConcurrencyKit.swift,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
