@@ -17,20 +17,20 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-/// Stage of completion of a to-do which determines whether such to-do is
+/// Stage of completion of a ``ToDo`` which determines whether such ``ToDo`` is
 /// *idle*, *ongoing* or *done*.
 @frozen
 public enum Status: CaseIterable, Codable, Comparable {
   /// ``Status`` of a ``ToDo`` when none has been set.
   public static let `default` = Self.idle
 
-  /// Denotes that the to-do has been added to the goal, but no progress on it
-  /// has been done yet.
+  /// Denotes that the ``ToDo`` has been added to the ``Goal``, but no progress
+  /// on it has been done yet.
   case idle
 
-  /// Denotes that the to-do is being worked on and is not yet done.
+  /// Denotes that the ``ToDo`` is being worked on and is not yet done.
   case ongoing
 
-  /// Denotes that the to-do has been worked on and is done.
+  /// Denotes that the ``ToDo`` has been worked on and is done.
   case done
 }
