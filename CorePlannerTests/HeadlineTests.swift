@@ -20,19 +20,16 @@
 @testable import CorePlanner
 import Testing
 
-@Suite("Headlined+Normalization tests")
-struct HeadlinedNormalizationTests {
-  @Test(arguments: [" Title", "Title "])
-  func trims(title: String) {
-    var title = title
-    normalize(title: &title)
-    #expect(title == "Title")
+struct HeadlineTests {
+  @Test(arguments: ["Title", " Title", "Title "])
+  func normalizes(title: String) {
+    let headline = Headline.from(title: title, summary: "")
+    #expect(headline.title == "Title")
   }
 
-  @Test(arguments: [" Summary.", "Summary. "])
-  func trims(summary: String) {
-    var summary = summary
-    normalize(summary: &summary)
-    #expect(summary == "Summary.")
+  @Test(arguments: ["Summary.", " Summary.", "Summary. "])
+  func normalizes(summary: String) {
+    let headline = Headline.from(title: "Title", summary: summary)
+    #expect(headline.summary == "Summary.")
   }
 }

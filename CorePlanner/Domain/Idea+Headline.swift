@@ -17,13 +17,11 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-/// Part of the process of achieving an objective defined by the user,
-/// regardless of its granularity.
-///
-/// This is the protocol common to each entity of ``CorePlanner``: ``Plan``,
-/// ``Goal`` and ``ToDo``.
-public protocol Idea: Identifiable, Sendable, SendableMetatype
-where ID: Sendable {
-  /// Explanation and/or instructions on how to achieve the objective.
-  var headline: Headline { get }
+public extension Idea {
+  /// Main, general, non-blank description.
+  var title: String { headline.title }
+
+  /// Secondary, detailed explanation related to the contents of the ``title``.
+  /// May be blank.
+  var summary: String { headline.summary }
 }

@@ -17,8 +17,6 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-// MARK: - Backwards compatibility
-
 /// ``Headlined`` which allows for asynchronous modifications of its
 /// ``Headlined/title`` and ``Headlined/summary``.
 @available(*, deprecated, message: "Headline should be implemented manually.")
@@ -82,9 +80,14 @@ extension Headlined where Self: Equatable {
 ///
 /// - Parameters:
 ///   - title: Title suggested for a headline.
+@available(
+  *,
+  deprecated,
+  message: "Produce a headline from 'Headline.from(title:summary:)' instead."
+)
 public func normalize(title: inout String) {
-  precondition(!title.isBlank, "A title cannot be blank.")
-  title.trim(.whitespacesAndNewlines)
+  var summary = ""
+  title = Headline.from(title: title, summary: summary).title
 }
 
 /// Trims a ``summary``.
@@ -94,65 +97,12 @@ public func normalize(title: inout String) {
 ///
 /// - Parameters:
 ///   - summary: Summary suggested for a headline.
+@available(
+  *,
+  deprecated,
+  message: "Produce a headline from 'Headline.from(title:summary:)' instead."
+)
 public func normalize(summary: inout String) {
-  summary.trim(.whitespacesAndNewlines)
-}
-
-extension String {
-  /// Whether this ``String`` is empty or contains only whitespace or newlines.
-  fileprivate var isBlank: Bool {
-    isEmpty
-      || allSatisfy { character in character.isNewline || character.isWhitespace
-      }
-  }
-
-  /// Removes prefixes and suffixes which are a subset of the given set.
-  ///
-  /// - Parameter characters: Set of characters which should be removed from
-  ///   both extremes of this ``String``.
-  fileprivate mutating func trim(_ characters: CharacterSet) {
-    guard !isEmpty else { return }
-    var trimmingIndices = Array(indices)
-    var trimmableCount: Int {
-      trimmingIndices.count(while: { trimmingIndex in
-        !characters.isDisjoint(
-          with: .init(charactersIn: .init(self[trimmingIndex]))
-        )
-      })
-    }
-    let leadingTrimmableCount = trimmableCount
-    if leadingTrimmableCount > 0 {
-      removeSubrange(
-        startIndex..<index(startIndex, offsetBy: leadingTrimmableCount)
-      )
-      guard !isEmpty else { return }
-    }
-    trimmingIndices = .init(indices)
-    trimmingIndices.reverse()
-    let trailingTrimmableCount = trimmableCount
-    guard trailingTrimmableCount > 0 else { return }
-    removeSubrange(
-      index(endIndex, offsetBy: -trailingTrimmableCount)..<endIndex
-    )
-  }
-}
-
-extension Sequence {
-  /// Counts how many elements consecutively match the `predicate`, starting
-  /// from the first one.
-  ///
-  /// - Complexity: O(*n*), where *n* is the amount of elements in this
-  ///   sequence.
-  /// - Parameter predicate: Condition to be satisfied by an element for
-  ///   determining whether that which succeeds it may be counted. Returning
-  ///   `false` denotes that the return of ``count(while:)`` will be the amount
-  ///   of elements for which this predicate has yielded `true` until this one.
-  fileprivate func count(while predicate: (Element) -> Bool) -> Int {
-    var count = 0
-    for element in self {
-      guard predicate(element) else { break }
-      count += 1
-    }
-    return count
-  }
+  var title = "Title"
+  summary = Headline.from(title: title, summary: summary).summary
 }

@@ -153,8 +153,7 @@ public final class PersistedPlan: PersistedDomain, Plan {
 
   public let context: ConcurrentContext
   public let id: UUID
-  public let title: String
-  public let summary: String
+  public let headline: Headline
 
   public var goals: [PersistedGoal] {
     get async throws {
@@ -182,12 +181,10 @@ public final class PersistedPlan: PersistedDomain, Plan {
       identifiedAs: id,
       insertedInto: context
     )
-    var title = backingModel.title
-    normalize(title: &title)
-    self.title = title
-    var summary = backingModel.summary
-    normalize(summary: &summary)
-    self.summary = summary
+    self.headline = .from(
+      title: backingModel.title,
+      summary: backingModel.summary
+    )
   }
 
   public func addGoal(
@@ -272,8 +269,7 @@ public final class PersistedGoal: PersistedDomain, Goal {
 
   public let context: ConcurrentContext
   public let id: UUID
-  public let title: String
-  public let summary: String
+  public let headline: Headline
 
   public var toDos: [PersistedToDo] {
     get async throws {
@@ -301,12 +297,10 @@ public final class PersistedGoal: PersistedDomain, Goal {
       identifiedAs: id,
       insertedInto: context
     )
-    var title = backingModel.title
-    normalize(title: &title)
-    self.title = title
-    var summary = backingModel.summary
-    normalize(summary: &summary)
-    self.summary = summary
+    self.headline = .from(
+      title: backingModel.title,
+      summary: backingModel.summary
+    )
   }
 
   public func addToDo(
@@ -383,8 +377,7 @@ public final class PersistedToDo: PersistedDomain, ToDo {
 
   public let context: ConcurrentContext
   public let id: UUID
-  public let title: String
-  public let summary: String
+  public let headline: Headline
   public let status: Status
   public let deadline: Date
 
@@ -400,12 +393,10 @@ public final class PersistedToDo: PersistedDomain, ToDo {
       identifiedAs: id,
       insertedInto: context
     )
-    var title = backingModel.title
-    normalize(title: &title)
-    self.title = title
-    var summary = backingModel.summary
-    normalize(summary: &summary)
-    self.summary = summary
+    self.headline = .from(
+      title: backingModel.title,
+      summary: backingModel.summary
+    )
     self.status = backingModel.status
     self.deadline = backingModel.deadline
   }
