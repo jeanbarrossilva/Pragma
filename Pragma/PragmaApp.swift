@@ -29,7 +29,7 @@ struct PragmaApp: App {
       Group {
         if let viewModel {
           PragmaView(plansViewModel: viewModel)
-            .modelContainer(for: PersistentPlanner.modelTypes)
+            .modelContainer(for: PersistentPlanRepository.modelTypes)
         }
       }
       .task {
@@ -41,5 +41,5 @@ struct PragmaApp: App {
   }
 
   @State
-  private var viewModel: PlansViewModel<PersistentPlanner>?
+  private var viewModel: PlansViewModel<PersistentPlanRepository>?
 }

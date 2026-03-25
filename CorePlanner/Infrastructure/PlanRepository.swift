@@ -21,7 +21,7 @@
 /// retrieve them afterwards. The mechanism for adding and whether the plans or
 /// changes to them are maintained after deinitialization of an instance of this
 /// type or of its plans is a detail of the implementation.
-public protocol Planner
+public protocol PlanRepository
 where
   PlanType.ID == PlanType.GoalType.ID,
   PlanType.GoalType.ID == PlanType.GoalType.ToDoType.ID
@@ -29,10 +29,10 @@ where
   /// Type of the descriptor of an instance of a ``PlanType``.
   associatedtype PlanDescriptor: Sendable
 
-  /// Type of ``Plan``s by which this ``Planner`` is composed.
+  /// Type of ``Plan``s by which this ``PlanRepository`` is composed.
   associatedtype PlanType: Plan
 
-  /// Stream of ``Plan``s in this ``Planner``.
+  /// Stream of ``Plan``s in this ``PlanRepository``.
   ///
   /// ###### Implementation notes
   ///
@@ -61,7 +61,7 @@ where
     describedBy descriptor: PlanDescriptor
   ) async throws -> PlanType.ID
 
-  /// Removes an added plan from this ``Planner``.
+  /// Removes an added plan from this ``PlanRepository``.
   ///
   /// ###### Implementation notes
   ///
@@ -79,7 +79,7 @@ where
   /// - Throws: If the ``Plan`` is not found.
   func plan(identifiedAs id: PlanType.ID) async throws -> PlanType
 
-  /// Removes every added plan, goal and to-do from this ``Planner``.
+  /// Removes every added plan, goal and to-do from this ``PlanRepository``.
   ///
   /// > Warning: This is a destructive action and cannot be undone.
   mutating func clear() async throws

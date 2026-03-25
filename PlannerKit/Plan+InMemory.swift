@@ -17,16 +17,16 @@
 // this program. If not, see https://www.gnu.org/licenses.
 // ===-----------------------------------------------------------------------===
 
-extension Planner where Self == InMemoryPlanner {
+extension PlanRepository where Self == InMemoryPlanRepository {
   /// Alias for the initialization of an ``InMemoryPlanner``.
-  public static func inMemory() -> InMemoryPlanner { InMemoryPlanner() }
+  public static func inMemory() -> InMemoryPlanRepository { .init() }
 }
 
-/// Planner which stores its plans, goals and to-dos in memory. Persistence is,
-/// therefore, not supported: all data added to it will be removed upon its
+/// Repository which stores its plans, goals and to-dos in memory. Persistence
+/// is, therefore, not supported: all data added to it will be removed upon its
 /// deinitialization, and will not be recoverable afterward; every newly
 /// initialized instance of this planner is in an untouched state.
-public struct InMemoryPlanner: Planner {
+public struct InMemoryPlanRepository: PlanRepository {
   public typealias ImplementationError = NSError
 
   private(set) public var plans = [InMemoryPlan]()

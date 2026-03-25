@@ -21,7 +21,7 @@ import Combine
 import CorePlanner
 
 @MainActor
-public struct PlansViewModel<PlannerType> where PlannerType: Planner {
+public struct PlansViewModel<PlannerType> where PlannerType: PlanRepository {
   var plans: [AnyPlanDescriptor]
 
   private var planner: PlannerType

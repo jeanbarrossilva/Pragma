@@ -23,7 +23,7 @@ import Testing
 fileprivate struct InMemoryGoalTests {
   @Test(arguments: AnyGoalDescriptor.samples)
   func normalizesHeadline(of descriptor: AnyGoalDescriptor) async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     var plan = try await planner.plan(identifiedAs: planID)
     let goalID = try await plan.addGoal(
@@ -36,7 +36,7 @@ fileprivate struct InMemoryGoalTests {
 
   @Test
   func setsTitle() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(
       describedBy: .sample(.withGoals(.withToDos))
     )
@@ -49,7 +49,7 @@ fileprivate struct InMemoryGoalTests {
 
   @Test
   func setsDescription() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(
       describedBy: .sample(.withGoals(.withToDos))
     )
@@ -62,7 +62,7 @@ fileprivate struct InMemoryGoalTests {
 
   @Test
   func addsToDo() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals))
     let plan = try await planner.plan(identifiedAs: planID)
     var goal = plan.goals[0]
@@ -79,7 +79,7 @@ fileprivate struct InMemoryGoalTests {
 
   @Test
   func removesToDo() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(
       describedBy: .sample(.withGoals(.withToDos))
     )

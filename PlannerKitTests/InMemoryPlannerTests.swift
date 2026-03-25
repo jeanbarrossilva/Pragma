@@ -20,17 +20,17 @@
 @testable import PlannerKit
 import Testing
 
-struct InMemoryPlannerTests {
+struct InMemoryPlanRepositoryTests {
   @Test(arguments: AnyPlanDescriptor.samples)
   func addsPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: descriptor)
     _ = try await planner.plan(identifiedAs: planID)
   }
 
   @Test(arguments: AnyPlanDescriptor.samples)
   func removesPlan(basedOn descriptor: AnyPlanDescriptor) async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: descriptor)
     try await planner.removePlan(identifiedAs: planID)
     await #expect(
@@ -40,7 +40,7 @@ struct InMemoryPlannerTests {
 
   @Test
   func clears() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planIDs = try await AnyPlanDescriptor.samples.asyncMap {
       planDescriptor in try await planner.addPlan(describedBy: planDescriptor)
     }

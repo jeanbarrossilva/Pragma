@@ -33,7 +33,7 @@ where GoalType.ID == ID, GoalType.ToDoType.ID == ID {
   associatedtype ID: Hashable & Sendable
 
   /// Identifier which distinguishes this ``Plan`` from others in the same
-  /// ``Planner``.
+  /// ``PlanRepository``.
   var id: ID { get }
 
   /// Main, general, non-blank description.

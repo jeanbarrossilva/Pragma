@@ -23,7 +23,7 @@ import Testing
 struct InMemoryToDoTests {
   @Test
   func headlineIsNormalized() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .samples[0])
     let plan = try await planner.plan(identifiedAs: planID)
     var goal = plan.goals[0]
@@ -42,7 +42,7 @@ struct InMemoryToDoTests {
 
   @Test
   func setsTitle() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(
       describedBy: .sample(.withGoals(.withToDos))
     )
@@ -54,7 +54,7 @@ struct InMemoryToDoTests {
 
   @Test
   func setsDescription() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(
       describedBy: .sample(.withGoals(.withToDos))
     )
@@ -66,7 +66,7 @@ struct InMemoryToDoTests {
 
   @Test
   func setsStatus() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(
       describedBy: .sample(.withGoals(.withToDos))
     )

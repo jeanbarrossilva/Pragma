@@ -25,7 +25,7 @@ import SwiftUI
 private let isFirstLaunch =
   Launch.current(from: .standard, updating: true).count == 1
 
-struct PragmaView<PlannerType>: View where PlannerType: Planner {
+struct PragmaView<PlannerType>: View where PlannerType: PlanRepository {
   var body: some View {
     if isOnboarding {
       OnboardingCarousel(onNext: { isOnboarding = false })

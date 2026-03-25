@@ -23,7 +23,7 @@ import Testing
 struct InMemoryPlanTests {
   @Test
   func headlineIsNormalized() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .samples[0])
     var plan = try await planner.plan(identifiedAs: planID)
     try await plan.setTitle(to: " Title")
@@ -34,7 +34,7 @@ struct InMemoryPlanTests {
 
   @Test
   func setsTitle() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .samples[0])
     var plan = try await planner.plan(identifiedAs: planID)
     let newTitle = "🥼"
@@ -44,7 +44,7 @@ struct InMemoryPlanTests {
 
   @Test
   func setsDescription() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .samples[0])
     var plan = try await planner.plan(identifiedAs: planID)
     let newSummary = "⚓️"
@@ -54,7 +54,7 @@ struct InMemoryPlanTests {
 
   @Test
   func addsGoal() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     var plan = try await planner.plan(identifiedAs: planID)
     let goalID = try await plan.addGoal(
@@ -65,7 +65,7 @@ struct InMemoryPlanTests {
 
   @Test
   func addedGoalHasNoToDosByDefault() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .sample(.withoutGoals))
     var plan = try await planner.plan(identifiedAs: planID)
     let goalID = try await plan.addGoal(
@@ -77,7 +77,7 @@ struct InMemoryPlanTests {
 
   @Test
   func removesGoal() async throws {
-    var planner = InMemoryPlanner()
+    var planner = InMemoryPlanRepository()
     let planID = try await planner.addPlan(describedBy: .sample(.withGoals))
     var plan = try await planner.plan(identifiedAs: planID)
     let goalID = plan.goals[0].id

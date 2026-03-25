@@ -62,7 +62,7 @@ public struct Plans: View {
       Void
 
   public init<PlannerType>(viewModel: PlansViewModel<PlannerType>)
-  where PlannerType: Planner {
+  where PlannerType: PlanRepository {
     self.plans = viewModel.plans
     self.onDidRequestPlanAddition = {}
     self.onDidRequestToDoAddition = { goalID, toDo in

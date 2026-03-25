@@ -27,7 +27,7 @@ struct ConcurrentContextTests {
     @Test
     func doesNotSaveWhileInsertingInTransaction() async throws {
       try await ConcurrentContext(
-        container: PersistentPlanner.makeContainer(isInMemory: true)
+        container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
       .transaction { context in
         try context.insert(PlanModel(uuid: .init(), title: "", summary: ""))
@@ -42,7 +42,7 @@ struct ConcurrentContextTests {
     @Test
     func doesNotSaveWhileDeletingInTransaction() async throws {
       let context = try ConcurrentContext(
-        container: PersistentPlanner.makeContainer(isInMemory: true)
+        container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
       let insertedModel = PlanModel(uuid: .init(), title: "", summary: "")
       let insertedModelSnapshot = Snapshot(of: insertedModel)
@@ -61,7 +61,7 @@ struct ConcurrentContextTests {
     @Test
     func savesAfterInsertionInTransaction() async throws {
       let context = try ConcurrentContext(
-        container: PersistentPlanner.makeContainer(isInMemory: true)
+        container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
       let insertedModelUUID = UUID()
       try await context.transaction { context in
@@ -81,7 +81,7 @@ struct ConcurrentContextTests {
     @Test
     func savesAfterBatchingDeletion() async throws {
       let context = try ConcurrentContext(
-        container: PersistentPlanner.makeContainer(isInMemory: true)
+        container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
       let insertedModelUUID = UUID()
       try await context.insert(
@@ -109,7 +109,7 @@ struct ConcurrentContextTests {
     @Test
     func fetchingOneNonexistentModelReturnsNil() async throws {
       try await ConcurrentContext(
-        container: PersistentPlanner.makeContainer(isInMemory: true)
+        container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
       .run { context in
         let fetchedModel = try context.fetch(
@@ -123,7 +123,7 @@ struct ConcurrentContextTests {
     @Test
     func fetchesOneExistingModel() async throws {
       try await ConcurrentContext(
-        container: PersistentPlanner.makeContainer(isInMemory: true)
+        container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
       .run { context in
         let insertedModel = PlanModel(uuid: .init(), title: "", summary: "")
@@ -139,7 +139,7 @@ struct ConcurrentContextTests {
     @Test
     func fetchesAllModels() async throws {
       try await ConcurrentContext(
-        container: PersistentPlanner.makeContainer(isInMemory: true)
+        container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
       .run { context in
         let insertedModels = [PlanModel](count: 128) { _ in
@@ -160,7 +160,7 @@ struct ConcurrentContextTests {
   @Test
   func inserts() async throws {
     try await ConcurrentContext(
-      container: PersistentPlanner.makeContainer(isInMemory: true)
+      container: PersistentPlanRepository.makeContainer(isInMemory: true)
     )
     .run { context in
       let model = PlanModel(uuid: .init(), title: "", summary: "")
@@ -173,7 +173,7 @@ struct ConcurrentContextTests {
   @Test
   func deletes() async throws {
     try await ConcurrentContext(
-      container: PersistentPlanner.makeContainer(isInMemory: true)
+      container: PersistentPlanRepository.makeContainer(isInMemory: true)
     )
     .run { context in
       let model = PlanModel(uuid: .init(), title: "", summary: "")
@@ -187,7 +187,7 @@ struct ConcurrentContextTests {
   @Test
   func deletesAllOfSomeType() async throws {
     let context = try ConcurrentContext(
-      container: PersistentPlanner.makeContainer(isInMemory: true)
+      container: PersistentPlanRepository.makeContainer(isInMemory: true)
     )
     let planSnapshots = [Snapshot<PlanModel>](count: 2) { _ in
       .init(of: .init(uuid: .init(), title: "", summary: ""))

@@ -19,13 +19,13 @@
 
 import SwiftData
 
-extension Planner where Self == PersistentPlanner {
-  /// Alias for the initialization of a ``PersistentPlanner``.
-  public static var persistent: PersistentPlanner {
+extension PlanRepository where Self == PersistentPlanRepository {
+  /// Alias for the initialization of a ``PersistentPlanRepository``.
+  public static var persistent: PersistentPlanRepository {
     get throws { try persistent(isInMemory: false) }
   }
 
-  /// Produces an instance of a ``PersistentPlanner``.
+  /// Produces an instance of a ``PersistentPlanRepository``.
   ///
   /// - Parameter isInMemory: Whether plans, goals and to-dos are stored in
   ///   memory, as opposed to persisted.
@@ -38,7 +38,7 @@ extension Planner where Self == PersistentPlanner {
 /// are inserted, with the stored data being retrievable after deinitialization
 /// of this class or the underlying implementations of ``CorePlanner/Plan``,
 /// ``CorePlanner/Goal`` and ``CorePlanner/ToDo``.
-public struct PersistentPlanner: Planner {
+public struct PersistentPlanRepository: PlanRepository {
   /// Context by which all standalone and batched operations are performed.
   public let context: ConcurrentContext
 
