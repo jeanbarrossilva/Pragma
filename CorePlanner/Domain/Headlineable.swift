@@ -85,10 +85,7 @@ extension Headlined where Self: Equatable {
   deprecated,
   message: "Produce a headline from 'Headline.from(title:summary:)' instead."
 )
-public func normalize(title: inout String) {
-  var summary = ""
-  title = Headline.from(title: title, summary: summary).title
-}
+public func normalize(title: inout String) { Headline.normalize(title: &title) }
 
 /// Trims a ``summary``.
 ///
@@ -103,6 +100,5 @@ public func normalize(title: inout String) {
   message: "Produce a headline from 'Headline.from(title:summary:)' instead."
 )
 public func normalize(summary: inout String) {
-  var title = "Title"
-  summary = Headline.from(title: title, summary: summary).summary
+  Headline.normalize(summary: &summary)
 }

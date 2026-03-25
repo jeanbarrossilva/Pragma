@@ -21,12 +21,32 @@
 /// different levels of detail. Serves as an explanation for what the ``Idea``
 /// represents and/or how to achieve its objective.
 public struct Headline: Sendable {
+  /// Backing property of the ``title``.
+  private var _title: String
+
+  /// Backing property of the ``summary``.
+  private var _summary: String
+
   /// Main, general, non-blank description.
-  let title: String
+  var title: String {
+    get { _title }
+    set {
+      var newValue = newValue
+      Self.normalize(title: &newValue)
+      _title = newValue
+    }
+  }
 
   /// Secondary, detailed explanation related to the contents of the ``title``.
   /// May be blank.
-  let summary: String
+  var summary: String {
+    get { _summary }
+    set {
+      var newValue = newValue
+      Self.normalize(summary: &newValue)
+      _summary = newValue
+    }
+  }
 
   /// Initializes a ``Headline`` with a title and a summary which have already
   /// undergone normalization.
@@ -36,8 +56,8 @@ public struct Headline: Sendable {
   ///   - summary: Secondary, detailed explanation related to the contents of
   ///     the ``title``. May be blank.
   private init(title: String, summary: String) {
-    self.title = title
-    self.summary = summary
+    self._title = title
+    self._summary = summary
   }
 
   /// Produces a ``Headline`` from a title and a summary suggested by the user,
@@ -51,14 +71,38 @@ public struct Headline: Sendable {
   /// 2. Removal of leading and trailing whitespaces from the summary, which, as
   ///    opposed to the title, may be blank.
   ///
+  /// - Parameters:
+  ///   - title: Suggested main, general, non-blank description.
+  ///   - summary: Suggested secondary, detailed explanation related to the
+  ///     contents of the `title`. May be blank.
   /// - Returns: A ``Headline`` with the given `title` and `summary` normalized.
   public static func from(title: String, summary: String) -> Self {
-    precondition(!title.isBlank, "Title cannot be blank.")
     var title = title
     var summary = summary
-    title.trim(.whitespacesAndNewlines)
-    summary.trim(.whitespacesAndNewlines)
+    Self.normalize(title: &title)
+    Self.normalize(summary: &summary)
     return .init(title: title, summary: summary)
+  }
+
+  /// Normalizes the title suggested for a ``Headline``, trimming any leading or
+  /// trailing whitespaces. This function will terminate the program in case the
+  /// title is blank, as that is not allowed by a ``Headline``.
+  ///
+  /// - Parameter title: Suggested main, general, non-blank description.
+  static func normalize(title: inout String) {
+    title.trim(.whitespacesAndNewlines)
+    precondition(!title.isEmpty, "Title cannot be blank.")
+  }
+
+  /// Normalizes the summary suggested for ``Headline``, trimming any leading or
+  /// trailing whitespaces. May be blank; therefore, as opposed to the
+  /// normalization of a ``title``, calling this function will not cause the
+  /// program to terminate.
+  ///
+  /// - Parameter summary: Suggested secondary, detailed explanation related to
+  ///   the contents of the title of the ``Headline``.
+  static func normalize(summary: inout String) {
+    summary.trim(.whitespacesAndNewlines)
   }
 }
 
