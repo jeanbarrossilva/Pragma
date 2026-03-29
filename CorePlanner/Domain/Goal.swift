@@ -40,16 +40,6 @@ public protocol Goal: Idea {
   /// factory function.
   var toDos: [ToDoType] { get async throws }
 
-  /// Changes the ``title``.
-  ///
-  /// - Parameter newTitle: Title by which the current one will be replaced.
-  mutating func setTitle(to newTitle: String) async throws
-
-  /// Changes the ``summary``.
-  ///
-  /// - Parameter newSummary: Summary by which the current one will be replaced.
-  mutating func setSummary(to newSummary: String) async throws
-
   /// Adds a ``ToDo`` as described by its descriptor.
   ///
   /// ###### Implementation notes

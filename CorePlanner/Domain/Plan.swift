@@ -39,16 +39,6 @@ public protocol Plan: Idea where GoalType.ID == ID, GoalType.ToDoType.ID == ID {
   /// factory function.
   var goals: [GoalType] { get async throws }
 
-  /// Changes the ``title``.
-  ///
-  /// - Parameter newTitle: Title by which the current one will be replaced.
-  mutating func setTitle(to newTitle: String) async throws
-
-  /// Changes the ``summary``.
-  ///
-  /// - Parameter newSummary: Summary by which the current one will be replaced.
-  mutating func setSummary(to newSummary: String) async throws
-
   /// Adds a ``Goal`` as described by its descriptor. All ``ToDo``s described in
   /// it will also be added.
   ///

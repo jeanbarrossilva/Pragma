@@ -21,98 +21,16 @@
 import SwiftData
 import Testing
 
-struct ConcurrentContextTests {
-  @Suite("Transaction")
-  struct TransactionTests {
-    @Test
-    func doesNotSaveWhileInsertingInTransaction() async throws {
-      try await ConcurrentContext(
-        container: PersistentPlanRepository.makeContainer(isInMemory: true)
-      )
-      .transaction { context in
-        try context.insert(PlanModel(uuid: .init(), title: "", summary: ""))
-        let fetchedModel = try context.fetch(
-          .one,
-          where: Predicate<PlanModel>.true
-        )
-        #expect(fetchedModel == nil)
-      }
-    }
-
-    @Test
-    func doesNotSaveWhileDeletingInTransaction() async throws {
-      let context = try ConcurrentContext(
-        container: PersistentPlanRepository.makeContainer(isInMemory: true)
-      )
-      let insertedModel = PlanModel(uuid: .init(), title: "", summary: "")
-      let insertedModelSnapshot = Snapshot(of: insertedModel)
-      try await context.insert(insertedModel)
-      try await context.transaction { context in
-        let copiedInsertedModel = insertedModelSnapshot.copy()
-        try context.delete(copiedInsertedModel)
-        let fetchedModel = try context.fetch(
-          .one,
-          where: Predicate<PlanModel>.true
-        )
-        #expect(fetchedModel?.uuid == copiedInsertedModel.uuid)
-      }
-    }
-
-    @Test
-    func savesAfterInsertionInTransaction() async throws {
-      let context = try ConcurrentContext(
-        container: PersistentPlanRepository.makeContainer(isInMemory: true)
-      )
-      let insertedModelUUID = UUID()
-      try await context.transaction { context in
-        try context.insert(
-          PlanModel(uuid: insertedModelUUID, title: "", summary: "")
-        )
-      }
-      try await context.run { context in
-        let fetchedModel = try context.fetch(
-          .one,
-          where: Predicate<PlanModel>.true
-        )
-        #expect(fetchedModel?.uuid == insertedModelUUID)
-      }
-    }
-
-    @Test
-    func savesAfterBatchingDeletion() async throws {
-      let context = try ConcurrentContext(
-        container: PersistentPlanRepository.makeContainer(isInMemory: true)
-      )
-      let insertedModelUUID = UUID()
-      try await context.insert(
-        PlanModel(uuid: insertedModelUUID, title: "", summary: "")
-      )
-      try await context.transaction { context in
-        try context.delete(
-          where: #Predicate<PlanModel> { model in
-            model.uuid == insertedModelUUID
-          }
-        )
-      }
-      try await context.run { context in
-        let fetchedModel = try context.fetch(
-          .one,
-          where: Predicate<PlanModel>.true
-        )
-        #expect(fetchedModel == nil)
-      }
-    }
-  }
-
+struct ModelContextQueueTests {
   @Suite("Fetching")
   struct FetchingTests {
     @Test
     func fetchingOneNonexistentModelReturnsNil() async throws {
-      try await ConcurrentContext(
+      try await ModelContextQueue(
         container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
-      .run { context in
-        let fetchedModel = try context.fetch(
+      .run { contextQueue in
+        let fetchedModel = try contextQueue.fetch(
           .one,
           where: Predicate<PlanModel>.true
         )
@@ -122,13 +40,14 @@ struct ConcurrentContextTests {
 
     @Test
     func fetchesOneExistingModel() async throws {
-      try await ConcurrentContext(
+      try await ModelContextQueue(
         container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
-      .run { context in
+      .run { contextQueue in
         let insertedModel = PlanModel(uuid: .init(), title: "", summary: "")
-        try context.insert(insertedModel)
-        let fetchedModel = try context.fetch(
+        contextQueue.enqueue(.insertion(of: insertedModel))
+        try await contextQueue.flush()
+        let fetchedModel = try contextQueue.fetch(
           .one,
           where: Predicate<PlanModel>.true
         )
@@ -138,17 +57,18 @@ struct ConcurrentContextTests {
 
     @Test
     func fetchesAllModels() async throws {
-      try await ConcurrentContext(
+      try await ModelContextQueue(
         container: PersistentPlanRepository.makeContainer(isInMemory: true)
       )
-      .run { context in
+      .run { contextQueue in
         let insertedModels = [PlanModel](count: 128) { _ in
           .init(uuid: .init(), title: "", summary: "")
         }
         for insertedModel in insertedModels {
-          try context.insert(insertedModel)
+          contextQueue.enqueue(.insertion(of: insertedModel))
         }
-        let fetchedModels = try context.fetch(
+        try await contextQueue.flush()
+        let fetchedModels = try contextQueue.fetch(
           .all,
           where: Predicate<PlanModel>.true
         )
@@ -159,34 +79,42 @@ struct ConcurrentContextTests {
 
   @Test
   func inserts() async throws {
-    try await ConcurrentContext(
+    try await ModelContextQueue(
       container: PersistentPlanRepository.makeContainer(isInMemory: true)
     )
-    .run { context in
+    .run { contextQueue in
       let model = PlanModel(uuid: .init(), title: "", summary: "")
-      try context.insert(model)
-      let models = try context.fetch(.all, where: Predicate<PlanModel>.true)
+      contextQueue.enqueue(.insertion(of: model))
+      try await contextQueue.flush()
+      let models = try contextQueue.fetch(
+        .all,
+        where: Predicate<PlanModel>.true
+      )
       #expect(models.elementsEqual([model]))
     }
   }
 
   @Test
-  func deletes() async throws {
-    try await ConcurrentContext(
+  func deletesOne() async throws {
+    try await ModelContextQueue(
       container: PersistentPlanRepository.makeContainer(isInMemory: true)
     )
-    .run { context in
+    .run { contextQueue in
       let model = PlanModel(uuid: .init(), title: "", summary: "")
-      try context.insert(model)
-      try context.delete(model)
-      let models = try context.fetch(.all, where: Predicate<PlanModel>.true)
+      contextQueue.enqueue(.insertion(of: model))
+      contextQueue.enqueue(.deletion(of: model))
+      try await contextQueue.flush()
+      let models = try contextQueue.fetch(
+        .all,
+        where: Predicate<PlanModel>.true
+      )
       #expect(models.isEmpty)
     }
   }
 
   @Test
-  func deletesAllOfSomeType() async throws {
-    let context = try ConcurrentContext(
+  func deletesMany() async throws {
+    let contextQueue = try ModelContextQueue(
       container: PersistentPlanRepository.makeContainer(isInMemory: true)
     )
     let planSnapshots = [Snapshot<PlanModel>](count: 2) { _ in
@@ -215,21 +143,22 @@ struct ConcurrentContextTests {
       )
     }
     for planSnapshot in planSnapshots {
-      try await context.insert(planSnapshot.copy())
+      await contextQueue.enqueue(.insertion(of: planSnapshot.copy()))
     }
     for goalSnapshot in goalSnapshots {
-      try await context.insert(goalSnapshot.copy())
+      await contextQueue.enqueue(.insertion(of: goalSnapshot.copy()))
     }
     for toDoSnapshot in toDoSnapshots {
-      try await context.insert(toDoSnapshot.copy())
+      await contextQueue.enqueue(.insertion(of: toDoSnapshot.copy()))
     }
-    try await context.deleteAll(ofType: PlanModel.self)
-    try await context.deleteAll(ofType: GoalModel.self)
-    try await context.deleteAll(ofType: ToDoModel.self)
-    try await context.run { context in
-      let plans = try context.fetch(.all, where: Predicate<PlanModel>.true)
-      let goals = try context.fetch(.all, where: Predicate<GoalModel>.true)
-      let toDos = try context.fetch(.all, where: Predicate<ToDoModel>.true)
+    await contextQueue.enqueue(.deletion(where: Predicate<PlanModel>.true))
+    await contextQueue.enqueue(.deletion(where: Predicate<GoalModel>.true))
+    await contextQueue.enqueue(.deletion(where: Predicate<ToDoModel>.true))
+    try await contextQueue.run { contextQueue in
+      try await contextQueue.flush()
+      let plans = try contextQueue.fetch(.all, where: Predicate<PlanModel>.true)
+      let goals = try contextQueue.fetch(.all, where: Predicate<GoalModel>.true)
+      let toDos = try contextQueue.fetch(.all, where: Predicate<ToDoModel>.true)
       #expect(plans.isEmpty)
       #expect(goals.isEmpty)
       #expect(toDos.isEmpty)

@@ -19,18 +19,18 @@
 
 import SwiftData
 
-public extension ConcurrentContext {
+public extension ModelContextQueue {
   /// Pseudo-type-erased version of a strategy for fetching models. Ultimately,
   /// acts as a wrapper which allows for static access to the implementations of
   /// the strategy protocol.
-  struct AnyFetchStrategy<Base, Model>: FetchStrategy
-  where Base: FetchStrategy, Base.Model == Model {
+  struct AnyFetchStrategy<Base, PersistentModelType>: FetchStrategy
+  where Base: FetchStrategy, Base.PersistentModelType == PersistentModelType {
     /// The backing, delegate strategy.
     private let base: Base
 
     public func fetch(
       through backingContext: ModelContext,
-      withDescriptor fetchDescriptor: FetchDescriptor<Model>
+      withDescriptor fetchDescriptor: FetchDescriptor<PersistentModelType>
     ) throws -> Base.Result {
       try base.fetch(through: backingContext, withDescriptor: fetchDescriptor)
     }
@@ -43,7 +43,7 @@ public extension ConcurrentContext {
   /// models).
   protocol FetchStrategy {
     /// Model being fetched.
-    associatedtype Model: PersistentModel
+    associatedtype PersistentModelType: PersistentModel
 
     /// Instance produced as a consequence of having performed a fetch.
     associatedtype Result
@@ -61,44 +61,46 @@ public extension ConcurrentContext {
     ///   `backingContext` called by the implementation.
     func fetch(
       through backingContext: ModelContext,
-      withDescriptor fetchDescriptor: FetchDescriptor<Model>
+      withDescriptor fetchDescriptor: FetchDescriptor<PersistentModelType>
     ) throws -> Result
   }
 }
 
 // MARK: - .count
 
-public extension ConcurrentContext.AnyFetchStrategy
-where Base == ConcurrentContext.CountFetchStrategy<Model> {
+public extension ModelContextQueue.AnyFetchStrategy
+where Base == ModelContextQueue.CountFetchStrategy<PersistentModelType> {
   /// Fetches the amount of models matching the predicate.
   static var count: Self { .init(base: .init()) }
 }
 
-public extension ConcurrentContext {
+public extension ModelContextQueue {
   /// Fetch strategy of ``AnyFetchStrategy/count``.
-  struct CountFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
+  struct CountFetchStrategy<PersistentModelType>: FetchStrategy
+  where PersistentModelType: PersistentModel {
     public func fetch(
       through backingContext: ModelContext,
-      withDescriptor fetchDescriptor: FetchDescriptor<Model>
+      withDescriptor fetchDescriptor: FetchDescriptor<PersistentModelType>
     ) throws -> Int { try backingContext.fetchCount(fetchDescriptor) }
   }
 }
 
 // MARK: - .one
 
-public extension ConcurrentContext.AnyFetchStrategy
-where Base == ConcurrentContext.OneFetchStrategy<Model> {
+public extension ModelContextQueue.AnyFetchStrategy
+where Base == ModelContextQueue.OneFetchStrategy<PersistentModelType> {
   /// Fetches a single model matching the predicate.
   static var one: Self { .init(base: .init()) }
 }
 
-public extension ConcurrentContext {
+public extension ModelContextQueue {
   /// Fetch strategy of ``AnyFetchStrategy/one``.
-  struct OneFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
+  struct OneFetchStrategy<PersistentModeltype>: FetchStrategy
+  where PersistentModeltype: PersistentModel {
     public func fetch(
       through backingContext: ModelContext,
-      withDescriptor fetchDescriptor: FetchDescriptor<Model>
-    ) throws -> Model? {
+      withDescriptor fetchDescriptor: FetchDescriptor<PersistentModeltype>
+    ) throws -> PersistentModeltype? {
       try backingContext.fetch(fetchDescriptor, batchSize: 1).first
     }
   }
@@ -106,18 +108,21 @@ public extension ConcurrentContext {
 
 // MARK: - .all
 
-public extension ConcurrentContext.AnyFetchStrategy
-where Base == ConcurrentContext.AllFetchStrategy<Model> {
+public extension ModelContextQueue.AnyFetchStrategy
+where Base == ModelContextQueue.AllFetchStrategy<PersistentModelType> {
   /// Fetches every model matching the predicate.
   static var all: Self { .init(base: .init()) }
 }
 
-public extension ConcurrentContext {
+public extension ModelContextQueue {
   /// Fetch strategy of ``AnyFetchStrategy/all``.
-  struct AllFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
+  struct AllFetchStrategy<PersistentModelType>: FetchStrategy
+  where PersistentModelType: PersistentModel {
     public func fetch(
       through backingContext: ModelContext,
-      withDescriptor fetchDescriptor: FetchDescriptor<Model>
-    ) throws -> [Model] { try backingContext.fetch(fetchDescriptor) }
+      withDescriptor fetchDescriptor: FetchDescriptor<PersistentModelType>
+    ) throws -> [PersistentModelType] {
+      try backingContext.fetch(fetchDescriptor)
+    }
   }
 }

@@ -13,6 +13,7 @@
 		4952C7492F0BF6AB00BFFB49 /* PlansFeature.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */; };
 		4952C74A2F0BF6AB00BFFB49 /* PlansFeature.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4952C7362F0BF6AB00BFFB49 /* PlansFeature.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		495FB9952F19595300154BF5 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 495FB9942F19595300154BF5 /* Collections */; };
+		496C6E672F75A83800B5F22E /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 496C6E662F75A83800B5F22E /* Collections */; };
 		49C7DBE42F66120000B2783F /* OnboardingFeature.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49C7DBDE2F66120000B2783F /* OnboardingFeature.framework */; };
 		49C7DBE52F66120000B2783F /* OnboardingFeature.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 49C7DBDE2F66120000B2783F /* OnboardingFeature.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		49DCA0EA2F0A65BC00274F58 /* .swift-format in Resources */ = {isa = PBXBuildFile; fileRef = 49DCA0E82F0A65B700274F58 /* .swift-format */; };
@@ -267,6 +268,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				496C6E672F75A83800B5F22E /* Collections in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,6 +525,7 @@
 			);
 			name = PlannerKit;
 			packageProductDependencies = (
+				496C6E662F75A83800B5F22E /* Collections */,
 			);
 			productName = PlannerToolkit;
 			productReference = 4952C75F2F0C7C9900BFFB49 /* PlannerKit.framework */;
@@ -1922,6 +1925,11 @@
 			productName = Collections;
 		};
 		495FB9942F19595300154BF5 /* Collections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 495FB9932F19595300154BF5 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = Collections;
+		};
+		496C6E662F75A83800B5F22E /* Collections */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 495FB9932F19595300154BF5 /* XCRemoteSwiftPackageReference "swift-collections" */;
 			productName = Collections;

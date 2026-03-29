@@ -22,8 +22,7 @@
 ///
 /// This is the protocol common to each entity of ``CorePlanner``: ``Plan``,
 /// ``Goal`` and ``ToDo``.
-public protocol Idea: Identifiable, Sendable, SendableMetatype
-where ID: Sendable {
+public protocol Idea: Identifiable where ID: Sendable {
   /// Explanation and/or instructions on how to achieve the objective.
-  var headline: Headline { get }
+  var headline: Headline { get set }
 }

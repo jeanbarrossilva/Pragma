@@ -21,6 +21,7 @@ extension Actor {
   /// Performs the given closure on this actor in isolation.
   ///
   /// - Parameter action: Operation to be performed.
+  @discardableResult
   public func run<Result>(
     _ action: @Sendable (isolated Self) async throws -> Result
   ) async rethrows -> Result where Result: Sendable { try await action(self) }

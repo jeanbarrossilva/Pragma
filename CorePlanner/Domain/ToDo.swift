@@ -23,28 +23,8 @@
 /// ascending, determined by their ``deadline``.
 public protocol ToDo: Idea {
   /// Stage of completion of this ``ToDo``.
-  var status: Status { get }
+  var status: Status { get set }
 
   /// Date until which this ``ToDo`` is expected to be done.
-  var deadline: Date { get }
-
-  /// Changes the ``title``.
-  ///
-  /// - Parameter newTitle: Title by which the current one will be replaced.
-  mutating func setTitle(to newTitle: String) async throws
-
-  /// Changes the ``summary``.
-  ///
-  /// - Parameter newSummary: Summary by which the current one will be replaced.
-  mutating func setSummary(to newSummary: String) async throws
-
-  /// Changes the ``status``.
-  ///
-  /// - Parameter newStatus: Status by which the current one will be replaced.
-  mutating func setStatus(to newStatus: Status) async throws
-
-  /// Changes the ``deadline``.
-  ///
-  /// - Parameter newDeadline: Deadline by which the current one will be replaced.
-  mutating func setDeadline(to newDeadline: Date) async throws
+  var deadline: Date { get set }
 }

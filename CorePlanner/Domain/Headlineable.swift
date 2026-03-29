@@ -40,8 +40,7 @@ public protocol Headlineable: Headlined {
   deprecated,
   message: "Title and abstract should be implemented manually."
 )
-public protocol Headlined: Comparable, Hashable, Identifiable, SendableMetatype
-{
+public protocol Headlined: Comparable, Hashable, Identifiable {
   /// Main, general, non-blank summary.
   var title: String { get }
 

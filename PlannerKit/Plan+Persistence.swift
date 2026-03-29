@@ -24,8 +24,9 @@ import SwiftData
 /// of this class or the underlying implementations of ``CorePlanner/Plan``,
 /// ``CorePlanner/Goal`` and ``CorePlanner/ToDo``.
 public class PersistentPlanRepository {
-  /// Context by which all standalone and batched operations are performed.
-  public let context: ConcurrentContext
+  /// ``ModelContextQueue`` by which all standalone and batched operations are
+  /// performed.
+  public let contextQueue: ModelContextQueue
 
   /// Plans in this repository.
   ///
@@ -37,11 +38,15 @@ public class PersistentPlanRepository {
   /// factory function.
   public var plans: [PersistedPlan] {
     get async throws {
-      try await context.run { context in
-        try await context.fetch(.all, where: Predicate<PlanModel>.true)
-          .asyncMap { model in
-            try await .init(identifiedAs: model.uuid, insertedInto: context)
-          }
+      try await contextQueue.run { contextQueue in
+        try contextQueue.fetch(.all, where: Predicate<PlanModel>.true)
+          .map { model in Snapshot(of: model) }
+      }
+      .asyncMap { modelSnapshot in
+        try await .init(
+          identifiedAs: modelSnapshot.copy().uuid,
+          insertedInto: contextQueue
+        )
       }
     }
   }
@@ -60,7 +65,7 @@ public class PersistentPlanRepository {
   ///   memory rather than in a database.
   public init(inMemory isInMemory: Bool) throws {
     self.container = try Self.makeContainer(isInMemory: isInMemory)
-    self.context = try .init(container: container)
+    self.contextQueue = .init(container: container)
   }
 
   /// Adds a plan as described by its descriptor. All goals described in it,
@@ -80,39 +85,42 @@ public class PersistentPlanRepository {
   public func addPlan(
     describedBy descriptor: AnyPlanDescriptor
   ) async throws -> UUID {
-    try await context.run { context in
+    try await contextQueue.run { contextQueue in
       let model = PlanModel(describedBy: descriptor)
       let planUUID = model.uuid
       if descriptor.goals.isEmpty {
-        try context.insert(model)
+        contextQueue.enqueue(.insertion(of: model))
       } else {
-        let modelSnapshot = Snapshot(of: model)
-        try await context.transaction { context in
-          let copiedModel = modelSnapshot.copy()
-          try context.insert(copiedModel)
-          for goalDescriptor in descriptor.goals {
-            let goalModel = GoalModel(
-              describedBy: goalDescriptor,
-              planUUID: planUUID
-            )
-            try context.insert(goalModel)
-            for toDoDescriptor in goalDescriptor.toDos {
-              try context.insert(
-                ToDoModel(describedBy: toDoDescriptor, goalUUID: goalModel.uuid)
+        contextQueue.enqueue(.insertion(of: model))
+        for goalDescriptor in descriptor.goals {
+          let goalModel = GoalModel(
+            describedBy: goalDescriptor,
+            planUUID: planUUID
+          )
+          contextQueue.enqueue(.insertion(of: goalModel))
+          for toDoDescriptor in goalDescriptor.toDos {
+            contextQueue.enqueue(
+              .insertion(
+                of: ToDoModel(
+                  describedBy: toDoDescriptor,
+                  goalUUID: goalModel.uuid
+                )
               )
-            }
+            )
           }
         }
       }
+      try await contextQueue.flush()
       return model.uuid
     }
   }
+
   /// Retrieves an added plan identified with a given ID.
   ///
   /// - Parameter id: ID of the plan to be retrieved.
   /// - Throws: If the plan is not found.
   public func plan(identifiedAs id: UUID) async throws -> PersistedPlan {
-    try await .init(identifiedAs: id, insertedInto: context)
+    try await .init(identifiedAs: id, insertedInto: contextQueue)
   }
 
   /// Removes an added plan from this repository.
@@ -126,9 +134,12 @@ public class PersistentPlanRepository {
   ///
   /// - Parameter id: ID of the plan to be deleted.
   public func removePlan(identifiedAs id: UUID) async throws {
-    try await context.delete(
-      where: #Predicate<PlanModel> { model in model.uuid == id }
-    )
+    try await contextQueue.run { contextQueue in
+      contextQueue.enqueue(
+        .deletion(where: #Predicate<PlanModel> { model in model.uuid == id })
+      )
+      try await contextQueue.flush()
+    }
   }
 
   /// Removes every added plan, goal and to-do from this repository.
@@ -151,20 +162,21 @@ public final class PersistedPlan: PersistedDomain, Plan {
   public typealias Descriptor = AnyPlanDescriptor
   public typealias BackingModel = PlanModel
 
-  public let context: ConcurrentContext
+  public let contextQueue: ModelContextQueue
   public let id: UUID
-  public let headline: Headline
+  public var headline: Headline
 
   public var goals: [PersistedGoal] {
     get async throws {
-      try await context.run { context in
-        try await context.fetch(
+      try await contextQueue.run { context in
+        try context.fetch(
           .all,
           where: #Predicate<GoalModel> { goalModel in goalModel.planUUID == id }
         )
-        .asyncMap { goalModel in
-          try await .init(identifiedAs: goalModel.uuid, insertedInto: context)
-        }
+        .map(\.uuid)
+      }
+      .asyncMap { goalID in
+        try await .init(identifiedAs: goalID, insertedInto: contextQueue)
       }
     }
   }
@@ -173,10 +185,10 @@ public final class PersistedPlan: PersistedDomain, Plan {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
+    insertedInto context: ModelContextQueue
   ) async throws {
     self.id = id
-    self.context = context
+    self.contextQueue = context
     let backingModel = try await Self.backingModel(
       identifiedAs: id,
       insertedInto: context
@@ -190,34 +202,38 @@ public final class PersistedPlan: PersistedDomain, Plan {
   public func addGoal(
     describedBy descriptor: AnyGoalDescriptor
   ) async throws -> UUID {
-    try await context.run { context in
+    try await contextQueue.run { [id] contextQueue in
       let goalModel = GoalModel(describedBy: descriptor, planUUID: id)
       let goalUUID = goalModel.uuid
       if descriptor.toDos.isEmpty {
-        try context.insert(goalModel)
+        contextQueue.enqueue(.insertion(of: goalModel))
       } else {
-        try await context.transaction { context in
-          for toDoDescriptor in descriptor.toDos {
-            let toDoModel = ToDoModel(
-              describedBy: toDoDescriptor,
-              goalUUID: goalUUID
-            )
-            try context.insert(toDoModel)
-          }
+        for toDoDescriptor in descriptor.toDos {
+          let toDoModel = ToDoModel(
+            describedBy: toDoDescriptor,
+            goalUUID: goalUUID
+          )
+          contextQueue.enqueue(.insertion(of: toDoModel))
         }
       }
+      try await contextQueue.flush()
       return goalUUID
     }
   }
 
   public func goal(identifiedAs id: UUID) async throws -> PersistedGoal {
-    try await .init(identifiedAs: id, insertedInto: context)
+    try await .init(identifiedAs: id, insertedInto: contextQueue)
   }
 
   public func removeGoal(identifiedAs id: UUID) async throws {
-    try await context.delete(
-      where: #Predicate<GoalModel> { goalModel in goalModel.uuid == id }
-    )
+    try await contextQueue.run { contextQueue in
+      contextQueue.enqueue(
+        .deletion(
+          where: #Predicate<GoalModel> { goalModel in goalModel.uuid == id }
+        )
+      )
+      try await contextQueue.flush()
+    }
   }
 }
 
@@ -267,20 +283,21 @@ public final class PersistedGoal: PersistedDomain, Goal {
   public typealias Descriptor = AnyGoalDescriptor
   public typealias BackingModel = GoalModel
 
-  public let context: ConcurrentContext
+  public let contextQueue: ModelContextQueue
   public let id: UUID
-  public let headline: Headline
+  public var headline: Headline
 
   public var toDos: [PersistedToDo] {
     get async throws {
-      try await context.run { context in
-        try await context.fetch(
+      try await contextQueue.run { [id] context in
+        try context.fetch(
           .all,
           where: #Predicate<ToDoModel> { toDoModel in toDoModel.goalUUID == id }
         )
-        .asyncMap { toDoModel in
-          try await .init(identifiedAs: toDoModel.uuid, insertedInto: context)
-        }
+        .map(\.uuid)
+      }
+      .asyncMap { toDoID in
+        try await .init(identifiedAs: toDoID, insertedInto: contextQueue)
       }
     }
   }
@@ -289,10 +306,10 @@ public final class PersistedGoal: PersistedDomain, Goal {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
+    insertedInto context: ModelContextQueue
   ) async throws {
     self.id = id
-    self.context = context
+    self.contextQueue = context
     let backingModel = try await Self.backingModel(
       identifiedAs: id,
       insertedInto: context
@@ -306,21 +323,27 @@ public final class PersistedGoal: PersistedDomain, Goal {
   public func addToDo(
     describedBy descriptor: AnyToDoDescriptor
   ) async throws -> UUID {
-    try await context.run { context in
+    try await contextQueue.run { [id] contextQueue in
       let toDoModel = ToDoModel(describedBy: descriptor, goalUUID: id)
-      try context.insert(toDoModel)
+      contextQueue.enqueue(.insertion(of: toDoModel))
+      try await contextQueue.flush()
       return toDoModel.uuid
     }
   }
 
   public func toDo(identifiedAs id: UUID) async throws -> PersistedToDo {
-    try await .init(identifiedAs: id, insertedInto: context)
+    try await .init(identifiedAs: id, insertedInto: contextQueue)
   }
 
   public func removeToDo(identifiedAs id: UUID) async throws {
-    try await context.delete(
-      where: #Predicate<ToDoModel> { toDoModel in toDoModel.uuid == id }
-    )
+    try await contextQueue.run { contextQueue in
+      contextQueue.enqueue(
+        .deletion(
+          where: #Predicate<ToDoModel> { toDoModel in toDoModel.uuid == id }
+        )
+      )
+      try await contextQueue.flush()
+    }
   }
 }
 
@@ -375,20 +398,20 @@ public final class PersistedToDo: PersistedDomain, ToDo {
   public typealias Descriptor = AnyToDoDescriptor
   public typealias BackingModel = ToDoModel
 
-  public let context: ConcurrentContext
+  public let contextQueue: ModelContextQueue
   public let id: UUID
-  public let headline: Headline
-  public let status: Status
-  public let deadline: Date
+  public var headline: Headline
+  public var status: Status
+  public var deadline: Date
 
   public static let description = "to-do"
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
+    insertedInto context: ModelContextQueue
   ) async throws {
     self.id = id
-    self.context = context
+    self.contextQueue = context
     let backingModel = try await Self.backingModel(
       identifiedAs: id,
       insertedInto: context
@@ -489,8 +512,8 @@ public protocol PersistedDomain: Headlineable where ID == UUID {
   /// The persisted model on which this structure is based.
   associatedtype BackingModel: PartialHeadlined, PersistentModel, NSCopying
 
-  /// Context of the model backing this implementation.
-  var context: ConcurrentContext { get }
+  /// ``ModelContextQueue`` of the model backing this implementation.
+  var contextQueue: ModelContextQueue { get }
 
   /// Makes an instance of this type from the ID of the model persisted into the
   /// container, backing accesses to each of its properties, adding
@@ -499,10 +522,10 @@ public protocol PersistedDomain: Headlineable where ID == UUID {
   ///
   /// - Parameters:
   ///   - id: The stable identity of the entity associated with this instance.
-  ///   - context: Context into which the model is inserted.
+  ///   - context: ``ModelContextQueue`` into which the model is inserted.
   init(
     identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
+    insertedInto contextQueue: ModelContextQueue
   ) async throws
 }
 
@@ -513,7 +536,7 @@ extension PersistedDomain {
   /// - SeeAlso: ``backingModel(identifiedAs:insertedInto:)``
   fileprivate var backingModel: BackingModel {
     get async throws {
-      try await Self.backingModel(identifiedAs: id, insertedInto: context)
+      try await Self.backingModel(identifiedAs: id, insertedInto: contextQueue)
     }
   }
 
@@ -533,13 +556,14 @@ extension PersistedDomain {
   ///
   /// - Parameters:
   ///   - uuid: The ID of the backing model.
-  ///   - context: Context into which the backing model is inserted.
+  ///   - context: ``ModelContextQueue`` into which the backing model is
+  ///     inserted.
   /// - SeeAlso: ``backingModel``
   fileprivate static func backingModel(
     identifiedAs id: UUID,
-    insertedInto context: ConcurrentContext
+    insertedInto contextQueue: ModelContextQueue
   ) async throws -> BackingModel {
-    let snapshot = try await context.run { context in
+    let snapshot = try await contextQueue.run { context in
       guard
         let backingModel = try context.fetch(
           .one,
