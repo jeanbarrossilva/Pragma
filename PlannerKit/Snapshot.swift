@@ -55,3 +55,13 @@ public struct Snapshot<Object>: @unchecked Sendable where Object: NSCopying {
   /// original `NSObject` was by the time this ``Snapshot`` was initialized.
   public func copy() -> Object { object.copy() as! Object }
 }
+
+extension Snapshot: Equatable where Object: Equatable {
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.copy() == rhs.copy()
+  }
+}
+
+extension Snapshot: Hashable where Object: Hashable {
+  public func hash(into hasher: inout Hasher) { copy().hash(into: &hasher) }
+}

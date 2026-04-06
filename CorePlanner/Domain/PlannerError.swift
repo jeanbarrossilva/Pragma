@@ -29,7 +29,7 @@ public enum PlannerError: Error, @unchecked Sendable {
   /// - Parameters:
   ///   - type: Type of the instance which was not found.
   ///   - id: The unique ID expected to be that of the nonexistent instance.
-  case nonexistent(type: any Sendable.Type, id: any Hashable & Sendable)
+  case nonexistent(type: any Idea.Type, id: any Hashable & Sendable)
 }
 
 extension PlannerError: Equatable {

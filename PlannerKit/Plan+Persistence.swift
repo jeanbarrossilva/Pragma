@@ -39,7 +39,7 @@ public class PersistentPlanRepository {
   public var plans: [PersistedPlan] {
     get async throws {
       try await contextQueue.run { contextQueue in
-        try contextQueue.fetch(.all, where: Predicate<PlanModel>.true)
+        try contextQueue.fetch(.all(PlanModel.self))
           .map { model in Snapshot(of: model) }
       }
       .asyncMap { modelSnapshot in
@@ -64,8 +64,11 @@ public class PersistentPlanRepository {
   /// - Parameter isInMemory: Whether plans, goals and to-dos are stored in
   ///   memory rather than in a database.
   public init(inMemory isInMemory: Bool) throws {
-    self.container = try Self.makeContainer(isInMemory: isInMemory)
-    self.contextQueue = .init(container: container)
+    self.container = try Self.makeContainer(inMemory: isInMemory)
+    self.contextQueue = .init(
+      backingContext: .init(container),
+      modelTypes: Self.modelTypes
+    )
   }
 
   /// Adds a plan as described by its descriptor. All goals described in it,
@@ -147,12 +150,18 @@ public class PersistentPlanRepository {
   /// > Warning: This is a destructive action and cannot be undone.
   public func clear() throws { try container.erase() }
 
-  /// Produces a container into which models of persisted implementations of
-  /// ``CorePlanner`` are inserted.
-  static func makeContainer(isInMemory: Bool) throws -> ModelContainer {
-    try .init(
+  /// Produces a container into which models of implementations of ideas are
+  /// inserted.
+  ///
+  /// - Parameter isInMemory: Whether the models are stored in memory instead of
+  ///   persisted in a database.
+  static func makeContainer(inMemory isInMemory: Bool) throws -> ModelContainer
+  {
+    return try .init(
       for: .init(Self.modelTypes),
-      configurations: .init(isStoredInMemoryOnly: isInMemory)
+      configurations: Self.modelTypes.map { _ in
+        .init(isStoredInMemoryOnly: isInMemory)
+      }
     )
   }
 }
@@ -168,10 +177,10 @@ public final class PersistedPlan: PersistedDomain, Plan {
 
   public var goals: [PersistedGoal] {
     get async throws {
-      try await contextQueue.run { context in
+      try await contextQueue.run { [id] context in
         try context.fetch(
-          .all,
-          where: #Predicate<GoalModel> { goalModel in goalModel.planUUID == id }
+          .all(GoalModel.self),
+          where: #Predicate { goalModel in goalModel.planUUID == id }
         )
         .map(\.uuid)
       }
@@ -291,8 +300,8 @@ public final class PersistedGoal: PersistedDomain, Goal {
     get async throws {
       try await contextQueue.run { [id] context in
         try context.fetch(
-          .all,
-          where: #Predicate<ToDoModel> { toDoModel in toDoModel.goalUUID == id }
+          .all(ToDoModel.self),
+          where: #Predicate { toDoModel in toDoModel.goalUUID == id }
         )
         .map(\.uuid)
       }
@@ -508,7 +517,8 @@ extension ToDoModel: NSCopying {
 /// headline of the model (upon both initialization and changes through the
 /// setters) and domain-driven behavior, e.g., adding to-dos to goals and goals
 /// to plans, without exposing details about the underlying persistence layer.
-public protocol PersistedDomain: Headlineable where ID == UUID {
+public protocol PersistedDomain: Idea, Headlineable, SendableMetatype
+where ID == UUID {
   /// The persisted model on which this structure is based.
   associatedtype BackingModel: PartialHeadlined, PersistentModel, NSCopying
 
@@ -566,10 +576,8 @@ extension PersistedDomain {
     let snapshot = try await contextQueue.run { context in
       guard
         let backingModel = try context.fetch(
-          .one,
-          where: #Predicate<BackingModel> { backingModel in
-            backingModel.uuid == id
-          }
+          .one(BackingModel.self),
+          where: #Predicate { backingModel in backingModel.uuid == id }
         )
       else { throw PlannerError.nonexistent(type: Self.self, id: id) }
       return Snapshot(of: backingModel)
