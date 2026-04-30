@@ -26,7 +26,7 @@ import SwiftData
 public class PersistentPlanRepository {
   /// ``ModelContextQueue`` by which all standalone and batched operations are
   /// performed.
-  public let contextQueue: ModelContextQueue
+  public let contextQueue: PersistenceQueue
 
   /// Plans in this repository.
   ///
@@ -66,7 +66,7 @@ public class PersistentPlanRepository {
   public init(inMemory isInMemory: Bool) throws {
     self.container = try Self.makeContainer(inMemory: isInMemory)
     self.contextQueue = .init(
-      backingContext: .init(container),
+      backingContainer: container,
       modelTypes: Self.modelTypes
     )
   }
@@ -171,7 +171,7 @@ public final class PersistedPlan: PersistedDomain, Plan {
   public typealias Descriptor = AnyPlanDescriptor
   public typealias BackingModel = PlanModel
 
-  public let contextQueue: ModelContextQueue
+  public let contextQueue: PersistenceQueue
   public let id: UUID
   public var headline: Headline
 
@@ -194,7 +194,7 @@ public final class PersistedPlan: PersistedDomain, Plan {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ModelContextQueue
+    insertedInto context: PersistenceQueue
   ) async throws {
     self.id = id
     self.contextQueue = context
@@ -292,7 +292,7 @@ public final class PersistedGoal: PersistedDomain, Goal {
   public typealias Descriptor = AnyGoalDescriptor
   public typealias BackingModel = GoalModel
 
-  public let contextQueue: ModelContextQueue
+  public let contextQueue: PersistenceQueue
   public let id: UUID
   public var headline: Headline
 
@@ -315,7 +315,7 @@ public final class PersistedGoal: PersistedDomain, Goal {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ModelContextQueue
+    insertedInto context: PersistenceQueue
   ) async throws {
     self.id = id
     self.contextQueue = context
@@ -407,7 +407,7 @@ public final class PersistedToDo: PersistedDomain, ToDo {
   public typealias Descriptor = AnyToDoDescriptor
   public typealias BackingModel = ToDoModel
 
-  public let contextQueue: ModelContextQueue
+  public let contextQueue: PersistenceQueue
   public let id: UUID
   public var headline: Headline
   public var status: Status
@@ -417,7 +417,7 @@ public final class PersistedToDo: PersistedDomain, ToDo {
 
   public init(
     identifiedAs id: UUID,
-    insertedInto context: ModelContextQueue
+    insertedInto context: PersistenceQueue
   ) async throws {
     self.id = id
     self.contextQueue = context
@@ -523,7 +523,7 @@ where ID == UUID {
   associatedtype BackingModel: PartialHeadlined, PersistentModel, NSCopying
 
   /// ``ModelContextQueue`` of the model backing this implementation.
-  var contextQueue: ModelContextQueue { get }
+  var contextQueue: PersistenceQueue { get }
 
   /// Makes an instance of this type from the ID of the model persisted into the
   /// container, backing accesses to each of its properties, adding
@@ -535,7 +535,7 @@ where ID == UUID {
   ///   - context: ``ModelContextQueue`` into which the model is inserted.
   init(
     identifiedAs id: UUID,
-    insertedInto contextQueue: ModelContextQueue
+    insertedInto contextQueue: PersistenceQueue
   ) async throws
 }
 
@@ -571,7 +571,7 @@ extension PersistedDomain {
   /// - SeeAlso: ``backingModel``
   fileprivate static func backingModel(
     identifiedAs id: UUID,
-    insertedInto contextQueue: ModelContextQueue
+    insertedInto contextQueue: PersistenceQueue
   ) async throws -> BackingModel {
     let snapshot = try await contextQueue.run { context in
       guard

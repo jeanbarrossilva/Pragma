@@ -19,9 +19,9 @@
 
 import SwiftData
 
-public extension ModelContextQueue {
+public extension PersistenceQueue {
   /// Fetcher and transformer of the result of having fetched models from a
-  /// concurrent context, providing to the user of the API for choosing the
+  /// persistence queue, providing to the user of the API for choosing the
   /// amount of models to fetch and returning a result of an appropriate type
   /// for that amount (e.g., `.one` yields a model; `.all` yields an array of
   /// models).
@@ -33,18 +33,18 @@ public extension ModelContextQueue {
     associatedtype Result
 
     /// Calls the appropriate functions on the SwiftData model context backing
-    /// the MCQ in order to fetch model(s) in an amount equivalent to that of
-    /// this strategy (e.g., one, many, …).
+    /// the persistence queue in order to fetch model(s) in an amount equivalent
+    /// to that of this strategy (e.g., one, many, …).
     ///
     /// - Parameters:
-    ///   - backingContext: Underlying context backing the concurrent one from
-    ///     which the fetch is being performed.
+    ///   - context: Context backing the persistence queue from which the fetch
+    ///     is being performed.
     ///   - fetchDescriptor: Descriptor with the predicate and the sorting of
     ///     the models to be fetched.
-    /// - Throws: The error thrown by any throwing function of the
-    ///   `backingContext` called by the implementation.
+    /// - Throws: The error thrown by any throwing function of the `context`
+    ///   called by the implementation.
     func fetch(
-      through backingContext: ModelContext,
+      through context: ModelContext,
       withDescriptor fetchDescriptor: FetchDescriptor<Model>
     ) throws -> Result
   }
@@ -52,17 +52,17 @@ public extension ModelContextQueue {
 
 // MARK: - Count
 
-public extension ModelContextQueue.FetchStrategy {
+public extension PersistenceQueue.FetchStrategy {
   /// Fetches the amount of models matching the predicate.
   ///
   /// - Parameter modelType: Type of the models whose count may be fetched.
   static func count<Model>(_ modelType: Model.Type) -> Self
   where
-    Self == ModelContextQueue.CountFetchStrategy<Model>, Model: PersistentModel
+    Self == PersistenceQueue.CountFetchStrategy<Model>, Model: PersistentModel
   { .init() }
 }
 
-public extension ModelContextQueue {
+public extension PersistenceQueue {
   /// Fetch strategy of ``AnyFetchStrategy/count``.
   struct CountFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
     public func fetch(
@@ -74,17 +74,16 @@ public extension ModelContextQueue {
 
 // MARK: - One
 
-public extension ModelContextQueue.FetchStrategy {
+public extension PersistenceQueue.FetchStrategy {
   /// Fetches a single model matching the predicate.
   ///
   /// - Parameter modelType: Type of the model to be fetched.
   static func one<Model>(_ modelType: Model.Type) -> Self
-  where
-    Self == ModelContextQueue.OneFetchStrategy<Model>, Model: PersistentModel
+  where Self == PersistenceQueue.OneFetchStrategy<Model>, Model: PersistentModel
   { .init() }
 }
 
-public extension ModelContextQueue {
+public extension PersistenceQueue {
   /// Fetch strategy of ``AnyFetchStrategy/one``.
   struct OneFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
     public func fetch(
@@ -96,17 +95,16 @@ public extension ModelContextQueue {
 
 // MARK: - All
 
-public extension ModelContextQueue.FetchStrategy {
+public extension PersistenceQueue.FetchStrategy {
   /// Fetches every model matching the predicate.
   ///
   /// - Parameter modelType: Type of the models to be fetched.
   static func all<Model>(_ modelType: Model.Type) -> Self
-  where
-    Self == ModelContextQueue.AllFetchStrategy<Model>, Model: PersistentModel
+  where Self == PersistenceQueue.AllFetchStrategy<Model>, Model: PersistentModel
   { .init() }
 }
 
-public extension ModelContextQueue {
+public extension PersistenceQueue {
   /// Fetch strategy of ``AnyFetchStrategy/all``.
   struct AllFetchStrategy<Model>: FetchStrategy where Model: PersistentModel {
     public func fetch(

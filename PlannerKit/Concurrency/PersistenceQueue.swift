@@ -21,8 +21,9 @@ import SwiftData
 
 internal import Collections
 
-/// A model context queue is a wrapper around a SwiftData model context,
-/// allowing for performing enqueued operations on the context asynchronously.
+/// A persistence queue is a wrapper around a SwiftData container, acting as a
+/// queue data structure and allowing for performing enqueued operations on the
+/// container asynchronously.
 ///
 /// ## Disadvantages of concurrency built into SwiftData
 ///
@@ -36,58 +37,64 @@ internal import Collections
 ///
 /// For more details on the quirks of `ModelActor`, see
 /// ["ModelActor Is Just Weird"](https://www.massicotte.org/model-actor) by Matt
-/// Massicotte. Because of these unexplained behaviors, a context queue is the
-/// recommended approach for using SwiftData asynchronously in Pragma.
+/// Massicotte. Because of these unexplained behaviors, a persistence queue is
+/// the recommended approach for using SwiftData asynchronously in Pragma.
 ///
 /// ## Auto-saving
 ///
-/// Apart from the concurrency aspect, a context queue differs from a bare
-/// context in that it *never* saves changes automatically. This is intentional,
-/// given that performing operations immediately and sequentially may be
-/// expensive.
+/// Apart from the concurrency aspect, a persistence queue differs from the bare
+/// context of a container in that it *never* saves changes automatically. This
+/// is intentional, given that performing operations immediately and
+/// sequentially may be expensive.
 ///
 /// Because it is a queue, its operations are enqueued: requests for them are
-/// stored, and all are performed in first in, first out order (FIFO) upon the
-/// next call to ``flush()``.
+/// stored, and all are performed in FIFO order upon the next call to
+/// ``flush()``.
 ///
 /// ## Sendability
 ///
-/// A context queue is backed by a context. A context, by itself, is not
+/// A persistence queue is backed by a context. A container, by itself, is not
 /// sendable:
 ///
-/// 1. It exposes properties storing models that have been inserted, deleted,
-///    and other data modifiable by one of the methods of the context; and
+/// 1. Its main context is public, and exposes properties storing models that
+///    have been inserted, deleted, and other data modifiable by one of the
+///    methods of the context; and
 /// 2. it is not an actor, with accesses to those properties being
 ///    non-thread-safe.
 ///
-/// A queue, however, is sendable because it is an actor,
+/// A persistence queue, however, is sendable because it is an actor,
 /// [with each access being isolated](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Isolation)
-/// (including accesses to its backing context).
-public actor ModelContextQueue: Sendable {
-  /// Context backing each operation or transaction.
-  let backingContext: ModelContext
+/// (including accesses to its backing container).
+public actor PersistenceQueue: Sendable {
+  /// Context on which updates to the ``backingContainer`` will be performed
+  /// until the next flush.
+  ///
+  /// - SeeAlso: ``flush()``
+  private(set) var currentContext: ModelContext
 
   /// Types of the models which can be inserted.
   let modelTypes: AnySequence<any PersistentModel.Type>
+
+  /// Container backing each operation or transaction.
+  private let backingContainer: ModelContainer
 
   /// Requests for operations to be performed upon the next call to ``flush()``.
   /// This is `nil` by default, and gets assigned an array with at least one
   /// request once ``enqueue(_:)`` is called.
   private var requests: OrderedSet<AnyRequest>?
 
-  /// Initializes a ``ModelContextQueue`` backed by a SwiftData model context.
+  /// Initializes a ``PersistenceQueue`` backed by a SwiftData container.
   ///
   /// - Parameters:
-  ///   - backingContext: SwiftData model context backing each operation or
-  ///     transaction.
+  ///   - backingContainer: SwiftData container backing the queue.
   ///   - modelTypes: Types of the models which can be inserted.
   init(
-    backingContext: ModelContext,
+    backingContainer: ModelContainer,
     modelTypes: some Sequence<any PersistentModel.Type>
   ) {
-    self.backingContext = backingContext
+    self.backingContainer = backingContainer
+    self.currentContext = Self.makeContext(for: backingContainer)
     self.modelTypes = .init(modelTypes)
-    backingContext.autosaveEnabled = false
   }
 
   /// Prepares the operation of a given request for execution when the changes
@@ -124,7 +131,7 @@ public actor ModelContextQueue: Sendable {
       sortingBy: sorting
     )
     return try AllFetchStrategy()
-      .fetch(through: backingContext, withDescriptor: fetchDescriptor)
+      .fetch(through: currentContext, withDescriptor: fetchDescriptor)
   }
 
   /// Obtains models of a given type inserted into the container in order of
@@ -163,7 +170,7 @@ public actor ModelContextQueue: Sendable {
       sortingBy: nil as AnySequence<SortDescriptor<Strategy.Model>>?
     )
     return try strategy.fetch(
-      through: backingContext,
+      through: currentContext,
       withDescriptor: fetchDescriptor
     )
   }
@@ -181,34 +188,63 @@ public actor ModelContextQueue: Sendable {
     guard let requests, !requests.isEmpty else { return }
     if requests.count == 1, let request = requests.first {
       try request.performOperation(in: self)
-      try backingContext.save()
+      try currentContext.save()
     } else {
-      try await backingContext.transactAndWait {
-        try self.assumeIsolated { context in
-          for request in requests { try request.performOperation(in: context) }
+      try await currentContext.transactAndWait {
+        try self.assumeIsolated { persistenceQueue in
+          let currentContext = persistenceQueue.currentContext
+          for request in requests {
+            try request.performOperation(in: persistenceQueue)
+
+            // According to ModelContext's transaction(block:)'s documentation,
+            // the changes made within the transaction are supposed to be saved
+            // automatically; however, that does not happen as of the SwiftData
+            // in Xcode 26.3's bundled Swift toolchain.
+            //
+            // (Or maybe it does, but in another queue, after the closure or the
+            // method itself returns. Either way, there is no documented
+            // approach for knowing when that potential save occurs.)
+            //
+            // https://developer.apple.com/documentation/swiftdata/modelcontext/transaction(block:)
+            guard currentContext.hasChanges else { return }
+            try currentContext.save()
+          }
         }
       }
     }
+    currentContext = Self.makeContext(for: backingContainer)
     self.requests!.removeAll()
   }
 
+  /// Produces a context into which models may be inserted and from which
+  /// inserted ones may be deleted. Changes in the returned context are not
+  /// saved automatically; rather, they should be saved when this queue gets
+  /// flushed.
+  ///
+  /// - Parameter container: Container into which changes by the context may be
+  ///   saved.
+  /// - Returns: A newly-created, non-auto-saving SwiftData model context.
+  private static func makeContext(for container: ModelContainer) -> ModelContext
+  {
+    let context = ModelContext(container)
+    context.autosaveEnabled = false
+    return context
+  }
+
   /// Makes a fetch descriptor with configuration common to all overloads of
-  /// ``fetch(_:)``. Because this queue only saves pending operations in the
-  /// backing context upon a flush, the changes resulted from them are
-  /// disregarded when fetching before flushing.
+  /// ``fetch(_:)``.
   ///
   /// - Parameters:
   ///   - predicate: Condition to be satisfied by the models to be fetched.
   ///   - sorting: Descriptors with the properties of each model by which they
-  ///     will be ordered. In scenarios in which the order is unimportant or
-  ///     models should be unordered, rather than an empty array (that requires
-  ///     allocation), `nil` should be passed in.
+  ///     will be ordered. In scenarios in which the order is not important or
+  ///     models should be unordered, instead of initializing an empty sequence
+  ///     and handing it to this function, `nil` should be passed in.
   private static func makeFetchDescriptor<Model>(
     where predicate: Predicate<Model>,
     sortingBy sorting: (some Sequence<SortDescriptor<Model>>)?
   ) -> FetchDescriptor<Model> where Model: PersistentModel {
     var fetchDescriptor = FetchDescriptor(predicate: predicate)
-    fetchDescriptor.includePendingChanges = true
     if let sorting { fetchDescriptor.sortBy = .init(sorting) }
     return fetchDescriptor
   }

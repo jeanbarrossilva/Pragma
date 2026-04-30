@@ -21,12 +21,12 @@
 import SwiftData
 import Testing
 
-struct ModelContextQueueTests {
+struct PersistenceQueueTests {
   @Suite("Fetching")
   struct FetchingTests {
     @Test
     func fetchingOneNonexistentModelReturnsNil() async throws {
-      try await withModelContextQueue { contextQueue in
+      try await withPersistenceQueue { contextQueue in
         let fetchedModel = try contextQueue.fetch(.one(PlanModel.self))
         #expect(fetchedModel == nil)
       }
@@ -34,7 +34,7 @@ struct ModelContextQueueTests {
 
     @Test
     func fetchesOneExistingModel() async throws {
-      try await withModelContextQueue { contextQueue in
+      try await withPersistenceQueue { contextQueue in
         let insertedModel = makePlanModel()
         contextQueue.enqueue(.insertion(of: insertedModel))
         try await contextQueue.flush()
@@ -45,7 +45,7 @@ struct ModelContextQueueTests {
 
     @Test
     func fetchesAllModels() async throws {
-      try await withModelContextQueue { contextQueue in
+      try await withPersistenceQueue { contextQueue in
         let insertedModels = makePlanModels()
         for insertedModel in insertedModels {
           contextQueue.enqueue(.insertion(of: insertedModel))
@@ -61,7 +61,7 @@ struct ModelContextQueueTests {
   struct InsertionTests {
     @Test
     func doesNotInsertBeforeFlushing() async throws {
-      try await withModelContextQueue { contextQueue in
+      try await withPersistenceQueue { contextQueue in
         let toBeInsertedModel = makePlanModel()
         contextQueue.enqueue(.insertion(of: toBeInsertedModel))
         let fetchedModel = try contextQueue.fetch(.one(PlanModel.self))
@@ -71,7 +71,7 @@ struct ModelContextQueueTests {
 
     @Test
     func inserts() async throws {
-      try await withModelContextQueue { contextQueue in
+      try await withPersistenceQueue { contextQueue in
         let insertedModel = makePlanModel()
         contextQueue.enqueue(.insertion(of: insertedModel))
         try await contextQueue.flush()
@@ -88,21 +88,27 @@ struct ModelContextQueueTests {
 
   @Test
   func deletesOne() async throws {
-    try await withModelContextQueue { contextQueue in
-      let deletedModel = makePlanModel()
-      contextQueue.enqueue(.insertion(of: deletedModel))
+    try await withPersistenceQueue { contextQueue in
+      let insertedModel = makePlanModel()
+      contextQueue.enqueue(.insertion(of: insertedModel))
+      try await contextQueue.flush()
+      let preDeletionFetchedModel = try! contextQueue.fetch(
+        .one(PlanModel.self)
+      )!
       contextQueue.enqueue(
-        .deletion(of: PlanModel.self, identifiedAs: deletedModel.id)
+        .deletion(of: PlanModel.self, identifiedAs: preDeletionFetchedModel.id)
       )
       try await contextQueue.flush()
-      let fetchedModels = try contextQueue.fetch(.all(PlanModel.self))
-      #expect(fetchedModels.isEmpty)
+      let postDeletionFetchedModels = try! contextQueue.fetch(
+        .all(PlanModel.self)
+      )
+      #expect(postDeletionFetchedModels.isEmpty)
     }
   }
 
   @Test
   func deletesMany() async throws {
-    try await withModelContextQueue { contextQueue in
+    try await withPersistenceQueue { contextQueue in
       let planModels = makePlanModels()
       let goalModels = makeGoalModels(of: planModels)
       for planModel in planModels {
@@ -124,7 +130,7 @@ struct ModelContextQueueTests {
   struct DeletionOfAllTests {
     @Test
     func deletesAll() async throws {
-      try await withModelContextQueue { contextQueue in
+      try await withPersistenceQueue { contextQueue in
         let planModels = makePlanModels()
         let goalModels = makeGoalModels(of: planModels)
         for planModel in planModels {

@@ -20,22 +20,27 @@
 @testable import PlannerKit
 import SwiftData
 
-/// Performs an operation with an independent instance of an MCQ. This function
-/// is aimed at testing, and each operation requested to the MCQ is performed in
-/// memory (instead of persisted). Every insertion made in the given closure is
-/// undone by the time this function returns.
+/// Performs an operation with an independent instance of a persistence queue.
+/// This function is aimed at testing, and each operation requested to the queue
+/// is performed in memory (instead of persisted). Every insertion made in the
+/// given closure is undone by the time this function returns.
 ///
 /// - Parameter body: Closure by which operations regarding a test case are
-///   performed on a newly initialized MCQ. Changes performed on it by this
+///   performed on a newly initialized queue. Changes performed on it by this
 ///   closure are undone afterwards.
-func withModelContextQueue(
-  _ body: @Sendable (isolated ModelContextQueue) async throws -> Void
+func withPersistenceQueue(
+  _ body: @Sendable (isolated PersistenceQueue) async throws -> Void
 ) async throws {
-  let container = try PersistentPlanRepository.makeContainer(inMemory: true)
-  let context = ModelContext(container)
-  let contextQueue = ModelContextQueue(
-    backingContext: context,
+  let backingContainer = try PersistentPlanRepository.makeContainer(
+    inMemory: true
+  )
+  let persistenceQueue = PersistenceQueue(
+    backingContainer: backingContainer,
     modelTypes: PersistentPlanRepository.modelTypes
   )
-  try await contextQueue.run { contextQueue in try await body(contextQueue) }
+  try await persistenceQueue.run { persistenceQueue in
+    try await body(persistenceQueue)
+    persistenceQueue.enqueue(.deletionOfAll)
+    try await persistenceQueue.flush()
+  }
 }

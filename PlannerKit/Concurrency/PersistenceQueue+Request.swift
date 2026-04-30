@@ -19,7 +19,7 @@
 
 import SwiftData
 
-extension ModelContextQueue {
+extension PersistenceQueue {
   /// Request whose type information (e.g., regarding the operation it performs)
   /// has been erased.
   struct AnyRequest: Request {
@@ -46,52 +46,51 @@ extension ModelContextQueue {
       }
     }
 
-    func performOperation(in contextQueue: isolated ModelContextQueue) throws {
+    func performOperation(in contextQueue: isolated PersistenceQueue) throws {
       try base.performOperation(in: contextQueue)
     }
   }
 }
 
-extension ModelContextQueue.AnyRequest: Equatable {
+extension PersistenceQueue.AnyRequest: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.isBaseEqual(rhs.base)
   }
 }
 
-extension ModelContextQueue.AnyRequest: Hashable {
+extension PersistenceQueue.AnyRequest: Hashable {
   func hash(into hasher: inout Hasher) { base.hash(into: &hasher) }
 }
 
-public extension ModelContextQueue {
-  /// An intent to perform an operation on the backing context of a concurrent
-  /// context. Because operations of a concurrent context are not performed
-  /// immediately (but, rather, scheduled), instances conforming to this
-  /// protocol are stored upon requests to their respective operations.
+public extension PersistenceQueue {
+  /// An intent to perform an operation on the backing context of a persistence
+  /// queue. Because operations of a persistence queue are not performed
+  /// immediately, instances conforming to this protocol are stored upon
+  /// requests to their respective operations.
   protocol Request: Hashable, Sendable {
     /// Performs the operation associated to this request (e.g., for an
-    /// insertion request, inserts a model) on the given context queue.
+    /// insertion request, inserts a model) on the given persistence queue.
     ///
-    /// - Parameter contextQueue: Context queue on which the operation of this
-    ///   request will be performed.
-    func performOperation(in contextQueue: isolated ModelContextQueue) throws
+    /// - Parameter persistenceQueue: Persistence queue on which the operation
+    ///   of this request will be performed.
+    func performOperation(in persistenceQueue: isolated PersistenceQueue) throws
   }
 }
 
 // MARK: - Insertion
 
-public extension ModelContextQueue.Request {
+public extension PersistenceQueue.Request {
   /// Request for inserting a model.
   ///
   /// - Parameter model: Model to be inserted.
   static func insertion<Model>(
     of model: Model
-  ) -> ModelContextQueue.InsertionRequest<Model>
-  where
-    Self == ModelContextQueue.InsertionRequest<Model>, Model: PersistentModel
+  ) -> PersistenceQueue.InsertionRequest<Model>
+  where Self == PersistenceQueue.InsertionRequest<Model>, Model: PersistentModel
   { .init(model: model) }
 }
 
-public extension ModelContextQueue {
+public extension PersistenceQueue {
   /// Request of ``Request/insertion(of:)``.
   struct InsertionRequest<Model>: Request
   where Model: NSCopying & PersistentModel {
@@ -104,17 +103,17 @@ public extension ModelContextQueue {
     init(model: Model) { modelSnapshot = .init(of: model) }
 
     public func performOperation(
-      in contextQueue: isolated ModelContextQueue
+      in contextQueue: isolated PersistenceQueue
     ) throws {
       let model = modelSnapshot.copy()
-      contextQueue.backingContext.insert(model)
+      contextQueue.currentContext.insert(model)
     }
   }
 }
 
 // MARK: - Deletion (one)
 
-public extension ModelContextQueue.Request {
+public extension PersistenceQueue.Request {
   /// Request for deleting a model.
   ///
   /// Attempts to delete nonexistent models, i.e., flushing the queue with such
@@ -127,14 +126,13 @@ public extension ModelContextQueue.Request {
   static func deletion<Model>(
     of modelType: Model.Type,
     identifiedAs modelID: PersistentIdentifier
-  ) -> ModelContextQueue.DeletionOfOneRequest<Model>
+  ) -> PersistenceQueue.DeletionOfOneRequest<Model>
   where
-    Self == ModelContextQueue.DeletionOfOneRequest<Model>,
-    Model: PersistentModel
+    Self == PersistenceQueue.DeletionOfOneRequest<Model>, Model: PersistentModel
   { .init(modelID: modelID) }
 }
 
-public extension ModelContextQueue {
+public extension PersistenceQueue {
   /// Request of ``Request/deletion(of:)``.
   struct DeletionOfOneRequest<Model>: Request where Model: PersistentModel {
     /// ID of the model to be deleted.
@@ -146,37 +144,58 @@ public extension ModelContextQueue {
     init(modelID: PersistentIdentifier) { self.modelID = modelID }
 
     public func performOperation(
-      in contextQueue: isolated ModelContextQueue
+      in persistenceQueue: isolated PersistenceQueue
     ) throws {
-      let backingContext = contextQueue.backingContext
-      guard let model: Model = backingContext.registeredModel(for: modelID)
+      let currentContext = persistenceQueue.currentContext
+      guard
+        let model: Model = try currentContext.registeredModel(for: modelID)
+          ?? persistenceQueue.fetch(
+            .one(Model.self),
+            where: #Predicate { model in model.id == modelID }
+          )
       else { return }
-      backingContext.delete(model)
+
+      // We have gotten the model. Now, a bifurcation on the thread of destiny
+      // unravels: either another context (probably a previous one, given that
+      // being the current one or some other would be… weird)…
+      if let insertionContext = model.modelContext,
+        currentContext != insertionContext
+      {
+        insertionContext.delete(model)
+        if insertionContext.hasChanges { try insertionContext.save() }
+      }
+      // …or the model has — indeed! — been inserted by the current context of
+      // the queue. In this case, we needn't save, as this will be done by the
+      // queue itself (after all, it was its current context that inserted the
+      // model).
+      else {
+        currentContext.delete(model)
+      }
     }
   }
 }
 
-extension ModelContextQueue.DeletionOfOneRequest: Equatable {
+extension PersistenceQueue.DeletionOfOneRequest: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.modelID == rhs.modelID
   }
 }
 
-extension ModelContextQueue.DeletionOfOneRequest: Hashable {
+extension PersistenceQueue.DeletionOfOneRequest: Hashable {
   public func hash(into hasher: inout Hasher) { modelID.hash(into: &hasher) }
 }
 
 // MARK: - Deletion (many)
 
-public extension ModelContextQueue.Request {
+public extension PersistenceQueue.Request {
   /// Request for deletion of many models of a given type.
   ///
   /// - Parameter modelType: Type of the models to be deleted.
   static func deletion<Model>(
     ofType modelType: Model.Type
-  ) -> ModelContextQueue.DeletionOfManyRequest<Model>
+  ) -> PersistenceQueue.DeletionOfManyRequest<Model>
   where
-    Self == ModelContextQueue.DeletionOfManyRequest<Model>,
+    Self == PersistenceQueue.DeletionOfManyRequest<Model>,
     Model: PersistentModel
   { .deletion(where: Predicate<Model>.true) }
 
@@ -185,14 +204,14 @@ public extension ModelContextQueue.Request {
   /// - Parameter predicate: Condition satisfied by models to be deleted.
   static func deletion<Model>(
     where predicate: Predicate<Model>
-  ) -> ModelContextQueue.DeletionOfManyRequest<Model>
+  ) -> PersistenceQueue.DeletionOfManyRequest<Model>
   where
-    Self == ModelContextQueue.DeletionOfManyRequest<Model>,
+    Self == PersistenceQueue.DeletionOfManyRequest<Model>,
     Model: PersistentModel
   { .init(predicate: predicate) }
 }
 
-public extension ModelContextQueue {
+public extension PersistenceQueue {
   /// Request of ``Request/deletion(where:)``.
   struct DeletionOfManyRequest<Model>: Request where Model: PersistentModel {
     /// Condition satisfied by models to be deleted.
@@ -204,9 +223,9 @@ public extension ModelContextQueue {
     init(predicate: Predicate<Model>) { self.predicate = predicate }
 
     public func performOperation(
-      in contextQueue: isolated ModelContextQueue
+      in contextQueue: isolated PersistenceQueue
     ) throws {
-      try contextQueue.backingContext.delete(
+      try contextQueue.currentContext.delete(
         model: Model.self,
         where: predicate,
         includeSubclasses: false
@@ -215,13 +234,13 @@ public extension ModelContextQueue {
   }
 }
 
-extension ModelContextQueue.DeletionOfManyRequest: Equatable {
+extension PersistenceQueue.DeletionOfManyRequest: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     lhs.predicate.description == rhs.predicate.description
   }
 }
 
-extension ModelContextQueue.DeletionOfManyRequest: Hashable {
+extension PersistenceQueue.DeletionOfManyRequest: Hashable {
   public func hash(into hasher: inout Hasher) {
     predicate.description.hash(into: &hasher)
   }
@@ -229,8 +248,8 @@ extension ModelContextQueue.DeletionOfManyRequest: Hashable {
 
 // MARK: - Deletion (all)
 
-public extension ModelContextQueue.Request
-where Self == ModelContextQueue.DeletionOfAllRequest {
+public extension PersistenceQueue.Request
+where Self == PersistenceQueue.DeletionOfAllRequest {
   /// Request for deletion of every model.
   ///
   /// - Warning: Once this request is enqueued and flushed, its operation cannot
@@ -238,14 +257,14 @@ where Self == ModelContextQueue.DeletionOfAllRequest {
   static var deletionOfAll: Self { .init() }
 }
 
-public extension ModelContextQueue {
+public extension PersistenceQueue {
   /// Request of ``Request/deletionOfAll``.
   struct DeletionOfAllRequest: Request {
     public func performOperation(
-      in contextQueue: isolated ModelContextQueue
+      in contextQueue: isolated PersistenceQueue
     ) throws {
       for modelType in contextQueue.modelTypes {
-        try contextQueue.backingContext.delete(model: modelType)
+        try contextQueue.currentContext.delete(model: modelType)
       }
     }
   }
